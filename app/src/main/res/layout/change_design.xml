@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/theme"
+        android:paddingTop="10dp"/>
+
+    <GridView
+        android:id="@+id/gridview_themes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:numColumns="5"
+        android:verticalSpacing="5dp"
+        android:horizontalSpacing="5dp"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:stretchMode="columnWidth"
+        android:gravity="center" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/background"
+        android:paddingTop="10dp"/>
+
+    <GridView
+        android:id="@+id/gridview_backgrounds"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:numColumns="5"
+        android:verticalSpacing="5dp"
+        android:horizontalSpacing="5dp"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:stretchMode="columnWidth"
+        android:gravity="center" />
+
+</LinearLayout>

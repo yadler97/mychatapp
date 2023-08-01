@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="ExpandableMaxLines">25</integer>
+    <integer name="ExpandableMaxLinesLand">15</integer>
+
+    <integer-array name="themeDrawables">
+        <item>@drawable/theme_standard</item>
+        <item>@drawable/theme_dark</item>
+    </integer-array>
+
+    <integer-array name="backgroundDrawables">
+        <item>@drawable/theme_standard</item>
+        <item>@drawable/background_botw</item>
+        <item>@drawable/background_splatoon2</item>
+        <item>@drawable/background_persona</item>
+        <item>@drawable/background_kiminonawa</item>
+        <item>@drawable/background_smb</item>
+        <item>@drawable/background_smm</item>
+        <item>@drawable/background_xc2</item>
+        <item>@drawable/background_fef</item>
+        <item>@drawable/background_ssbu</item>
+        <item>@drawable/background_dp</item>
+    </integer-array>
+
+    <integer-array name="messageLayouts">
+        <item>@layout/item_header</item>                                        //0
+        <item>@layout/item_message_received</item>                              //1
+        <item>@layout/item_message_received_con</item>                          //2
+        <item>@layout/item_message_sent</item>                                  //3
+        <item>@layout/item_message_sent_con</item>                              //4
+        <item>@layout/item_quote_received</item>                                //5
+        <item>@layout/item_quote_received_con</item>                            //6
+        <item>@layout/item_quote_sent</item>                                    //7
+        <item>@layout/item_quote_sent_con</item>                                //8
+        <item>@layout/item_quote_received_deleted</item>                        //9
+        <item>@layout/item_quote_received_deleted_con</item>                    //10
+        <item>@layout/item_quote_sent_deleted</item>                            //11
+        <item>@layout/item_quote_sent_deleted_con</item>                        //12
+        <item>@layout/item_image_received</item>                                //13
+        <item>@layout/item_image_received_con</item>                            //14
+        <item>@layout/item_image_sent</item>                                    //15
+        <item>@layout/item_image_sent_con</item>                                //16
+        <item>@layout/item_quote_image_received</item>                          //17
+        <item>@layout/item_quote_image_received_con</item>                      //18
+        <item>@layout/item_quote_image_sent</item>                              //19
+        <item>@layout/item_quote_image_sent_con</item>                          //20
+        <item>@layout/item_message_forwarded_received</item>                    //21
+        <item>@layout/item_message_forwarded_received_con</item>                //22
+        <item>@layout/item_message_forwarded_sent</item>                        //23
+        <item>@layout/item_message_forwarded_sent_con</item>                    //24
+        <item>@layout/item_link_preview_received</item>                         //25
+        <item>@layout/item_link_preview_received_con</item>                     //26
+        <item>@layout/item_link_preview_sent</item>                             //27
+        <item>@layout/item_link_preview_sent_con</item>                         //28
+        <item>@layout/item_message_expandable_received</item>                   //29
+        <item>@layout/item_message_expandable_received_con</item>               //30
+        <item>@layout/item_message_expandable_sent</item>                       //31
+        <item>@layout/item_message_expandable_sent_con</item>                   //32
+        <item>@layout/item_message_forwarded_expandable_received</item>         //33
+        <item>@layout/item_message_forwarded_expandable_received_con</item>     //34
+        <item>@layout/item_message_forwarded_expandable_sent</item>             //35
+        <item>@layout/item_message_forwarded_expandable_sent_con</item>         //36
+    </integer-array>
+</resources>

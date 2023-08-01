@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/dialog_padding_top"
+        android:paddingBottom="@dimen/dialog_padding_top" >
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/user_name_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:counterEnabled="true"
+            app:counterMaxLength="15"
+            app:errorEnabled="true" >
+            <org.droidparts.widget.ClearableEditText
+                android:id="@+id/user_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="14dp"
+                android:inputType="text|textCapSentences"
+                android:hint="@string/name"
+                android:maxLength="15"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/user_bio_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:counterEnabled="true"
+            app:counterMaxLength="200"
+            app:errorEnabled="true" >
+            <org.droidparts.widget.ClearableEditText
+                android:id="@+id/user_bio"
+                android:layout_width="match_parent"
+                android:layout_height="135dp"
+                android:paddingTop="14dp"
+                android:gravity="top"
+                android:inputType="textMultiLine|textCapSentences"
+                android:maxLines="6"
+                android:hint="@string/aboutme"
+                android:maxLength="200"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+            <EditText
+                android:id="@+id/user_birthday"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="14dp"
+                android:hint="@string/birth"
+                android:focusable="false"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/user_location_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:counterEnabled="true"
+            app:counterMaxLength="25"
+            app:errorEnabled="true" >
+            <org.droidparts.widget.ClearableEditText
+                android:id="@+id/user_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="14dp"
+                android:inputType="text|textCapSentences"
+                android:hint="@string/location"
+                android:maxLength="25"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingLeft="5dp"
+            android:paddingBottom="5dp"
+            android:orientation="horizontal" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/favoritecolor"
+                android:paddingRight="10dp"
+                android:textSize="15dp" />
+
+            <ImageButton
+                android:id="@+id/user_favcolor"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center_vertical" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingLeft="5dp"
+            android:paddingBottom="5dp"
+            android:orientation="horizontal" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/profileimage"
+                android:paddingRight="10dp"
+                android:textSize="15dp" />
+
+            <ImageButton
+                android:id="@+id/user_profile_image"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center_vertical"
+                android:background="?attr/selectableItemBackground"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="10dp"
+            android:paddingLeft="5dp"
+            android:paddingBottom="5dp"
+            android:orientation="horizontal" >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/profilebanner"
+                android:paddingRight="10dp"
+                android:textSize="15dp" />
+
+            <ImageButton
+                android:id="@+id/user_profile_banner"
+                android:layout_width="35dp"
+                android:layout_height="20dp"
+                android:layout_gravity="center_vertical"
+                android:background="?attr/selectableItemBackground"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

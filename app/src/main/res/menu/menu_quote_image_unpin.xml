@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/copy"
+        android:title="@string/copy"
+        android:icon="@drawable/icon_copy" />
+
+    <item
+        android:id="@+id/quote"
+        android:title="@string/quote"
+        android:icon="@drawable/icon_quote" />
+
+    <item
+        android:id="@+id/forward"
+        android:title="@string/forward"
+        android:icon="@drawable/icon_forward" />
+
+    <item
+        android:id="@+id/pin"
+        android:title="@string/unpin"
+        android:icon="@drawable/icon_unpin" />
+
+    <item
+        android:id="@+id/jump"
+        android:title="@string/jumptoquotedimage"
+        android:icon="@drawable/icon_jump" />
+
+    <item
+        android:id="@+id/download"
+        android:title="@string/download"
+        android:icon="@drawable/icon_download" />
+
+    <item
+        android:id="@+id/openprofile"
+        android:title="@string/showprofile"
+        android:icon="@drawable/icon_showprofile" />
+
+</menu>

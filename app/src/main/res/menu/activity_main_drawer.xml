@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+        <item
+            android:id="@+id/nav_profil"
+            android:icon="@drawable/ic_account"
+            android:title="@string/myprofile" />
+        <item
+            android:id="@+id/nav_themes"
+            android:icon="@drawable/ic_themes"
+            android:title="@string/design" />
+        <item
+            android:id="@+id/nav_einstellungen"
+            android:icon="@drawable/ic_options"
+            android:title="@string/settings" />
+
+    <item android:title="@string/misc">
+        <menu>
+            <item
+                android:id="@+id/nav_changelog"
+                android:icon="@drawable/ic_info"
+                android:title="@string/changelog" />
+            <item
+                android:id="@+id/nav_impressum"
+                android:icon="@drawable/ic_copyright"
+                android:title="@string/aboutus" />
+        </menu>
+    </item>
+
+    <item android:title="">
+        <menu>
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_exit"
+                android:title="@string/logout" />
+        </menu>
+    </item>
+
+</menu>

@@ -1,0 +1,376 @@
+<resources>
+    <string name="app_name">MyChatApp</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="close">Close</string>
+    <string name="enteruserid">Enter User ID</string>
+    <string name="roomname">Room name</string>
+    <string name="password">Password</string>
+    <string name="confirmpassword">Confirm password</string>
+    <string name="theme">Theme</string>
+    <string name="send">SEND</string>
+    <string name="sendmessage">Send message</string>
+    <string name="myprofile">My Profile</string>
+    <string name="design">Design</string>
+    <string name="settings">Settings</string>
+    <string name="misc">Misc</string>
+    <string name="changelog">Changelog</string>
+    <string name="aboutus">About us</string>
+    <string name="background">Background</string>
+    <string name="messagecopied">Message copied</string>
+    <string name="download">Download</string>
+    <string name="createroom">Create room</string>
+    <string name="pleaseenterpassword">Please enter password</string>
+    <string name="changedesign">Change design</string>
+    <string name="settingssaved">Settings saved</string>
+    <string name="wrongpassword">Wrong password</string>
+    <string name="pleaseenteruserid">Enter User ID</string>
+    <string name="roomcreated">Room created</string>
+    <string name="passwordsdontmatch">Passwords don\'t match</string>
+    <string name="enterroomname">Enter room name</string>
+    <string name="selectcategory">Select category</string>
+    <string name="imageuploaded">Image uploaded</string>
+    <string name="imagetoolarge">Failed: Image too large</string>
+    <string name="copy">Copy</string>
+    <string name="quote">Quote</string>
+    <string name="jumptoquotedimage">Jump to quoted image</string>
+    <string name="imagesaved">Image saved</string>
+    <string name="savingimagefailed">Saving image failed</string>
+    <string name="nodatabaseconnection">No database connection</string>
+    <string name="quotedmessagenolongeravailable">Quoted message no longer available</string>
+    <string name="roominfo">Room info</string>
+    <string name="category">Category</string>
+    <string name="admin">Admin</string>
+    <string name="foundation">Foundation</string>
+    <string name="sentmessages">Sent Messages</string>
+    <string name="upload">Upload&#8230;</string>
+    <string name="enterpassword">Enter password</string>
+    <string name="editprofile">Edit profile</string>
+    <string name="createprofile">Create profile</string>
+    <string name="messagesaved">Message saved</string>
+    <string name="receivepushnotifications">Receive push notifications</string>
+    <string name="saveenteredmessage">Save entered message when closing room</string>
+    <string name="roomalreadyexists">Room already exists</string>
+    <string name="noroomfound">No room found</string>
+    <string name="favorite">Favorite</string>
+    <string name="searchmessage">Search message</string>
+    <string name="images">Images</string>
+    <string name="pinboard">Pinboard</string>
+    <string name="backup">Backup</string>
+    <string name="backupcreated">Backup created</string>
+    <string name="open">OPEN</string>
+    <string name="roomintro">Room created on %s by %s</string>
+    <string name="sharedapicture">shared a picture</string>
+    <string name="uploaded">uploaded</string>
+    <string name="name">Name</string>
+    <string name="location">Location</string>
+    <string name="birth">Date of birth</string>
+    <string name="favoritecolor">Favorite color</string>
+    <string name="aboutme">About me</string>
+    <string name="incompletedata">Incomplete data</string>
+    <string name="chooseacolor">Choose a color</string>
+    <string name="myrooms">My Rooms</string>
+    <string name="favorites">Favorites</string>
+    <string name="more">More</string>
+    <string name="addedtofavorites">Added to favorites</string>
+    <string name="removedfromfavorites">Removed from favorites</string>
+    <string name="showprofile">Show profile</string>
+    <string name="profile">%s\'s Profile</string>
+    <string name="nomessagesfound">No messages found</string>
+    <string name="profileedited">Profile edited</string>
+    <string name="profilecreated">Profile created</string>
+    <string name="logout">Logout</string>
+    <string name="back">Back</string>
+    <string name="nomessagefound">No message found</string>
+    <string name="forwarded">Forwarded</string>
+    <string name="forward">Forward</string>
+    <string name="forwardmessage">Forward message</string>
+    <string name="messageforwarded">Message forwarded</string>
+    <string name="selectanoption">Select an option</string>
+    <string name="roomdesc">Description</string>
+    <string name="enterroomdesc">Enter description</string>
+    <string name="backupof">Backup of</string>
+    <string name="createdon">Created</string>
+    <string name="imageforwarded">Image forwarded</string>
+    <string name="successfullyloggedout">Successfully logged out</string>
+    <string name="repeatpassword">Repeat password</string>
+    <string name="entername">Enter name</string>
+    <string name="enterbio">Enter bio</string>
+    <string name="enterlocation">Enter location</string>
+    <string name="mute">Mute</string>
+    <string name="unmute">Unmute</string>
+    <string name="unfavorite">Remove favorite</string>
+    <string name="pin">Pin</string>
+    <string name="unpin">Unpin</string>
+    <string name="messagepinned">Message pinned</string>
+    <string name="messageunpinned">Message unpinned</string>
+    <string name="imagepinned">Image pinned</string>
+    <string name="imageunpinned">Image unpinned</string>
+    <string name="noimagesfound">No images found</string>
+    <string name="nopinnedmessagesfound">No pinned messages found</string>
+    <string name="editroom">Edit room</string>
+    <string name="roomedited">Room edited</string>
+    <string name="roommuted">Room muted</string>
+    <string name="roomunmuted">Room unmuted</string>
+    <string name="members">Members</string>
+    <string name="showmore">Show more</string>
+    <string name="showless">Show less</string>
+    <string name="yousharedapicture">You shared a picture</string>
+    <string name="you">You</string>
+    <string name="youcreatedthisroom">You created this room</string>
+    <string name="createdthisroom">created this room</string>
+    <string name="unreadmessages">Unread messages</string>
+    <string name="searchroom">Search room</string>
+    <string name="profileimage">Profile image</string>
+    <string name="profilebanner">Profile banner</string>
+    <string name="leaveroom">Leave room</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="reallyleaveroom">Really leave room?</string>
+    <string name="roomleaved">Room leaved</string>
+    <string name="previewimages">Preview images</string>
+    <string name="savecamerapictures">Save camera pictures on device</string>
+    <string name="reply">Reply</string>
+    <string name="markasread">Mark as read</string>
+    <string name="messagesent">Message sent</string>
+    <string name="roomimage">Room image</string>
+    <string name="login">Login</string>
+    <string name="email">E-Mail Address</string>
+    <string name="enteremail">Enter E-Mail</string>
+    <string name="loginfailed">Login failed</string>
+    <string name="createnewaccount">Create new account</string>
+    <string name="passwordmustcontainatleastsixcharacters">Password must contain at least 6 characters</string>
+    <string name="pleaseverifyemail">Please verify E-Mail</string>
+    <string name="resendverificationmail">Resend verification mail</string>
+    <string name="profilecreationfailed">Profile creation failed</string>
+    <string name="verificationmailsent">Verification mail sent</string>
+
+    <string-array name="categories">
+        <item>Select category</item>
+        <item>Gaming</item>
+        <item>Politics</item>
+        <item>Geography</item>
+        <item>Dialects</item>
+        <item>Anime</item>
+        <item>School and work</item>
+        <item>Technics</item>
+        <item>TV</item>
+        <item>Sports</item>
+        <item>Culture</item>
+        <item>Misc</item>
+        <item>Shitposting</item>
+    </string-array>
+
+    <string-array name="themes">
+        <item>Standard</item>
+        <item>Dark</item>
+    </string-array>
+
+    <string-array name="backgrounds">
+        <item>Standard</item>
+        <item>Breath of the Wild</item>
+        <item>Splatoon 2</item>
+        <item>Persona 5</item>
+        <item>Kimi no na wa</item>
+        <item>Super Mario Bros.</item>
+        <item>Super Mario Maker</item>
+        <item>Xenoblade Chronicles 2</item>
+        <item>Fire Emblem Fates</item>
+        <item>Super Smash Bros. Ultimate</item>
+    </string-array>
+
+    <string name="v100_title">"Version 1.0.0 (July 1st, 2018)"</string>
+    <string name="v100_text">" - Initial release\n"
+        "\n "</string>
+
+    <string name="v101_title">"Version 1.0.1 (July 2nd, 2018)"</string>
+    <string name="v101_text">" - The text field for the username can\'t be left empty now\n"
+        "- The activity won\'t be reloaded if the user presses \"Create Room\" after not having entered a roomname\n"
+        "- After creating a room the user will now be notified with a toast \"Room created\" that the action was successful\n"
+        "- The application now uses its own icon\n"
+        "\n "</string>
+
+    <string name="v102_title">"Version 1.0.2 (July 2nd, 2018)"</string>
+    <string name="v102_text">" - Messages are now displayed in colored textboxes\n"
+        "- A profile picture is now being shown next to the message of other users. Currently it just displays the first letter of the username\n"
+        "- The time a message was sent is now being shown next to the message\n"
+        "\n "</string>
+
+    <string name="v103_title">"Version 1.0.3 (July 5th, 2018)"</string>
+    <string name="v103_text">" - A Menu is now available in the room selection. The own name is being displayed there and a variety of other functions are accessible\n"
+        "- The Changelog and a "About us" section can be accessed from there\n"
+        "- The own profile can now be viewed\n"
+        "- The application's icon has been redesigned to better fit to the colors being used in the chatrooms\n"
+        "\n "</string>
+
+    <string name="v104_title">"Version 1.0.4 (August 13th, 2018)"</string>
+    <string name="v104_text">" - Messages in a chat can now be copied by pressing\n"
+        "- When creating a room, a category and a password must now be entered\n"
+        "- The password will be saved on the device after being entered correctly for the first time. It will be entered automatically in the future, so the user can switch between rooms faster\n"
+		"- The category of a room is displayed in the room selection beneath the room name\n"
+        "\n "</string>
+
+    <string name="v105_title">"Version 1.0.5 (August 26th, 2018)"</string>
+    <string name="v105_text">" - The position of the button to add a room has been changed\n"
+        "- If a entry in the database is being altered or deleted, the chatroom will now be updated in real time\n"
+        "- The creator of a room is now longer being asked to enter the room's password\n"
+        "- New categories for rooms have been added\n"
+        "- Messages from the same sender and same time will now be combined to one textbox\n"
+        "- The user can now change the corners of the textboxes in the \"Design\" submenu\n"
+        "- At the start of a room, it is now displayed when and by whom the room was created\n"
+        "- Between messages of different days, the date of the new day is now being shown\n"
+        "\n "</string>
+
+    <string name="v106_title">"Version 1.0.6 (October 27th, 2018)"</string>
+    <string name="v106_text">" - Images from the gallery can now be posted\n"
+        "- Images can also be taken with the camera and posted directly from the app\n"
+        "- Images can be downloaded to the device by pressing on it\n"
+        "- The background can be changed in the \"Design\" submenu\n"
+        "- A dark theme is available in the \"Design\" submenu\n"
+        "- Messages can now be quoted\n"
+        "- Rooms that the user doesn\'t have access to will now be marked with a lock in the room selection\n"
+		"- Rooms that the user does have access to will now show the time of the newest message in the room selection\n"
+        "- Rooms that the user does have access to will now be sorted on the newest message in the room selection\n"
+        "- The layout of the room selection has been improved and now uses the whole screen\n"
+        "- Links are now identified as such. The website will be opened in the browser after pressing on the link\n"
+        "- A back button is now available in the chatroom that brings the user back to the room selection\n"
+        "- A info button is now available in the chatroom that displays infos about the room\n"
+        "- The text at the start of a room and the displays for the dates have received a new layout\n"
+        "- Dates and Times are now being adjusted to the settings of the device\n"
+        "- The app now has its own splash screen\n"
+        "- The username now has a limit of 15 characters\n"
+        "- The roomname now has a limit of 25 characters\n"
+        "- blanks at the start and the end of a message are now being removed\n"
+        "- The username can now be changed in the \"My Profile\" submenu\n"
+        "- The user is now being notified if no database connection can be established\n"
+        "- A serious bug was fixed that caused a immediate crash after restarting\n"
+        "- Android versions below 4.4 are no longer supported\n"
+        "\n "</string>
+
+    <string name="v107_title">"Version 1.0.7 (March 1st, 2019)"</string>
+    <string name="v107_text">" - User profiles now have a bio, a date of birth and a location\n"
+        "- The own profile can now be edited\n"
+        "- Every user has a own unique ID\n"
+        "- The user's favorite color is being displayed as background of the user's profile picture\n"
+        "- Profiles of other users can now be opened in the chat\n"
+        "- Images can now be quoted\n"
+        "- Messages can now be forwarded\n"
+        "- The room selection now has three tabs: \"My rooms\", \"Favorites\" and \"More\"\n"
+        "- Rooms can now be pinned\n"
+        "- Messages in a chat can now be searched\n"
+        "- A backup of the entire chat can now be created and saved to the documents folder\n"
+        "- Images and backups can now be opened directly after saving\n"
+        "- Images can now be opened in full screen\n"
+        "- Rooms now have a description\n"
+        "- Other users can now be mentioned with \@\n"
+        "- Entered but not sent text is now saved when leaving the room. This can be disabled in the settings\n"
+        "- Text can now be marked as bold and italic with \* and \_\n"
+		"- If the user scrolls up, a button will now be shown to jump back to the newest message directly\n"
+		"- Chats can now be read without a internet connection. Sent messages will be sent to the server when internet connection has been reestablished\n"
+		"- English is now a supported language\n"
+        "- The uppercase mode will automatically be activated at the beginning of a new sentence\n"
+        "- Text fields can now be cleared with the click of a button\n"
+        "- Messages now have a limit of 5000 characters\n"
+        "- The character limit is now being displayed beneath input fields\n"
+		"- If the user enters something in a input field the hint is now being showed above\n"
+		"- The password can now be displayed in readable characters by pressing a button\n"
+		"- Breaks are now pssobile when entering a message. Up to six lines are displayed in the input field\n"
+        "- The action bar will no longer disappear when the user opens the keyboard\n"
+        "- The keyboard no longer overlaps the input field\n"
+        "- The user is no being notified when he quotes a message\n"
+        "- Textboxes are no wider in landscape mode\n"
+        "- The user must no longer login after every restart of the app\n"
+        "- The app icon has been optimized for Samsung devices\n"
+        "- The user is now being notified if no room exists\n"
+        "- Messages from the same user and time are now displayed in different textboxes. The gap is smaller and name and profile picture will only be displayed for the first message\n"
+        "- The navigation bar is now grey on devices with onscreen navigation bar when switching to dark theme\n"
+        "- The options menu appearing when clicking on a message has been given a new design\n"
+        "- A bug was fixed that allowed the user to send empty messages\n"
+        "- A bug was fixed that caused the keyboard to not close properly when the user clicks on \"Cancel\"\n"
+        "- A bug was fixed that was triggered when the user tried to create a room with the name of an already existing room\n"
+        "\n "</string>
+
+    <string name="v108_title">"Version 1.0.8 (June 2nd, 2019)"</string>
+    <string name="v108_text">"- Push notifications can now be received\n"
+        "- User profiles now have a banner\n"
+        "- Banners and profile images can now be edited\n"
+        "- Messages can now be pinned\n"
+        "- A gallery with all pictures of a room can now be opened\n"
+        "- Images can now be forwarded\n"
+        "- GIFs are now supported\n"
+        "- A preview of the newest message in a room is now displayed in the room list\n"
+        "- Rooms containing unread messages are now highlighted in the room list\n"
+        "- Unread messages are now marked with \"Unread messages\" in the chat room\n"
+        "- Rooms can now be searched\n"
+        "- Photos taken with the camera are now automatically saved to the \"MyChatApp\" Images Directory\n"
+        "- A member list is now available in the room info\n"
+        "- The admin can now edit the room\n"
+        "- Rooms can now be leaved\n"
+        "- The special characters \., \$, \[, \], \# and \/ can now be used in room names\n"
+        "- The input field is no longer overlapping the messages when it contains more than two lines\n"
+        "- Messages with more than 2000 characters are no longer shown completely. Clicking on \"Show more\" shows the entire message\n"
+        "- The character limit per message has been raised to 10000\n"
+        "- Backup files now contain the date of their creation and messages are packed together by date\n"
+        "- Snackbars are now shown a bit longer and can be dismissed by swiping\n"
+        "- A \"Detective Pikachu\" background image is now available\n"
+        "- Background images are now displayed properly in landscape mode\n"
+        "- Error messages for input fields have been redesigned\n"
+        "- The changelog and design menu have received new layouts\n"
+        "- The option to modify corners of textboxes has been removed\n"
+        "- Quoted messages are now displayed above the input field\n"
+        "- Quoting can now be cancelled by pressing the clear button on the right side\n"
+        "- Quotes are now shortened after three lines\n"
+        "- Jumping to the quoted message is now possible with a simple click on the quote\n"
+        "- Message boxes are now being highlighted when clicking on them\n"
+        "- Dialogs now adjust their size when the keyboard is opened to prevent it from overlapping the dialog\n"
+        "- After opening an image the background is now black in Dark Theme\n"
+        "- The System UI is now completely hidden when pictures are opened in fullscreen\n"
+        "- When using the search function, the User will now get to the message outside the search by clicking on it\n"
+        "- The search function is now slightly faster\n"
+        "- If no message is found via the search function, the "No message found" text is now placed more visible when the keyboard is opened\n"
+        "- The search process is now being stopped when sending a message or an image or creating a room\n"
+        "- Hearts are now displayed next to the rooms in the favorites tab\n"
+        "- The status bar is now transparent when the NavigationView is being opened\n"
+        "- The own profile can now also be opened by clicking on the profile image in the NavigationView\n"
+        "- A bug leading to crashes when using overlapping formatting with \* and \_ was fixed\n"
+        "- Device information and crash reports are now submitted to the developer\n"
+        "- Android versions below 5.0 are no longer supported\n"
+        "\n "</string>
+
+    <string name="v109_title">"Version 1.0.9 (November 14th, 2019)"</string>
+    <string name="v109_text">"- The account system has been optimized. Using the app is now only possible when authenticated\n"
+        "- Push notifications now have a "Reply" and "Mark as read" function\n"
+        "- The admin can now set a room image\n"
+        "- The user can now slide through the image list when an image is opened in fullscreen\n"
+        "- All AlertDialogs have a new header now\n"
+        "- Automatic saving of pictures taken with the camera function to the device can now be disabled in the settings\n"
+        "- Previewing images in the chat room, can now be disabled if they are not cached\n"
+        "- Muted rooms are now marked with an icon in the roomlist\n"
+        "- When quoting an image, the image to be quoted is now previewed\n"
+        "- When uploading a profile image or banner, a progress dialog is now shown\n"
+        "- A bug not showing the profile banner button in the \"Edit profile\" menu when the user has no own banner was fixed\n"
+        "\n "</string>
+
+    <string name="copyright">"Yannick Adler, 2018–2019\nVersion %s\n\n"
+        "Used libraries:\n"
+        "- Droidparts by Alex Yanchenko\n"
+        "- Spectrum by The Blue Alliance\n"
+        "- PhotoView by Chris Banes\n"
+        "- SheetMenu by Anton Vlasov\n"
+        "- DropdownTextView by Hakob Astvacatryan\n"
+        "- GravityImageView by Chris Renke\n"
+        "- RoundImageView by Vince Mi\n"
+        "- ExpandableTextView by Blogc.at\n"
+        "- WhatsappFormatter by Harish Sridharan\n"
+        "- CircleImageView by Henning Dodenhof\n"
+        "- TextDrawable by Amulya Khare\n"
+        "\nOther used tools:\n"
+        "- Firebase\n"
+        "- Jsoup\n"
+        "- Glide\n"
+    </string>
+</resources>

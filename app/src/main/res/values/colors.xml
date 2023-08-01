@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="red">#FF0000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+    <color name="textbox_sent">#0048FF</color>
+    <color name="textbox_sent_clicked">#09349F</color>
+    <color name="textbox_received">#FF6E00</color>
+    <color name="textbox_received_clicked">#CC5800</color>
+    <color name="textbox_time">#E6E6E6</color>
+    <color name="grey">#C0C0C0</color>
+    <color name="divider">#dfdfdf</color>
+    <color name="lightgrey">#E9E9E9</color>
+    <color name="iconGrey">#9E9E9E</color>
+    <color name="standardTextColor">#757575</color>
+
+    <color name="logo_background">#8EC54F</color>
+
+    <color name="dark_background">#36393E</color>
+    <color name="dark_top">#202225</color>
+    <color name="dark_actionbar">#2F3136</color>
+    <color name="dark_divider">#4A4C52</color>
+    <color name="dark_button">#7289DA</color>
+
+    <color name="darkRed">#BF0000</color>
+    <color name="darkGreen">#438C00</color>
+    <color name="darkBlue">#160087</color>
+
+    <array name="favcolors">
+        <item name="red">@color/red</item>
+        <item name="blue">#0099FF</item>
+        <item name="green">#00FF3F</item>
+        <item name="yellow">#F2FF00</item>
+        <item name="orange">#FFBB00</item>
+        <item name="pink">#FF4081</item>
+        <item name="purple">#D800FF</item>
+        <item name="turquoise">#00FFED</item>
+        <item name="brown">#A63F10</item>
+        <item name="black">@color/black</item>
+    </array>
+
+    <color name="roomhighlight">#70BABABA</color>
+    <color name="roomhighlight_dark">#605C5E63</color>
+
+</resources>

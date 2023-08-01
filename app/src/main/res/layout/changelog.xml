@@ -1,0 +1,182 @@
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/dialog_padding_top" >
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v100_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v100_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v101_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v101_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v102_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v102_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v103_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v103_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v104_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v104_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v105_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v105_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v106_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v106_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v107_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v107_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v108_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v108_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v109_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v109_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="150dp" />
+
+    </LinearLayout>
+
+</ScrollView>
