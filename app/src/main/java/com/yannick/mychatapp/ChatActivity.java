@@ -125,8 +125,8 @@ public class ChatActivity extends AppCompatActivity {
     private String lastSearch = "";
 
     private DatabaseReference root;
-    private DatabaseReference userroot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
-    private DatabaseReference roomroot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private FirebaseStorage storage;
     private StorageReference storageReference;
     private StorageReference storageReferenceRoomImages;
@@ -417,7 +417,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        userroot.addChildEventListener(new ChildEventListener() {
+        userRoot.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 addUser(dataSnapshot);
@@ -480,7 +480,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         }, 10);
 
-        roomroot.addValueEventListener(new ValueEventListener() {
+        roomRoot.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
@@ -1062,12 +1062,12 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private String readFromFile(String datei) {
+    private String readFromFile(String file) {
         Context context = this;
         String erg = "";
 
         try {
-            InputStream inputStream = context.openFileInput(datei);
+            InputStream inputStream = context.openFileInput(file);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -1798,7 +1798,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public void addUser(final String key, final String user_id, final String chat_msg, final String img, final String pin, final String zitat, final String time, final MyCallback myCallback) {
-        userroot.child(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
+        userRoot.child(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
@@ -1905,11 +1905,11 @@ public class ChatActivity extends AppCompatActivity {
                         break;
                     }
                 }
-                temp_key = roomroot.child(raumkey).push().getKey();
+                temp_key = roomRoot.child(raumkey).push().getKey();
 
                 String currentDateandTime = sdf.format(new Date());
 
-                DatabaseReference message_root = roomroot.child(raumkey).child(temp_key);
+                DatabaseReference message_root = roomRoot.child(raumkey).child(temp_key);
                 Map<String, Object> map2 = new HashMap<>();
                 map2.put("name", userID);
                 if (fMessage.getTyp() == 13 || fMessage.getTyp() == 14 || fMessage.getTyp() == 15 || fMessage.getTyp() == 16) {

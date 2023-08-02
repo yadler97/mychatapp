@@ -207,30 +207,30 @@ public class RoomlistFragmentFavorites extends Fragment {
     }
 
     private void requestPassword(final Room room) {
-        String raumname = room.getKey();
-        if (room.getPasswd().equals(readFromFile("mychatapp_raum_" + raumname + ".txt"))) {
+        String roomKey = room.getKey();
+        if (room.getPasswd().equals(readFromFile("mychatapp_raum_" + roomKey + ".txt"))) {
             Intent intent = new Intent(getContext(), ChatActivity.class);
             intent.putExtra("room_name", room.getName());
-            intent.putExtra("room_key", room.getKey());
-            intent.putExtra("last_read_message", readFromFile("mychatapp_raum_" + room.getKey() + "_nm.txt"));
+            intent.putExtra("room_key", roomKey);
+            intent.putExtra("last_read_message", readFromFile("mychatapp_raum_" + roomKey + "_nm.txt"));
             if (room.getnM() != null) {
                 intent.putExtra("nmid", room.getnM().getKey());
-                writeToFile(room.getnM().getKey(), "mychatapp_raum_" + room.getKey() + "_nm.txt");
+                writeToFile(room.getnM().getKey(), "mychatapp_raum_" + roomKey + "_nm.txt");
             } else {
-                intent.putExtra("nmid", room.getKey());
-                writeToFile(room.getKey(), "mychatapp_raum_" + room.getKey() + "_nm.txt");
+                intent.putExtra("nmid", roomKey);
+                writeToFile(room.getKey(), "mychatapp_raum_" + roomKey + "_nm.txt");
             }
             adapter.notifyDataSetChanged();
             startActivity(intent);
         }
     }
 
-    private String readFromFile(String datei) {
+    private String readFromFile(String file) {
         Context context = getActivity();
         String erg = "";
 
         try {
-            InputStream inputStream = context.openFileInput(datei);
+            InputStream inputStream = context.openFileInput(file);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -255,10 +255,10 @@ public class RoomlistFragmentFavorites extends Fragment {
         return erg;
     }
 
-    public void writeToFile(String text, String datei) {
+    public void writeToFile(String text, String file) {
         Context context = getActivity();
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(datei, Context.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(file, Context.MODE_PRIVATE));
             outputStreamWriter.write(text);
             outputStreamWriter.close();
         }

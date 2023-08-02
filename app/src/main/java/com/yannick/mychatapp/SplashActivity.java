@@ -29,12 +29,6 @@ public class SplashActivity extends AppCompatActivity{
     private String theme;
     private FirebaseAuth mAuth;
     private FirebaseAnalytics mFirebaseAnalytics;
-    //String htmlContentInStringFormat = "";
-    //String htmlContentInStringFormat2 = "";
-    //String htmlContentInStringFormat3 = "";
-    //String htmlContentInStringFormat4 = "";
-    //Document htmlDocument;
-    //String testURL = "https://derstandard.at/2000099930972/T-Mobile-startet-kommende-Woche-Oesterreichs-erstes-5G-Netz";
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -57,8 +51,6 @@ public class SplashActivity extends AppCompatActivity{
 
         mAuth = FirebaseAuth.getInstance();
 
-        //MyTask task = new MyTask();
-        //task.execute(testURL);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -131,86 +123,4 @@ public class SplashActivity extends AppCompatActivity{
 
         return erg;
     }
-
-    /*private class JsoupAsyncTask extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                htmlDocument = Jsoup.connect(testURL).userAgent("Googlebot/2.1 (+http://www.google.com/bot.html)").get();
-                if (htmlDocument != null) {
-                    String url = new URL(htmlDocument.location()).getHost();
-                    if (url.contains("www.")) {
-                        url = url.substring(4);
-                    }
-                    htmlContentInStringFormat2 = url;
-                    Elements meta3e = htmlDocument.select("meta[property=og:image]");
-                    Elements meta2e = htmlDocument.select("meta[property=og:description]");
-                    Elements metae = htmlDocument.select("meta[property=og:title]");
-                    if (!meta2e.isEmpty() && !metae.isEmpty() && !meta3e.isEmpty()) {
-                        Element meta3 = meta3e.first();
-                        Element meta2 = meta2e.first();
-                        Element meta = metae.first();
-                        htmlContentInStringFormat4 = meta3.attr("content");
-                        htmlContentInStringFormat3 = meta2.attr("content");
-                        htmlContentInStringFormat = meta.attr("content");
-                    }
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            if (htmlDocument != null && !htmlContentInStringFormat.isEmpty() && !htmlContentInStringFormat2.isEmpty() && !htmlContentInStringFormat3.isEmpty() && !htmlContentInStringFormat4.isEmpty()) {
-                Log.d("HEYHY", "Titel: " + htmlContentInStringFormat);
-                Log.d("HEYHY", "Seite: " + htmlContentInStringFormat2);
-                Log.d("HEYHY", "Teaser: " + htmlContentInStringFormat3);
-                Log.d("HEYHY", "Bild: " + htmlContentInStringFormat4);
-            }
-        }
-    }
-
-    private class MyTask extends AsyncTask<String, Void, Boolean> {
-
-        @Override
-        protected void onPreExecute() {
-
-        }
-
-        @Override
-        protected Boolean doInBackground(String... params) {
-
-            try {
-                HttpURLConnection.setFollowRedirects(false);
-                HttpURLConnection con =  (HttpURLConnection) new URL(params[0]).openConnection();
-                con.setRequestMethod("HEAD");
-                System.out.println(con.getResponseCode());
-                return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                return false;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            boolean bResponse = result;
-            if (bResponse) {
-                Log.d("HEYHY", "File exists!");
-                JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask();
-                jsoupAsyncTask.execute();
-            } else {
-                Log.d("HEYHY", "File does not exist!");
-            }
-        }
-    }*/
 }

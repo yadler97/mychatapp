@@ -104,8 +104,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private String kategorie, themetyp, hintergrundtyp, theme, s_push, s_save, s_preview, s_camera, img_room, img_user, img_banner;
     private User currentUser;
-    private DatabaseReference roomroot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
-    private DatabaseReference userroot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
     private FloatingActionButton btn_add_room;
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private String[] kat;
@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        userroot.addListenerForSingleValueEvent(new ValueEventListener() {
+        userRoot.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
@@ -438,13 +438,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                     searchView.setIconified(true);
                                                     searchView.setIconified(true);
                                                 }
-                                                final String room_key = roomroot.push().getKey();
-                                                roomroot = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key);
-                                                roomroot.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                final String room_key = roomRoot.push().getKey();
+                                                roomRoot = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key);
+                                                roomRoot.addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(DataSnapshot snapshot) {
                                                         if (!snapshot.exists()) {
-                                                            DatabaseReference message_root = roomroot.child("-0roomdata");
+                                                            DatabaseReference message_root = roomRoot.child("-0roomdata");
                                                             Map<String, Object> map = new HashMap<>();
                                                             String currentDateandTime = sdf.format(new Date());
                                                             map.put("admin", currentUser.getUserID());
@@ -852,7 +852,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         if (tmpcolor >= 0) {
                                             color = tmpcolor;
                                         }
-                                        DatabaseReference user_root = userroot.child(currentUser.getUserID());
+                                        DatabaseReference user_root = userRoot.child(currentUser.getUserID());
                                         Map<String, Object> map = new HashMap<>();
                                         map.put("name", currentUser.getName());
                                         map.put("bio", currentUser.getBio());
@@ -1144,10 +1144,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
-    public void writeToFile(String text, String datei) {
+    public void writeToFile(String text, String file) {
         Context context = this;
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(datei, Context.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(file, Context.MODE_PRIVATE));
             outputStreamWriter.write(text);
             outputStreamWriter.close();
         }
@@ -1156,12 +1156,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    public String readFromFile(String datei) {
+    public String readFromFile(String file) {
         Context context = this;
         String erg = "";
 
         try {
-            InputStream inputStream = context.openFileInput(datei);
+            InputStream inputStream = context.openFileInput(file);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
@@ -1252,7 +1252,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void readUserData(final String userID) {
-        userroot.child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+        userRoot.child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 currentUser = dataSnapshot.getValue(User.class);
@@ -1407,14 +1407,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 progressDialog.dismiss();
                 if (type == 0) {
                     currentUser.setOwnpi("1");
-                    DatabaseReference user_root = userroot.child(currentUser.getUserID());
+                    DatabaseReference user_root = userRoot.child(currentUser.getUserID());
                     Map<String, Object> map = new HashMap<>();
                     map.put("ownpi", "1");
                     map.put("img", img_user);
                     user_root.updateChildren(map);
                 }
                 if (type == 1) {
-                    DatabaseReference user_root = userroot.child(currentUser.getUserID());
+                    DatabaseReference user_root = userRoot.child(currentUser.getUserID());
                     Map<String, Object> map = new HashMap<>();
                     map.put("banner", img_banner);
                     user_root.updateChildren(map);

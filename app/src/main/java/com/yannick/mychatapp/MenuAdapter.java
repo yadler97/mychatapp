@@ -111,11 +111,11 @@ public class MenuAdapter extends BaseAdapter {
         return imageView;
     }
 
-    private String readFromFile(String datei) {
+    private String readFromFile(String file) {
         String erg = "";
 
         try {
-            InputStream inputStream = context.openFileInput(datei);
+            InputStream inputStream = context.openFileInput(file);
 
             if ( inputStream != null ) {
                 InputStreamReader inputStreamReader = new InputStreamReader(inputStream);

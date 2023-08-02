@@ -89,7 +89,7 @@ public class LoginActivity extends AppCompatActivity {
     private static String ownpi = "0";
     private static int color = 0;
     private int tmpcolor = -1;
-    private DatabaseReference userroot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
     private StorageReference pathReference_image;
     private StorageReference pathReference_banner;
 
@@ -406,7 +406,7 @@ public class LoginActivity extends AppCompatActivity {
                                 img = imguuid;
                             }
 
-                            DatabaseReference user_root = userroot.child(userID);
+                            DatabaseReference user_root = userRoot.child(userID);
                             Map<String, Object> map = new HashMap<>();
                             map.put("name", name);
                             map.put("bio", bio);
@@ -881,7 +881,7 @@ public class LoginActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 if (type == 0) {
                     ownpi = "1";
-                    DatabaseReference user_root = userroot.child(userID);
+                    DatabaseReference user_root = userRoot.child(userID);
                     Map<String, Object> map = new HashMap<>();
                     map.put("ownpi", "1");
                     user_root.updateChildren(map);
