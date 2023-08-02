@@ -37,7 +37,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
 
-public class RoomlistFragmentMore extends Fragment {
+public class RoomListFragmentMore extends Fragment {
 
     private ListView listView;
     private String roomName;
@@ -48,7 +48,7 @@ public class RoomlistFragmentMore extends Fragment {
     private TextView noRoomFound;
     private Message newestMessage;
 
-    private final FileOperations fileOperations = new FileOperations(getActivity());
+    private FileOperations fileOperations;
 
     @Nullable
     @Override
@@ -58,7 +58,8 @@ public class RoomlistFragmentMore extends Fragment {
         listView = view.findViewById(R.id.listView);
         noRoomFound = view.findViewById(R.id.keinraumgefunden);
 
-        theme = Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt"));
+        theme = Theme.getCurrentTheme(getContext());
+        fileOperations = new FileOperations(getActivity());
 
         adapter = new RoomAdapter(getContext(), roomList, 2);
         listView.setAdapter(adapter);

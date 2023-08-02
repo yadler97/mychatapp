@@ -99,7 +99,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-            theme = Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt"));
+            theme = Theme.getCurrentTheme(context);
 
             view.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -243,35 +243,35 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 Toast.makeText(context, R.string.messagecopied, Toast.LENGTH_SHORT).show();
             } else if (item.getItemId() == R.id.openprofile) {
                 Intent intent = new Intent("userprofile");
-                intent.putExtra("userid",clickedDataItem.getUser().getUserID());
+                intent.putExtra("userid", clickedDataItem.getUser().getUserID());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.forward) {
-                Intent intent = new Intent("weiterleiten");
-                intent.putExtra("weiterleitenID", clickedDataItem.getKey());
+                Intent intent = new Intent("forward");
+                intent.putExtra("forwardID", clickedDataItem.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.pin) {
                 Intent intent = new Intent("pinnen");
                 intent.putExtra("pinID", clickedDataItem.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.jump) {
-                Intent intent = new Intent("zitiertenachricht");
-                intent.putExtra("zitat",clickedDataItem.getQuote_key());
+                Intent intent = new Intent("quotedMessage");
+                intent.putExtra("quoteID", clickedDataItem.getQuote_key());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.quote && typ != 13 && typ != 14 && typ != 15 && typ != 16) {
-                Intent intent = new Intent("zitieren");
-                intent.putExtra("zitat",clickedDataItem.getKey());
+                Intent intent = new Intent("quote");
+                intent.putExtra("quoteID", clickedDataItem.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.quote && (typ == 13 || typ == 14 || typ == 15 || typ == 16)) {
-                Intent intent = new Intent("zitieren");
-                intent.putExtra("zitat",clickedDataItem.getKey());
+                Intent intent = new Intent("quote");
+                intent.putExtra("quoteID", clickedDataItem.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.download && (typ == 13 || typ == 14 || typ == 15 || typ == 16)) {
                 Intent intent = new Intent("permission");
-                intent.putExtra("imgurl",message);
+                intent.putExtra("imgurl", message);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.download && (typ == 17 || typ == 18 || typ == 19 || typ == 20)) {
                 Intent intent = new Intent("permission");
-                intent.putExtra("imgurl",clickedDataItem.getQuote_message());
+                intent.putExtra("imgurl", clickedDataItem.getQuote_message());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         }
@@ -323,8 +323,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         public void openFullScreenImage() {
             clickedDataItem = messageList.get(pos);
             if (!clickedDataItem.getSearchString().equals("")) {
-                Intent intent = new Intent("zitiertenachricht");
-                intent.putExtra("zitat", clickedDataItem.getKey());
+                Intent intent = new Intent("quotedMessage");
+                intent.putExtra("quoteID", clickedDataItem.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else {
                 typ = clickedDataItem.getTyp();
@@ -337,8 +337,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     intent.putExtra("image", clickedDataItem.getQuote_message());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 } else if (typ == 5 || typ == 6 || typ == 7 || typ == 8) {
-                    Intent intent = new Intent("zitiertenachricht");
-                    intent.putExtra("zitat", clickedDataItem.getQuote_key());
+                    Intent intent = new Intent("quotedMessage");
+                    intent.putExtra("quoteID", clickedDataItem.getQuote_key());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
             }

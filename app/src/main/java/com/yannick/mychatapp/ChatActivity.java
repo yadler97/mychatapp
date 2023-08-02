@@ -198,7 +198,7 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        changeTheme();
+        changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.chat_room);
 
         //Toolbar toolbar = findViewById(R.id.toolbar);
@@ -250,11 +250,11 @@ public class ChatActivity extends AppCompatActivity {
 
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(quoteReceiver, new IntentFilter("zitieren"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(quotedReceiver, new IntentFilter("zitiertenachricht"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(quoteReceiver, new IntentFilter("quote"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(quotedReceiver, new IntentFilter("quotedMessage"));
         LocalBroadcastManager.getInstance(this).registerReceiver(permissionReceiver, new IntentFilter("permission"));
         LocalBroadcastManager.getInstance(this).registerReceiver(userReceiver, new IntentFilter("userprofile"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(forwardReceiver, new IntentFilter("weiterleiten"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(forwardReceiver, new IntentFilter("forward"));
         LocalBroadcastManager.getInstance(this).registerReceiver(fullscreenReceiver, new IntentFilter("fullscreenimage"));
         LocalBroadcastManager.getInstance(this).registerReceiver(pinReceiver, new IntentFilter("pinnen"));
         LocalBroadcastManager.getInstance(this).registerReceiver(jumppinnedReceiver, new IntentFilter("jumppinned"));
@@ -537,9 +537,9 @@ public class ChatActivity extends AppCompatActivity {
                 time_creation = room.getTime();*/
                 user = getUser(admin);
 
-                /*addUser(roomkey, admin, "", img, pin, zitat, time_creation, new MyCallback() {
+                /*addUser(roomkey, admin, "", img, pin, quote, time_creation, new MyCallback() {
                     @Override
-                    public void onCallback(String roomkey, User user, String time_creation, String chat_msg, String img, String pin, String zitat) {
+                    public void onCallback(String roomkey, User user, String time_creation, String chat_msg, String img, String pin, String quote) {
                         //Log.d("HEYHY", chat_msg + " - " + user.getName());*/
                         try {
                             time_creation = sdf_local.format(sdf_local.parse(time_creation));
@@ -664,9 +664,9 @@ public class ChatActivity extends AppCompatActivity {
                     mAdapter.notifyDataSetChanged();
                 }
 
-                /*addUser(key, chat_user_id, chat_msg, img, pin, zitat, time, new MyCallback() {
+                /*addUser(key, chat_user_id, chat_msg, img, pin, quote, time, new MyCallback() {
                     @Override
-                    public void onCallback(String key, User user, String time, String chat_msg, String img, String pin, String zitat) {
+                    public void onCallback(String key, User user, String time, String chat_msg, String img, String pin, String quote) {
                         //Log.d("HEYHY", chat_msg + " - " + user.getName());
 
 
@@ -860,8 +860,8 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private void changeTheme() {
-        theme = Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt"));
+    private void changeTheme(Theme theme) {
+        this.theme = theme;
         if (theme == Theme.DARK) {
             setTheme(R.style.DarkChat);
         } else {
@@ -1069,7 +1069,7 @@ public class ChatActivity extends AppCompatActivity {
     public BroadcastReceiver quoteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            quoteStatus = intent.getStringExtra("zitat");
+            quoteStatus = intent.getStringExtra("quoteID");
             for (Message m : messageList) {
                 if (m.getKey().equals(quoteStatus)) {
                     String user;
@@ -1116,7 +1116,7 @@ public class ChatActivity extends AppCompatActivity {
                 searchView.setIconified(true);
             }
             
-            String quoted = intent.getStringExtra("zitat");
+            String quoted = intent.getStringExtra("quoteID");
             int pos = 0;
             for (Message m : messageList) {
                 if (m.getKey().equals(quoted)) {
@@ -1159,7 +1159,7 @@ public class ChatActivity extends AppCompatActivity {
     public BroadcastReceiver forwardReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, Intent intent) {
-            String message_id = intent.getStringExtra("weiterleitenID");
+            String message_id = intent.getStringExtra("forwardID");
             if (!roomList.isEmpty()) {
                 forwardMessage(message_id);
             } else {
@@ -1760,14 +1760,14 @@ public class ChatActivity extends AppCompatActivity {
         userListCreated = true;
     }
 
-    public void addUser(final String key, final String user_id, final String chat_msg, final String img, final String pin, final String zitat, final String time, final MyCallback myCallback) {
+    public void addUser(final String key, final String user_id, final String chat_msg, final String img, final String pin, final String quote, final String time, final MyCallback myCallback) {
         userRoot.child(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 user.setUserID(user_id);
                 userList.add(user);
-                myCallback.onCallback(key, user, time, chat_msg, img, pin, zitat);
+                myCallback.onCallback(key, user, time, chat_msg, img, pin, quote);
             }
 
             @Override
@@ -1782,9 +1782,9 @@ public class ChatActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.profile, null);
 
-        CircleImageView profilicon = view.findViewById(R.id.icon_profile);
-        TextView profilname = view.findViewById(R.id.name_profile);
-        TextView profilbio = view.findViewById(R.id.profile_bio);
+        CircleImageView profileIcon = view.findViewById(R.id.icon_profile);
+        TextView profileName = view.findViewById(R.id.name_profile);
+        TextView profileDescription = view.findViewById(R.id.profile_bio);
         TextView birthday = view.findViewById(R.id.profile_birthday);
         TextView location = view.findViewById(R.id.profile_location);
         ImageView banner = view.findViewById(R.id.background_profile);
@@ -1810,9 +1810,9 @@ public class ChatActivity extends AppCompatActivity {
         GlideApp.with(getApplicationContext())
                 .load(pathReference_image)
                 .centerCrop()
-                .into(profilicon);
+                .into(profileIcon);
 
-        profilicon.setOnClickListener(new View.OnClickListener() {
+        profileIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showFullscreenImage(user_ID, 0);
@@ -1826,8 +1826,8 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        profilname.setText(user.getName());
-        profilbio.setText(user.getProfileDescription());
+        profileName.setText(user.getName());
+        profileDescription.setText(user.getProfileDescription());
         birthday.setText(user.getBirthday().substring(6, 8) + "." + user.getBirthday().substring(4, 6) + "." + user.getBirthday().substring(0, 4));
         location.setText(user.getLocation());
 

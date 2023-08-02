@@ -27,7 +27,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class RoomlistFragmentMyRooms extends Fragment {
+public class RoomListFragmentMyRooms extends Fragment {
 
     private ListView listView;
     private RoomAdapter adapter;

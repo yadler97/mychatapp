@@ -107,7 +107,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         if (typ == 0 || typ == 1) {
             if (roomList.get(position).getnM() != null) {
                 if (!roomList.get(position).getnM().getKey().equals(fileOperations.readFromFile("mychatapp_raum_" + roomList.get(position).getKey() + "_nm.txt"))) {
-                    if (Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt")) == Theme.DARK) {
+                    if (Theme.getCurrentTheme(context) == Theme.DARK) {
                         viewHolder.background.setBackgroundColor(context.getResources().getColor(R.color.roomhighlight_dark));
                     } else {
                         viewHolder.background.setBackgroundColor(context.getResources().getColor(R.color.roomhighlight));
@@ -119,7 +119,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         if (typ != 2) {
             if (fileOperations.readFromFile("mychatapp_" + roomList.get(position).getKey() + "_mute.txt").equals("1")) {
                 viewHolder.muteIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_muted));
-                if (Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt")) == Theme.DARK) {
+                if (Theme.getCurrentTheme(context) == Theme.DARK) {
                     viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
                 } else {
                     viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.iconGrey), PorterDuff.Mode.SRC_ATOP);

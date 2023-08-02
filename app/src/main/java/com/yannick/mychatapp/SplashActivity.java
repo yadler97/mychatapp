@@ -24,7 +24,7 @@ public class SplashActivity extends AppCompatActivity{
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        changeTheme();
+        changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.activity_splash);
 
         ImageView imgSplash = findViewById(R.id.imgsplash);
@@ -61,9 +61,8 @@ public class SplashActivity extends AppCompatActivity{
         }, SPLASH_OUT_TIME);
     }
 
-    private void changeTheme() {
-        FileOperations fileOperations = new FileOperations(this);
-        theme = Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt"));
+    private void changeTheme(Theme theme) {
+        this.theme = theme;
         if (theme == Theme.DARK) {
             setTheme(R.style.SplashDark);
         } else {

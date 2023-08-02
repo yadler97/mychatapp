@@ -12,6 +12,10 @@ public class Room {
     private String username;
     private String img;
 
+    public Room() {
+
+    }
+
     public Room(String key, String name, String caty, String time, String passwd, String admin) {
         this.key = key;
         this.name = name;
