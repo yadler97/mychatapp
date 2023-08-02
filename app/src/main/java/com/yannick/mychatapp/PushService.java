@@ -19,11 +19,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
@@ -40,8 +35,9 @@ public class PushService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         mAuth = FirebaseAuth.getInstance();
-        if (!appInForeground(this) || (appInForeground(this) && !readFromFile("mychatapp_current.txt").equals(remoteMessage.getData().get("roomid")))) {
-            if (!readFromFile("mychatapp_settings_push.txt").equals("off") && !remoteMessage.getData().get("userid").equals(mAuth.getCurrentUser().getUid())) {
+        FileOperations fileOperations = new FileOperations(this);
+        if (!appInForeground(this) || (appInForeground(this) && !fileOperations.readFromFile("mychatapp_current.txt").equals(remoteMessage.getData().get("roomid")))) {
+            if (!fileOperations.readFromFile("mychatapp_settings_push.txt").equals("off") && !remoteMessage.getData().get("userid").equals(mAuth.getCurrentUser().getUid())) {
                 int pushID = 0;
                 for (int i = 0; i < remoteMessage.getData().get("roomid").length(); ++i) {
                     pushID += (int) remoteMessage.getData().get("roomid").charAt(i);
@@ -154,35 +150,5 @@ public class PushService extends FirebaseMessagingService {
             }
         }
         return false;
-    }
-
-    private String readFromFile(String datei) {
-        Context context = getApplicationContext();
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(datei);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
     }
 }

@@ -91,14 +91,12 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -121,12 +119,14 @@ public class ChatActivity extends AppCompatActivity {
 
     private EditText input_msg;
 
-    private String userID, room_key, key, temp_key, chat_msg, chat_user_id, time, img, passwd, caty, theme, img_name, zitat, imgurl, roomkey, admin, time_creation, desc, pin, mimeType, app_name, name, room_name, lastReadMessage, key_last, nmid, room_img;
+    private Theme theme;
+
+    private String userID, room_key, key, temp_key, chat_msg, chat_user_id, time, img, passwd, caty, img_name, quote, imgurl, roomKey, admin, time_creation, desc, pin, mimeType, app_name, name, room_name, lastReadMessage, key_last, nmid, room_img;
     private String lastSearch = "";
 
     private DatabaseReference root;
-    private DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
-    private DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private FirebaseStorage storage;
     private StorageReference storageReference;
     private StorageReference storageReferenceRoomImages;
@@ -136,7 +136,7 @@ public class ChatActivity extends AppCompatActivity {
     private MessageAdapter mAdapter;
     private CoordinatorLayout layout;
     private GestureDetector gestureDetector;
-    private String zitatStatus = "";
+    private String quoteStatus = "";
     private int amount = 0;
     private int action = 0;
     private User user = new User();
@@ -176,8 +176,6 @@ public class ChatActivity extends AppCompatActivity {
     private String kategorie;
 
     private GravityImageView backgroundview;
-    private CircleImageView profilicon;
-    private ImageView banner;
 
     private TextView quote_text;
     private ImageButton quote_remove;
@@ -193,6 +191,8 @@ public class ChatActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
 
     private int index = -1;
+
+    private final FileOperations fileOperations = new FileOperations(this);
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -250,8 +250,8 @@ public class ChatActivity extends AppCompatActivity {
 
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(zitatReceiver, new IntentFilter("zitieren"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(zitiertReceiver, new IntentFilter("zitiertenachricht"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(quoteReceiver, new IntentFilter("zitieren"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(quotedReceiver, new IntentFilter("zitiertenachricht"));
         LocalBroadcastManager.getInstance(this).registerReceiver(permissionReceiver, new IntentFilter("permission"));
         LocalBroadcastManager.getInstance(this).registerReceiver(userReceiver, new IntentFilter("userprofile"));
         LocalBroadcastManager.getInstance(this).registerReceiver(forwardReceiver, new IntentFilter("weiterleiten"));
@@ -276,7 +276,7 @@ public class ChatActivity extends AppCompatActivity {
         lastReadMessage = getIntent().getExtras().get("last_read_message").toString();
         lastReadMessageReached = (nmid.equals(lastReadMessage));
         setTitle(room_name);
-        writeToFile(room_key, "mychatapp_current.txt");
+        fileOperations.writeToFile(room_key, "mychatapp_current.txt");
 
         int pushID = 0;
         for (int i = 0; i < room_key.length(); ++i) {
@@ -285,8 +285,8 @@ public class ChatActivity extends AppCompatActivity {
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(pushID);
 
-        if (!readFromFile("mychatapp_settings_save.txt").equals("off")) {
-            input_msg.setText(readFromFile("mychatapp_" + room_key + "_eingabe.txt").replaceAll("<br />", "\n"));
+        if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+            input_msg.setText(fileOperations.readFromFile("mychatapp_" + room_key + "_eingabe.txt").replaceAll("<br />", "\n"));
         }
 
         gestureDetector = new GestureDetector(this, new SingleTapConfirm());
@@ -329,7 +329,7 @@ public class ChatActivity extends AppCompatActivity {
                     temp_key = root.push().getKey();
                     root.updateChildren(map);
 
-                    String currentDateandTime = sdf.format(new Date());
+                    String currentDateAndTime = sdf.format(new Date());
 
                     DatabaseReference message_root = root.child(temp_key);
                     Map<String, Object> map2 = new HashMap<String, Object>();
@@ -337,18 +337,18 @@ public class ChatActivity extends AppCompatActivity {
                     map2.put("msg", input_msg.getText().toString().trim());
                     map2.put("img", "");
                     map2.put("pin", "0");
-                    map2.put("quote", zitatStatus);
-                    map2.put("time", currentDateandTime);
+                    map2.put("quote", quoteStatus);
+                    map2.put("time", currentDateAndTime);
 
                     message_root.updateChildren(map2);
                     input_msg.getText().clear();
-                    zitatStatus = "";
+                    quoteStatus = "";
                     quote_text.setText("");
                     quote_image.setImageDrawable(null);
                     quote_image.setVisibility(View.GONE);
                     quote_layout.setVisibility(View.GONE);
-                    writeToFile("", "mychatapp_" + room_key + "_eingabe.txt");
-                    writeToFile(temp_key, "mychatapp_raum_" + room_key + "_nm.txt");
+                    fileOperations.writeToFile("", "mychatapp_" + room_key + "_eingabe.txt");
+                    fileOperations.writeToFile(temp_key, "mychatapp_raum_" + room_key + "_nm.txt");
                 }
             }
         });
@@ -397,7 +397,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (gestureDetector.onTouchEvent(event)) {
-                    zitatStatus = "";
+                    quoteStatus = "";
                     quote_text.setText("");
                     quote_image.setImageDrawable(null);
                     quote_image.setVisibility(View.GONE);
@@ -484,14 +484,14 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
-                    String raumkey = uniqueKeySnapshot.getKey();
-                    if (raumkey.equals(room_key)) {
+                    String roomKey = uniqueKeySnapshot.getKey();
+                    if (roomKey.equals(room_key)) {
                         amount = (int)uniqueKeySnapshot.getChildrenCount() - 1;
                     }
                     for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
                         Room room = roomSnapshot.getValue(Room.class);
-                        room.setKey(raumkey);
-                        if (room.getPasswd().equals(readFromFile("mychatapp_raum_" + raumkey + ".txt")) && !raumkey.equals(room_key)) {
+                        room.setKey(roomKey);
+                        if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_raum_" + roomKey + ".txt")) && !roomKey.equals(room_key)) {
                             roomList.add(room.getName());
                             roomKeysList.add(room.getKey());
                         }
@@ -514,7 +514,7 @@ public class ChatActivity extends AppCompatActivity {
             if (firstMessage) {
                 firstMessage = false;
 
-                roomkey = dataSnapshot.getKey();
+                roomKey = dataSnapshot.getKey();
                 admin = (String) ((DataSnapshot) i.next()).getValue();
                 caty = (String) ((DataSnapshot) i.next()).getValue();
                 desc = (String) ((DataSnapshot) i.next()).getValue();
@@ -548,7 +548,7 @@ public class ChatActivity extends AppCompatActivity {
                         }
                         String time_creation_con = time_creation.substring(6, 8) + "." + time_creation.substring(4,6) + "." + time_creation.substring(0, 4);
                         String text = getResources().getString(R.string.roomintro, time_creation_con, user.getName());
-                        Message m = new Message(user, text, time_creation, time_creation, false, roomkey, 0, "", "", "", "0");
+                        Message m = new Message(user, text, time_creation, time_creation, false, roomKey, 0, "", "", "", "0");
 
                         messageList.add(m);
                         if (!memberList.contains(m.getUser())) {
@@ -565,7 +565,7 @@ public class ChatActivity extends AppCompatActivity {
                 chat_msg = (String) ((DataSnapshot) i.next()).getValue();
                 chat_user_id = (String) ((DataSnapshot) i.next()).getValue();
                 pin = (String) ((DataSnapshot) i.next()).getValue();
-                zitat = (String) ((DataSnapshot) i.next()).getValue();
+                quote = (String) ((DataSnapshot) i.next()).getValue();
                 time = (String) ((DataSnapshot) i.next()).getValue();
 
                 user = getUser(chat_user_id);
@@ -599,7 +599,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 Message m;
-                if (zitat.equals("")) {
+                if (quote.equals("")) {
                     if (!chat_msg.equals("")) {
                         if (chat_msg.length() > 11 && chat_msg.substring(0, 12).equals("(Forwarded) ")) {
                             if (chat_msg.length() > 2000 + 12) {
@@ -627,7 +627,7 @@ public class ChatActivity extends AppCompatActivity {
                     quote_name = "";
                     quote_key = "";
                     for (Message quote : messageList) {
-                        if (quote.getKey().equals(zitat)) {
+                        if (quote.getKey().equals(this.quote)) {
                             quote_message = quote.getMsg();
                             quote_name = quote.getUser().getName();
                             quote_key = quote.getKey();
@@ -687,7 +687,7 @@ public class ChatActivity extends AppCompatActivity {
         chat_msg = (String) ((DataSnapshot) i.next()).getValue();
         chat_user_id = (String) ((DataSnapshot) i.next()).getValue();
         pin = (String) ((DataSnapshot) i.next()).getValue();
-        zitat = (String) ((DataSnapshot) i.next()).getValue();
+        quote = (String) ((DataSnapshot) i.next()).getValue();
         time = (String) ((DataSnapshot) i.next()).getValue();
 
         if (!img.equals("")) {
@@ -737,7 +737,7 @@ public class ChatActivity extends AppCompatActivity {
         chat_msg = (String) ((DataSnapshot) i.next()).getValue();
         chat_user_id = (String) ((DataSnapshot) i.next()).getValue();
         pin = (String) ((DataSnapshot) i.next()).getValue();
-        zitat = (String) ((DataSnapshot) i.next()).getValue();
+        quote = (String) ((DataSnapshot) i.next()).getValue();
         time = (String) ((DataSnapshot) i.next()).getValue();
 
         for (Message m : messageList) {
@@ -769,96 +769,100 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setBackgroundImage() {
-        String hintergrund = readFromFile("mychatapp_hintergrund.txt");
-        if (getResources().getConfiguration().orientation != 2 && !hintergrund.isEmpty()) {
-            switch (Integer.parseInt(hintergrund)) {
-                case 1:
+        Background background = Background.valueOf(fileOperations.readFromFile("mychatapp_background.txt"));
+        if (getResources().getConfiguration().orientation != 2) {
+            switch (background) {
+                case BREATH_OF_THE_WILD:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_botw));
                     break;
-                case 2:
+                case SPLATOON_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_splatoon2));
                     break;
-                case 3:
+                case PERSONA_5:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_persona));
                     break;
-                case 4:
+                case KIMI_NO_NA_WA:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_kiminonawa));
                     break;
-                case 5:
+                case SUPER_MARIO_BROS:
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smb));
                     break;
-                case 6:
+                case SUPER_MARIO_MAKER:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smm));
                     break;
-                case 7:
+                case XENOBLADE_CHRONICLES_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_xc2));
                     break;
-                case 8:
+                case FIRE_EMBLEM_FATES:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_fef));
                     break;
-                case 9:
+                case SUPER_SMASH_BROS_ULTIMATE:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_ssbu));
                     break;
-                case 10:
+                case DETECTIVE_PIKACHU:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_dp));
                     break;
+                default:
+                    break;
             }
-        } else if (!hintergrund.isEmpty()) {
-            switch (Integer.parseInt(hintergrund)) {
-                case 1:
+        } else {
+            switch (background) {
+                case BREATH_OF_THE_WILD:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_botw_horizontal));
                     break;
-                case 2:
+                case SPLATOON_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_splatoon2_horizontal));
                     break;
-                case 3:
+                case PERSONA_5:
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_persona_horizontal));
                     break;
-                case 4:
+                case KIMI_NO_NA_WA:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_kiminonawa_horizontal));
                     break;
-                case 5:
+                case SUPER_MARIO_BROS:
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smb_horizontal));
                     break;
-                case 6:
+                case SUPER_MARIO_MAKER:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smm_horizontal));
                     break;
-                case 7:
+                case XENOBLADE_CHRONICLES_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_xc2_horizontal));
                     break;
-                case 8:
+                case FIRE_EMBLEM_FATES:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_fef_horizontal));
                     break;
-                case 9:
+                case SUPER_SMASH_BROS_ULTIMATE:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_ssbu_horizontal));
                     break;
-                case 10:
+                case DETECTIVE_PIKACHU:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_dp_horizontal));
+                    break;
+                default:
                     break;
             }
         }
     }
 
     private void changeTheme() {
-        theme = readFromFile("mychatapp_theme.txt");
-        if (theme.equals("1")) {
+        theme = Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt"));
+        if (theme == Theme.DARK) {
             setTheme(R.style.DarkChat);
         } else {
             setTheme(R.style.AppThemeChat);
@@ -871,7 +875,7 @@ public class ChatActivity extends AppCompatActivity {
             searchView.setIconified(true);
         }
         final ProgressDialog progressDialog;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             progressDialog = new ProgressDialog(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             progressDialog = new ProgressDialog(this);
@@ -956,7 +960,7 @@ public class ChatActivity extends AppCompatActivity {
                     temp_key = root.push().getKey();
                     root.updateChildren(map);
 
-                    String currentDateandTime = sdf.format(new Date());
+                    String currentDateAndTime = sdf.format(new Date());
 
                     DatabaseReference message_root = root.child(temp_key);
                     Map<String, Object> map2 = new HashMap<String, Object>();
@@ -965,17 +969,17 @@ public class ChatActivity extends AppCompatActivity {
                     map2.put("img", img_name);
                     map2.put("pin", "0");
                     map2.put("quote", "");
-                    map2.put("time", currentDateandTime);
+                    map2.put("time", currentDateAndTime);
 
                     message_root.updateChildren(map2);
 
-                    zitatStatus = "";
+                    quoteStatus = "";
 
-                    if (type == 1 && !readFromFile("mychatapp_settings_camera.txt").equals("off")) {
+                    if (type == 1 && !fileOperations.readFromFile("mychatapp_settings_camera.txt").equals("off")) {
                         downloadImage(img_name, type);
                     }
                 } else {
-                    DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomkey);
+                    DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomKey);
                     Map<String, Object> map = new HashMap<>();
                     map.put("img", img_name);
                     message_root.updateChildren(map);
@@ -1062,53 +1066,12 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private String readFromFile(String file) {
-        Context context = this;
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(file);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
-    }
-
-    public void writeToFile(String text, String datei) {
-        Context context = this;
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(datei, Context.MODE_PRIVATE));
-            outputStreamWriter.write(text);
-            outputStreamWriter.close();
-        } catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
-    }
-
-    public BroadcastReceiver zitatReceiver = new BroadcastReceiver() {
+    public BroadcastReceiver quoteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            zitatStatus = intent.getStringExtra("zitat");
+            quoteStatus = intent.getStringExtra("zitat");
             for (Message m : messageList) {
-                if (m.getKey().equals(zitatStatus)) {
+                if (m.getKey().equals(quoteStatus)) {
                     String user;
                     if (m.getUser().getUserID().equals(userID)) {
                         user = getResources().getString(R.string.you);
@@ -1145,7 +1108,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
-    public BroadcastReceiver zitiertReceiver = new BroadcastReceiver() {
+    public BroadcastReceiver quotedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!searchView.isIconified()) {
@@ -1153,10 +1116,10 @@ public class ChatActivity extends AppCompatActivity {
                 searchView.setIconified(true);
             }
             
-            String zitiert = intent.getStringExtra("zitat");
+            String quoted = intent.getStringExtra("zitat");
             int pos = 0;
             for (Message m : messageList) {
-                if (m.getKey().equals(zitiert)) {
+                if (m.getKey().equals(quoted)) {
                     break;
                 } else {
                     pos++;
@@ -1325,18 +1288,18 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu (Menu menu) {
-        MenuInflater myinflater = getMenuInflater();
-        if (!readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
-            if (!readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
-                myinflater.inflate(R.menu.menu_chatroom, menu);
+        MenuInflater inflater = getMenuInflater();
+        if (!fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
+            if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
+                inflater.inflate(R.menu.menu_chatroom, menu);
             } else {
-                myinflater.inflate(R.menu.menu_chatroom_unmute, menu);
+                inflater.inflate(R.menu.menu_chatroom_unmute, menu);
             }
         } else {
-            if (!readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
-                myinflater.inflate(R.menu.menu_chatroom_unfav, menu);
+            if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
+                inflater.inflate(R.menu.menu_chatroom_unfav, menu);
             } else {
-                myinflater.inflate(R.menu.menu_chatroom_unmute_unfav, menu);
+                inflater.inflate(R.menu.menu_chatroom_unmute_unfav, menu);
             }
         }
 
@@ -1406,12 +1369,12 @@ public class ChatActivity extends AppCompatActivity {
                 openPinboard();
                 return true;
             case R.id.roommute:
-                if (!readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
-                    writeToFile("1", "mychatapp_" + room_key + "_mute.txt");
+                if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
+                    fileOperations.writeToFile("1", "mychatapp_" + room_key + "_mute.txt");
                     FirebaseMessaging.getInstance().unsubscribeFromTopic(room_key);
                     Toast.makeText(this, R.string.roommuted, Toast.LENGTH_SHORT).show();
                 } else {
-                    writeToFile("0", "mychatapp_" + room_key + "_mute.txt");
+                    fileOperations.writeToFile("0", "mychatapp_" + room_key + "_mute.txt");
                     FirebaseMessaging.getInstance().subscribeToTopic(room_key);
                     Toast.makeText(this, R.string.roomunmuted, Toast.LENGTH_SHORT).show();
                 }
@@ -1426,7 +1389,7 @@ public class ChatActivity extends AppCompatActivity {
                 return true;
             case R.id.roomleave:
                 AlertDialog.Builder builder;
-                if (theme.equals("1")) {
+                if (theme == Theme.DARK) {
                     builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
                 } else {
                     builder = new AlertDialog.Builder(this);
@@ -1435,9 +1398,9 @@ public class ChatActivity extends AppCompatActivity {
                 builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        writeToFile("", "mychatapp_raum_" + room_key + ".txt");
+                        fileOperations.writeToFile("", "mychatapp_raum_" + room_key + ".txt");
                         startActivity(new Intent(ChatActivity.this, MainActivity.class));
-                        if (readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
+                        if (fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
                             markAsFav();
                         }
                         Intent intent = new Intent("leaveroom");
@@ -1461,16 +1424,16 @@ public class ChatActivity extends AppCompatActivity {
                     InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 }
-                if (!readFromFile("mychatapp_settings_save.txt").equals("off")) {
-                    writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+                if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+                    fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
                     if (!input_msg.getText().toString().trim().isEmpty()) {
                         Toast.makeText(this, R.string.messagesaved, Toast.LENGTH_SHORT).show();
                     }
                 }
                 if (!messageList.isEmpty()) {
-                    writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
+                    fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
                 }
-                writeToFile("0", "mychatapp_current.txt");
+                fileOperations.writeToFile("0", "mychatapp_current.txt");
                 startActivity(new Intent(ChatActivity.this, MainActivity.class));
                 return true;
             default:
@@ -1497,7 +1460,7 @@ public class ChatActivity extends AppCompatActivity {
         room_amount_messages.setText(String.valueOf(amount));
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(this);
@@ -1561,37 +1524,37 @@ public class ChatActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(fullscreenReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
-        if (!readFromFile("mychatapp_settings_save.txt").equals("off")) {
-            writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+        if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+            fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
         }
-        writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", "mychatapp_current.txt");
         if ((messageList.size() - 1) >= 0) {
-            writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
+            fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
         }
         super.onBackPressed();
     }
 
     @Override
     public void onPause() {
-        if (!readFromFile("mychatapp_settings_save.txt").equals("off")) {
-            writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+        if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+            fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
         }
         if (!messageList.isEmpty()) {
-            writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
+            fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
         }
-        writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", "mychatapp_current.txt");
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", "mychatapp_current.txt");
         super.onDestroy();
     }
 
     @Override
     public void onResume() {
-        writeToFile(room_key, "mychatapp_current.txt");
+        fileOperations.writeToFile(room_key, "mychatapp_current.txt");
         super.onResume();
     }
 
@@ -1710,7 +1673,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 });
         View sbView = snack.getView();
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             sbView.setBackgroundColor(getResources().getColor(R.color.dark_actionbar));
         } else {
             sbView.setBackgroundColor(getResources().getColor(R.color.red));
@@ -1766,11 +1729,11 @@ public class ChatActivity extends AppCompatActivity {
             intent.putExtra("nm_key", "");
             intent.putExtra("nm_typ", 0);
         }
-        if (!readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
-            writeToFile("1", "mychatapp_" + room_key + "_fav.txt");
+        if (!fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
+            fileOperations.writeToFile("1", "mychatapp_" + room_key + "_fav.txt");
             Toast.makeText(this, R.string.addedtofavorites, Toast.LENGTH_SHORT).show();
         } else {
-            writeToFile("0", "mychatapp_" + room_key + "_fav.txt");
+            fileOperations.writeToFile("0", "mychatapp_" + room_key + "_fav.txt");
             Toast.makeText(this, R.string.removedfromfavorites, Toast.LENGTH_SHORT).show();
         }
         invalidateOptionsMenu();
@@ -1819,15 +1782,15 @@ public class ChatActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.profile, null);
 
-        profilicon = view.findViewById(R.id.icon_profile);
+        CircleImageView profilicon = view.findViewById(R.id.icon_profile);
         TextView profilname = view.findViewById(R.id.name_profile);
         TextView profilbio = view.findViewById(R.id.profile_bio);
         TextView birthday = view.findViewById(R.id.profile_birthday);
         TextView location = view.findViewById(R.id.profile_location);
-        banner = view.findViewById(R.id.background_profile);
+        ImageView banner = view.findViewById(R.id.background_profile);
         AlertDialog.Builder builder;
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
             banner.setBackground(getResources().getDrawable(R.drawable.side_nav_bar_dark));
         } else {
@@ -1864,9 +1827,9 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         profilname.setText(user.getName());
-        profilbio.setText(user.getBio());
-        birthday.setText(user.getBday().substring(6, 8) + "." + user.getBday().substring(4, 6) + "." + user.getBday().substring(0, 4));
-        location.setText(user.getLoc());
+        profilbio.setText(user.getProfileDescription());
+        birthday.setText(user.getBirthday().substring(6, 8) + "." + user.getBirthday().substring(4, 6) + "." + user.getBirthday().substring(0, 4));
+        location.setText(user.getLocation());
 
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.profile, user.getName())));
         builder.setView(view);
@@ -1883,7 +1846,7 @@ public class ChatActivity extends AppCompatActivity {
         final ListView listView = view.findViewById(R.id.listView);
         listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, roomList));
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(this);
@@ -1897,7 +1860,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 int position = listView.getPositionForView(view);
-                String raumkey = roomKeysList.get(position);
+                String roomKey = roomKeysList.get(position);
                 Message fMessage = new Message();
                 for (Message m : messageList) {
                     if (m.getKey().equals(messageID)) {
@@ -1905,11 +1868,11 @@ public class ChatActivity extends AppCompatActivity {
                         break;
                     }
                 }
-                temp_key = roomRoot.child(raumkey).push().getKey();
+                temp_key = roomRoot.child(roomKey).push().getKey();
 
-                String currentDateandTime = sdf.format(new Date());
+                String currentDateAndTime = sdf.format(new Date());
 
-                DatabaseReference message_root = roomRoot.child(raumkey).child(temp_key);
+                DatabaseReference message_root = roomRoot.child(roomKey).child(temp_key);
                 Map<String, Object> map2 = new HashMap<>();
                 map2.put("name", userID);
                 if (fMessage.getTyp() == 13 || fMessage.getTyp() == 14 || fMessage.getTyp() == 15 || fMessage.getTyp() == 16) {
@@ -1920,11 +1883,11 @@ public class ChatActivity extends AppCompatActivity {
                     map2.put("img", "");
                 }
                 map2.put("pin", "0");
-                map2.put("quote", zitatStatus);
-                map2.put("time", currentDateandTime);
+                map2.put("quote", quoteStatus);
+                map2.put("time", currentDateAndTime);
 
                 message_root.updateChildren(map2);
-                writeToFile(temp_key, "mychatapp_raum_" + raumkey + "_nm.txt");
+                fileOperations.writeToFile(temp_key, "mychatapp_raum_" + roomKey + "_nm.txt");
                 alert.cancel();
                 if (fMessage.getTyp() == 13 || fMessage.getTyp() == 14 || fMessage.getTyp() == 15 || fMessage.getTyp() == 16) {
                     Toast.makeText(ChatActivity.this, R.string.imageforwarded, Toast.LENGTH_SHORT).show();
@@ -1946,7 +1909,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void showFullscreenImage(String image, int type) {
         final View dialogView = getLayoutInflater().inflate(R.layout.fullscreen_image, null);
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             fullscreendialog = new Dialog(this,R.style.FullScreenImageDark);
         } else {
             fullscreendialog = new Dialog(this,R.style.FullScreenImage);
@@ -2009,7 +1972,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
             AlertDialog.Builder builder;
-            if (theme.equals("1")) {
+            if (theme == Theme.DARK) {
                 builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
             } else {
                 builder = new AlertDialog.Builder(this);
@@ -2038,7 +2001,7 @@ public class ChatActivity extends AppCompatActivity {
             ListView pinListView = view.findViewById(R.id.pinboardList);
             pinListView.setAdapter(new PinboardAdapter(this, pinnedList));
             AlertDialog.Builder builder;
-            if (theme.equals("1")) {
+            if (theme == Theme.DARK) {
                 builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
             } else {
                 builder = new AlertDialog.Builder(this);
@@ -2229,7 +2192,7 @@ public class ChatActivity extends AppCompatActivity {
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         final StorageReference pathReference_image = storageRef.child("room_images/" + room_img);
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     .load(pathReference_image)
                     .placeholder(R.drawable.side_nav_bar_dark)
@@ -2256,7 +2219,7 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(this);
@@ -2294,33 +2257,33 @@ public class ChatActivity extends AppCompatActivity {
 
                     @Override
                     public void onClick(View view) {
-                        final String roomname = edit_room_name.getText().toString().trim();
-                        final String roompassword = edit_room_password.getText().toString().trim();
-                        final String roompasswordrepeat = edit_room_password_repeat.getText().toString().trim();
-                        final String roomdesc = edit_room_desc.getText().toString().trim();
-                        if (!roomname.isEmpty()) {
-                            if (!roomdesc.isEmpty()) {
+                        final String roomName = edit_room_name.getText().toString().trim();
+                        final String roomPassword = edit_room_password.getText().toString().trim();
+                        final String roomPasswordRepeat = edit_room_password_repeat.getText().toString().trim();
+                        final String roomDescription = edit_room_desc.getText().toString().trim();
+                        if (!roomName.isEmpty()) {
+                            if (!roomDescription.isEmpty()) {
                                 if (katindex!=0) {
-                                    if (!roompassword.isEmpty()) {
-                                        if (!roompasswordrepeat.isEmpty()) {
-                                            if (roompassword.equals(roompasswordrepeat)) {
+                                    if (!roomPassword.isEmpty()) {
+                                        if (!roomPasswordRepeat.isEmpty()) {
+                                            if (roomPassword.equals(roomPasswordRepeat)) {
                                                 if (view != null) {
                                                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                                                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                                                 }
-                                                DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomkey);
+                                                DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomKey);
                                                 Map<String, Object> map = new HashMap<>();
-                                                map.put("name", roomname);
-                                                map.put("passwd", roompassword);
-                                                map.put("desc", roomdesc);
+                                                map.put("name", roomName);
+                                                map.put("passwd", roomPassword);
+                                                map.put("desc", roomDescription);
                                                 map.put("caty", String.valueOf(katindex));
                                                 message_root.updateChildren(map);
-                                                writeToFile(roompassword, "mychatapp_raum_" + room_key + ".txt");
-                                                setTitle(roomname);
+                                                fileOperations.writeToFile(roomPassword, "mychatapp_raum_" + room_key + ".txt");
+                                                setTitle(roomName);
                                                 Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();
-                                                desc = roomdesc;
+                                                desc = roomDescription;
                                                 caty = String.valueOf(katindex);
-                                                passwd = roompassword;
+                                                passwd = roomPassword;
                                                 alert.cancel();
                                                 openInfo();
                                             } else {
@@ -2352,7 +2315,7 @@ public class ChatActivity extends AppCompatActivity {
     private TextView setupHeader(String title) {
         TextView header = new TextView(this);
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             header.setBackgroundColor(getResources().getColor(R.color.dark_button));
         } else {
             header.setBackgroundColor(getResources().getColor(R.color.red));

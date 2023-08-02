@@ -1,7 +1,6 @@
 package com.yannick.mychatapp;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -10,17 +9,12 @@ import android.widget.ImageView;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class ImageAdapter extends BaseAdapter {
 
-    private Context context;
-    private ArrayList<String> imageList;
+    private final Context context;
+    private final ArrayList<String> imageList;
 
     public ImageAdapter(Context context, ArrayList<String> imageList) {
         this.context = context;
@@ -47,7 +41,8 @@ public class ImageAdapter extends BaseAdapter {
         StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference pathReference = storageRef.child("images/" + imgurl);
 
-        if (readFromFile("mychatapp_settings_preview.txt").equals("off")) {
+        FileOperations fileOperations = new FileOperations(this.context);
+        if (fileOperations.readFromFile("mychatapp_settings_preview.txt").equals("off")) {
             GlideApp.with(context)
                     .load(pathReference)
                     .onlyRetrieveFromCache(true)
@@ -63,34 +58,5 @@ public class ImageAdapter extends BaseAdapter {
         }
 
         return imageView;
-    }
-
-    private String readFromFile(String datei) {
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(datei);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
     }
 }

@@ -23,9 +23,9 @@ public class MarkAsReadReceiver extends BroadcastReceiver {
         notificationManager.cancel(notifyId);
     }
 
-    public void writeToFile(String text, String datei, Context context) {
+    public void writeToFile(String text, String file, Context context) {
         try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(datei, Context.MODE_PRIVATE));
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(file, Context.MODE_PRIVATE));
             outputStreamWriter.write(text);
             outputStreamWriter.close();
         } catch (IOException e) {

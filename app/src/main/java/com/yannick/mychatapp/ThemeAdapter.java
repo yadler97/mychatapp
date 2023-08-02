@@ -3,35 +3,26 @@ package com.yannick.mychatapp;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
-import android.graphics.drawable.ColorDrawable;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-public class MenuAdapter extends BaseAdapter {
-    private Context context;
-    private TypedArray imageList;
-    private String selected;
-    private String theme;
-    private int typ;
-    private ArrayList<SquareImageView> viewList = new ArrayList<>();
+public class ThemeAdapter extends BaseAdapter {
+    private final Context context;
+    private final TypedArray imageList;
+    private final Theme selected;
+    private final Theme theme;
+    private final ArrayList<SquareImageView> viewList = new ArrayList<>();
 
-    public MenuAdapter(Context context, TypedArray imageList, String selected, String theme, int typ) {
+    public ThemeAdapter(Context context, TypedArray imageList, Theme selected, Theme theme) {
         this.context = context;
         this.imageList = imageList;
         this.selected = selected;
         this.theme = theme;
-        this.typ = typ;
     }
 
     public int getCount() {
@@ -51,7 +42,7 @@ public class MenuAdapter extends BaseAdapter {
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         if (position == 0) {
-            if(readFromFile("mychatapp_theme.txt").equals("1")) {
+            if(theme == Theme.DARK) {
                 imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
             } else {
                 imageView.setBorderColor(context.getResources().getColor(R.color.red));
@@ -62,12 +53,12 @@ public class MenuAdapter extends BaseAdapter {
             imageView.setBorderColor(context.getResources().getColor(R.color.grey));
         }
 
-        if (selected.equals(String.valueOf(position)) && position != 0) {
+        if (selected == Theme.getByPosition(position) && position != 0) {
             for (SquareImageView v : viewList) {
                 v.setBorderColor(context.getResources().getColor(R.color.grey));
                 v.setBorderWidth((float)2);
             }
-            if(readFromFile("mychatapp_theme.txt").equals("1")) {
+            if(theme == Theme.DARK) {
                 imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
             } else {
                 imageView.setBorderColor(context.getResources().getColor(R.color.red));
@@ -82,26 +73,19 @@ public class MenuAdapter extends BaseAdapter {
                     v.setBorderColor(context.getResources().getColor(R.color.grey));
                     v.setBorderWidth((float)2);
                 }
-                if(readFromFile("mychatapp_theme.txt").equals("1")) {
+                if(theme == Theme.DARK) {
                     imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
                 } else {
                     imageView.setBorderColor(context.getResources().getColor(R.color.red));
                 }
                 imageView.setBorderWidth((float)8);
-                Intent intent = new Intent("designOption");
-                intent.putExtra("position", String.valueOf(position));
-                intent.putExtra("typ", String.valueOf(typ));
+                Intent intent = new Intent("themeOption");
+                intent.putExtra("position", position);
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         });
 
-        if (typ == 1 && position == 0) {
-            if (theme.equals("1")) {
-                imageView.setImageDrawable(new ColorDrawable(context.getResources().getColor(R.color.dark_background)));
-            } else {
-                imageView.setImageDrawable(new ColorDrawable(context.getResources().getColor(R.color.white)));
-            }
-        } else {
+        if (position != 0) {
             int image = imageList.getResourceId(position, -1);
             imageView.setImageResource(image);
         }
@@ -109,34 +93,5 @@ public class MenuAdapter extends BaseAdapter {
         viewList.add(imageView);
 
         return imageView;
-    }
-
-    private String readFromFile(String file) {
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(file);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
     }
 }

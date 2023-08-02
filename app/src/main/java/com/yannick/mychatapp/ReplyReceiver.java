@@ -40,7 +40,7 @@ public class ReplyReceiver extends BroadcastReceiver {
         root.updateChildren(map);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
-        String currentDateandTime = sdf.format(new Date());
+        String currentDateAndTime = sdf.format(new Date());
 
         DatabaseReference message_root = root.child(temp_key);
         Map<String, Object> map2 = new HashMap<String, Object>();
@@ -49,7 +49,7 @@ public class ReplyReceiver extends BroadcastReceiver {
         map2.put("img", "");
         map2.put("pin", "0");
         map2.put("quote", "");
-        map2.put("time", currentDateandTime);
+        map2.put("time", currentDateAndTime);
 
         message_root.updateChildren(map2);
 

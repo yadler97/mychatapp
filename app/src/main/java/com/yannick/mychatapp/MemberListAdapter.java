@@ -18,10 +18,10 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MemberListAdapter extends ArrayAdapter<User> {
 
-    private Context context;
-    private ArrayList<User> memberList;
-    private String admin;
-    private FirebaseStorage storage;
+    private final Context context;
+    private final ArrayList<User> memberList;
+    private final String admin;
+    private final FirebaseStorage storage;
 
     static class ViewHolder {
         TextView userText;

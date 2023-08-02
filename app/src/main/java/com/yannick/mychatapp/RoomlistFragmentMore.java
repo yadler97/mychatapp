@@ -14,7 +14,6 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,24 +35,20 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
 public class RoomlistFragmentMore extends Fragment {
 
     private ListView listView;
-    private String raumname, theme;
+    private String roomName;
+    private Theme theme;
     private RoomAdapter adapter;
-    private DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
-    private ArrayList<Room> roomList = new ArrayList<>();
-    private ArrayList<Room> searchResultList = new ArrayList<>();
+    private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private final ArrayList<Room> roomList = new ArrayList<>();
     private TextView noRoomFound;
     private Message newestMessage;
+
+    private final FileOperations fileOperations = new FileOperations(getActivity());
 
     @Nullable
     @Override
@@ -63,7 +58,7 @@ public class RoomlistFragmentMore extends Fragment {
         listView = view.findViewById(R.id.listView);
         noRoomFound = view.findViewById(R.id.keinraumgefunden);
 
-        theme = readFromFile("mychatapp_theme.txt");
+        theme = Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt"));
 
         adapter = new RoomAdapter(getContext(), roomList, 2);
         listView.setAdapter(adapter);
@@ -115,7 +110,7 @@ public class RoomlistFragmentMore extends Fragment {
             for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
                 final Room room = roomSnapshot.getValue(Room.class);
                 room.setKey(name);
-                if (!room.getPasswd().equals(readFromFile("mychatapp_raum_" + name + ".txt"))) {
+                if (!room.getPasswd().equals(fileOperations.readFromFile("mychatapp_raum_" + name + ".txt"))) {
                     if (uniqueKeySnapshot.getChildrenCount() > 1) {
                         DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(name);
                         Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
@@ -156,7 +151,7 @@ public class RoomlistFragmentMore extends Fragment {
     private void requestPassword(final Room room, final int position) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.enter_room, null);
-        raumname = room.getKey();
+        roomName = room.getKey();
         final EditText input_field = view.findViewById(R.id.room_password);
         final TextInputLayout input_field_layout = view.findViewById(R.id.room_password_layout);
         input_field.addTextChangedListener(new TextWatcher() {
@@ -178,7 +173,7 @@ public class RoomlistFragmentMore extends Fragment {
             }
         });
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialog));
@@ -222,19 +217,19 @@ public class RoomlistFragmentMore extends Fragment {
                                 Intent intent = new Intent(getActivity(), ChatActivity.class);
                                 intent.putExtra("room_name", room.getName());
                                 intent.putExtra("room_key", room.getKey());
-                                intent.putExtra("last_read_message", readFromFile("mychatapp_raum_" + room.getKey() + "_nm.txt"));
+                                intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_raum_" + room.getKey() + "_nm.txt"));
                                 if (room.getnM() != null) {
                                     intent.putExtra("nmid", room.getnM().getKey());
                                 } else {
                                     intent.putExtra("nmid", room.getKey());
                                 }
                                 if (room.getnM() != null) {
-                                    writeToFile(room.getnM().getKey(), "mychatapp_raum_" + room.getKey() + "_nm.txt");
+                                    fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_raum_" + room.getKey() + "_nm.txt");
                                 } else {
-                                    writeToFile(room.getKey(), "mychatapp_raum_" + room.getKey() + "_nm.txt");
+                                    fileOperations.writeToFile(room.getKey(), "mychatapp_raum_" + room.getKey() + "_nm.txt");
                                 }
                                 updateRoomList(position);
-                                writeToFile(room.getPasswd(), "mychatapp_raum_" + raumname + ".txt");
+                                fileOperations.writeToFile(room.getPasswd(), "mychatapp_raum_" + roomName + ".txt");
                                 FirebaseMessaging.getInstance().subscribeToTopic(room.getKey());
                                 alert.cancel();
                                 startActivity(intent);
@@ -252,48 +247,6 @@ public class RoomlistFragmentMore extends Fragment {
         alert.show();
     }
 
-    private void writeToFile(String text, String datei) {
-        Context context = getActivity();
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(datei, Context.MODE_PRIVATE));
-            outputStreamWriter.write(text);
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
-    }
-
-    private String readFromFile(String datei) {
-        Context context = getActivity();
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(datei);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
-    }
-
     private void updateRoomList(int position) {
         roomList.remove(position);
         adapter.notifyDataSetChanged();
@@ -304,7 +257,7 @@ public class RoomlistFragmentMore extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String s = intent.getStringExtra("searchkey");
             if (!s.trim().isEmpty()) {
-                searchResultList = searchRoom(s);
+                ArrayList<Room> searchResultList = searchRoom(s);
 
                 if (!searchResultList.isEmpty()) {
                     adapter = new RoomAdapter(getContext(), searchResultList, 2);

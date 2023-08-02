@@ -40,11 +40,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -58,26 +54,28 @@ import ru.whalemare.sheetmenu.SheetMenu;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHolder> {
 
-    private List<Message> messageList;
-    private ArrayList<MyViewHolder> holderList = new ArrayList<>();
+    private final List<Message> messageList;
+    private final ArrayList<MyViewHolder> holderList = new ArrayList<>();
     private Context context;
     private FirebaseStorage storage;
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private Message clickedDataItem;
-    private FirebaseAuth mAuth;
+    private final FirebaseAuth mAuth;
+
+    private final FileOperations fileOperations = new FileOperations(context);
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
-        private TextView name, msg, time, quote_name, quote_message;
-        private LinearLayout quotebox, quotebox_content, messagebox;
-        private Button messagebutton;
-        private ExpandableTextView msg_exp;
-        private ImageView img;
+        private final TextView name, msg, time, quote_name, quote_message;
+        private final LinearLayout quotebox, quotebox_content, messagebox;
+        private final Button messagebutton;
+        private final ExpandableTextView msg_exp;
+        private final ImageView img;
         private String message;
         private int typ;
-        private String theme;
+        private final Theme theme;
         private int pos;
-        private GestureDetector gestureDetector;
-        private CircleImageView profile_image;
+        private final GestureDetector gestureDetector;
+        private final CircleImageView profile_image;
 
         @SuppressLint("ClickableViewAccessibility")
         private MyViewHolder(View view) {
@@ -101,7 +99,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-            theme = readFromFile("mychatapp_theme.txt");
+            theme = Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt"));
 
             view.setOnTouchListener(new View.OnTouchListener() {
                 @Override
@@ -314,7 +312,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     }
                 }
 
-                if (theme.equals("1")) {
+                if (theme == Theme.DARK) {
                     sheetMenu.show(new ContextThemeWrapper(context, R.style.SheetDialogDark));
                 } else {
                     sheetMenu.show(context);
@@ -457,7 +455,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
             StorageReference pathReference = storageRef.child("images/" + imgurl);
 
-            if (readFromFile("mychatapp_settings_preview.txt").equals("off")) {
+            if (fileOperations.readFromFile("mychatapp_settings_preview.txt").equals("off")) {
                 GlideApp.with(context)
                         .load(pathReference)
                         .onlyRetrieveFromCache(true)
@@ -553,35 +551,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     @Override
     public int getItemCount() {
         return messageList.size();
-    }
-
-    private String readFromFile(String datei) {
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(datei);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
     }
 
     private static SpannableStringBuilder styleText(String text) {

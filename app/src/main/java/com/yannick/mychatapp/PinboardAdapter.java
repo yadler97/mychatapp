@@ -18,8 +18,8 @@ import java.util.ArrayList;
 
 public class PinboardAdapter extends ArrayAdapter<Message> {
 
-    private Context context;
-    private ArrayList<Message> pinnedList;
+    private final Context context;
+    private final ArrayList<Message> pinnedList;
 
     static class ViewHolder {
         TextView userText;

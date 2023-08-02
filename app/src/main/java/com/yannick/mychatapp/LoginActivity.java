@@ -60,12 +60,10 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,7 +72,7 @@ import java.util.UUID;
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    private String theme;
+    private Theme theme;
     private ImageView imgsplash;
     private MaterialButton loginbutton, createbutton;
     private EditText inputemail, inputpassword;
@@ -113,7 +111,7 @@ public class LoginActivity extends AppCompatActivity {
         inputemail.setTextColor(getResources().getColor(R.color.black));
         inputpassword.setTextColor(getResources().getColor(R.color.black));
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             imgsplash.setImageResource(R.drawable.ic_splash_dark);
         } else {
             imgsplash.setImageResource(R.drawable.ic_splash);
@@ -222,7 +220,7 @@ public class LoginActivity extends AppCompatActivity {
         final MaterialButton resendemailbutton = view.findViewById(R.id.resendemailbutton);
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -324,7 +322,7 @@ public class LoginActivity extends AppCompatActivity {
         ownpi = "0";
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -461,16 +459,16 @@ public class LoginActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.edit_profile, null);
 
-        final EditText username = view.findViewById(R.id.user_name);
-        final EditText profilbio = view.findViewById(R.id.user_bio);
-        final EditText birthday = view.findViewById(R.id.user_birthday);
-        final EditText location = view.findViewById(R.id.user_location);
+        final EditText usernameEdit = view.findViewById(R.id.user_name);
+        final EditText profileDescriptionEdit = view.findViewById(R.id.user_bio);
+        final EditText birthdayEdit = view.findViewById(R.id.user_birthday);
+        final EditText locationEdit = view.findViewById(R.id.user_location);
 
-        final TextInputLayout username_layout = view.findViewById(R.id.user_name_layout);
-        final TextInputLayout profilbio_layout = view.findViewById(R.id.user_bio_layout);
-        final TextInputLayout location_layout = view.findViewById(R.id.user_location_layout);
+        final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
+        final TextInputLayout profileDescriptionLayout = view.findViewById(R.id.user_bio_layout);
+        final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
-        username.addTextChangedListener(new TextWatcher() {
+        usernameEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -484,11 +482,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    username_layout.setError(null);
+                    usernameLayout.setError(null);
                 }
             }
         });
-        profilbio.addTextChangedListener(new TextWatcher() {
+        profileDescriptionEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -502,11 +500,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    profilbio_layout.setError(null);
+                    profileDescriptionLayout.setError(null);
                 }
             }
         });
-        location.addTextChangedListener(new TextWatcher() {
+        locationEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -520,7 +518,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    location_layout.setError(null);
+                    locationLayout.setError(null);
                 }
             }
         });
@@ -533,9 +531,9 @@ public class LoginActivity extends AppCompatActivity {
         final StorageReference pathReference_image = storageRef.child("profile_images/" + img);
         final StorageReference pathReference_banner = storageRef.child("profile_banners/" + banner);
 
-        birthday.setText(geburtstag);
+        birthdayEdit.setText(geburtstag);
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
                     .load(pathReference_image)
@@ -594,30 +592,30 @@ public class LoginActivity extends AppCompatActivity {
         shape.setColor(getResources().getIntArray(R.array.favcolors)[color]);
         favcolor.setBackground(shape);
 
-        birthday.setOnClickListener(new View.OnClickListener() {
+        birthdayEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 DatePickerDialog datePicker = new DatePickerDialog(view.getContext(), new DatePickerDialog.OnDateSetListener() {
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        String datum;
+                        String date;
                         if (dayOfMonth < 10) {
-                            datum = "0" + dayOfMonth;
+                            date = "0" + dayOfMonth;
                         } else {
-                            datum = "" + dayOfMonth;
+                            date = "" + dayOfMonth;
                         }
                         monthOfYear = monthOfYear + 1;
                         if (monthOfYear < 10) {
-                            datum = datum + ".0" + monthOfYear + "." + year;
+                            date = date + ".0" + monthOfYear + "." + year;
                         } else {
-                            datum = datum + "." + monthOfYear + "." + year;
+                            date = date + "." + monthOfYear + "." + year;
                         }
 
-                        birthday.setText(datum);
+                        birthdayEdit.setText(date);
                     }
                 }, Integer.parseInt(geburtstag.substring(6, 10)), Integer.parseInt(geburtstag.substring(3, 5)) - 1, Integer.parseInt(geburtstag.substring(0, 2)));
-                if (theme.equals("1")) {
+                if (theme == Theme.DARK) {
                     datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
                 }
                 Calendar c = Calendar.getInstance();
@@ -631,7 +629,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 SpectrumDialog.Builder builder;
-                if (theme.equals("1")) {
+                if (theme == Theme.DARK) {
                     builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
                 } else {
                     builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
@@ -658,7 +656,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -696,16 +694,16 @@ public class LoginActivity extends AppCompatActivity {
                 b.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (!username.getText().toString().isEmpty()) {
-                            if (!profilbio.getText().toString().isEmpty()) {
-                                if (!location.getText().toString().isEmpty()) {
-                                    if (!birthday.getText().toString().isEmpty()) {
-                                        String name = username.getText().toString();
-                                        String bio = profilbio.getText().toString();
-                                        String wohnort = location.getText().toString();
-                                        String geburtstag = birthday.getText().toString();
+                        if (!usernameEdit.getText().toString().isEmpty()) {
+                            if (!profileDescriptionEdit.getText().toString().isEmpty()) {
+                                if (!locationEdit.getText().toString().isEmpty()) {
+                                    if (!birthdayEdit.getText().toString().isEmpty()) {
+                                        String username = usernameEdit.getText().toString();
+                                        String profileDescription = profileDescriptionEdit.getText().toString();
+                                        String location = locationEdit.getText().toString();
+                                        String birthday = birthdayEdit.getText().toString();
 
-                                        createAccountAuth(email, password, name, bio, wohnort, geburtstag);
+                                        createAccountAuth(email, password, username, profileDescription, location, birthday);
 
                                         if (view != null) {
                                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -717,13 +715,13 @@ public class LoginActivity extends AppCompatActivity {
                                         Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
-                                    location_layout.setError(getResources().getString(R.string.enterlocation));
+                                    locationLayout.setError(getResources().getString(R.string.enterlocation));
                                 }
                             } else {
-                                profilbio_layout.setError(getResources().getString(R.string.enterbio));
+                                profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
                             }
                         } else {
-                            username_layout.setError(getResources().getString(R.string.entername));
+                            usernameLayout.setError(getResources().getString(R.string.entername));
                         }
                     }
                 });
@@ -734,48 +732,19 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void changeTheme() {
-        theme = readFromFile("mychatapp_theme.txt");
-        if (theme.equals("1")) {
+        FileOperations fileOperations = new FileOperations(this);
+        theme = Theme.valueOf(fileOperations.readFromFile("mychatapp_theme.txt"));
+        if (theme == Theme.DARK) {
             setTheme(R.style.SplashDark);
         } else {
             setTheme(R.style.Splash);
         }
     }
 
-    public String readFromFile(String datei) {
-        Context context = this;
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(datei);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
-    }
-
     private TextView setupHeader(String title) {
         TextView header = new TextView(this);
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             header.setBackgroundColor(getResources().getColor(R.color.dark_button));
         } else {
             header.setBackgroundColor(getResources().getColor(R.color.red));
@@ -803,7 +772,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void uploadImage(Uri filePath, final int type) {
         final ProgressDialog progressDialog;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             progressDialog = new ProgressDialog(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             progressDialog = new ProgressDialog(this);
