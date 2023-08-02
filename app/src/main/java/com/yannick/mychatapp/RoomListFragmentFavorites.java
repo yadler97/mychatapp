@@ -36,7 +36,7 @@ public class RoomListFragmentFavorites extends Fragment {
     private TextView noRoomFound;
     private Message newestMessage;
 
-    private final FileOperations fileOperations = new FileOperations(getActivity());
+    private FileOperations fileOperations;
 
     @Nullable
     @Override
@@ -48,6 +48,8 @@ public class RoomListFragmentFavorites extends Fragment {
 
         adapter = new RoomAdapter(getContext(), roomList, 1);
         listView.setAdapter(adapter);
+
+        fileOperations = new FileOperations(getActivity());
 
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(favReceiver, new IntentFilter("favroom"));
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(searchReceiver, new IntentFilter("searchroom"));

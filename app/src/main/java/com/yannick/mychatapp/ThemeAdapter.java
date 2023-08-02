@@ -85,10 +85,8 @@ public class ThemeAdapter extends BaseAdapter {
             }
         });
 
-        if (position != 0) {
-            int image = imageList.getResourceId(position, -1);
-            imageView.setImageResource(image);
-        }
+        int image = imageList.getResourceId(position, -1);
+        imageView.setImageResource(image);
 
         viewList.add(imageView);
 

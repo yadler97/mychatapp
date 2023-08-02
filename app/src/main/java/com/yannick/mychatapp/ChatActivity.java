@@ -769,7 +769,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setBackgroundImage() {
-        Background background = Background.valueOf(fileOperations.readFromFile("mychatapp_background.txt"));
+        Background background = Background.getCurrentBackground(getApplicationContext());
         if (getResources().getConfiguration().orientation != 2) {
             switch (background) {
                 case BREATH_OF_THE_WILD:
@@ -1741,21 +1741,9 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addUser(DataSnapshot dataSnapshot) {
-        Iterator i = dataSnapshot.getChildren().iterator();
-
-        while (i.hasNext()){
-            String tmpuserid = dataSnapshot.getKey();
-            String tmpbanner = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpbday = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpbio = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpfavc = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpimg = (String) ((DataSnapshot) i.next()).getValue();
-            String tmploc = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpname = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpownpi = (String) ((DataSnapshot) i.next()).getValue();
-            User user = new User(tmpuserid, tmpname, tmpbday, tmpbio, tmploc, tmpfavc, tmpimg, tmpbanner);
-            userList.add(user);
-        }
+        User user = dataSnapshot.getValue(User.class);
+        user.setUserID(dataSnapshot.getKey());
+        userList.add(user);
 
         userListCreated = true;
     }

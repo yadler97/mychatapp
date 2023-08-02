@@ -16,10 +16,30 @@ enum Background {
     DETECTIVE_PIKACHU;
 
     public static Background getByPosition(int position) {
-        if (position == 1) {
-            return BREATH_OF_THE_WILD;
+        switch (position) {
+            case 1:
+                return BREATH_OF_THE_WILD;
+            case 2:
+                return SPLATOON_2;
+            case 3:
+                return PERSONA_5;
+            case 4:
+                return KIMI_NO_NA_WA;
+            case 5:
+                return SUPER_MARIO_BROS;
+            case 6:
+                return SUPER_MARIO_MAKER;
+            case 7:
+                return XENOBLADE_CHRONICLES_2;
+            case 8:
+                return FIRE_EMBLEM_FATES;
+            case 9:
+                return SUPER_SMASH_BROS_ULTIMATE;
+            case 10:
+                return DETECTIVE_PIKACHU;
+            default:
+                return STANDARD;
         }
-        return STANDARD;
     }
 
     public static Background getCurrentBackground(Context context) {
