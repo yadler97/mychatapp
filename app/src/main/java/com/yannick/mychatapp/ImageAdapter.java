@@ -46,13 +46,13 @@ public class ImageAdapter extends BaseAdapter {
             GlideApp.with(context)
                     .load(pathReference)
                     .onlyRetrieveFromCache(true)
-                    .placeholder(R.color.gray_material)
+                    .placeholder(R.color.grey)
                     .thumbnail(0.05f)
                     .into(imageView);
         } else {
             GlideApp.with(context)
                     .load(pathReference)
-                    .placeholder(R.color.gray_material)
+                    .placeholder(R.color.grey)
                     .thumbnail(0.05f)
                     .into(imageView);
         }

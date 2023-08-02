@@ -1093,7 +1093,7 @@ public class ChatActivity extends AppCompatActivity {
                         StorageReference pathReference = storageRef.child("images/" + imgurl);
                         GlideApp.with(context)
                                 .load(pathReference)
-                                .placeholder(R.color.gray_material)
+                                .placeholder(R.color.grey)
                                 .centerCrop()
                                 .thumbnail(0.05f)
                                 .into(quote_image);
@@ -1353,91 +1353,90 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.roominfo:
-                openInfo();
-                return true;
-            case R.id.roomfav:
-                markAsFav();
-                return true;
-            case R.id.roomsearch:
-                return super.onOptionsItemSelected(item);
-            case R.id.roomphotos:
-                openImageList();
-                return true;
-            case R.id.roompinboard:
-                openPinboard();
-                return true;
-            case R.id.roommute:
-                if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
-                    fileOperations.writeToFile("1", "mychatapp_" + room_key + "_mute.txt");
-                    FirebaseMessaging.getInstance().unsubscribeFromTopic(room_key);
-                    Toast.makeText(this, R.string.roommuted, Toast.LENGTH_SHORT).show();
-                } else {
-                    fileOperations.writeToFile("0", "mychatapp_" + room_key + "_mute.txt");
-                    FirebaseMessaging.getInstance().subscribeToTopic(room_key);
-                    Toast.makeText(this, R.string.roomunmuted, Toast.LENGTH_SHORT).show();
-                }
-                invalidateOptionsMenu();
-                return true;
-            case R.id.roombackup:
-                if (messageList.size() > 1) {
-                    writeBackup(createBackup());
-                } else {
-                    Toast.makeText(this, R.string.nomessagesfound, Toast.LENGTH_SHORT).show();
-                }
-                return true;
-            case R.id.roomleave:
-                AlertDialog.Builder builder;
-                if (theme == Theme.DARK) {
-                    builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
-                } else {
-                    builder = new AlertDialog.Builder(this);
-                }
-                builder.setTitle(R.string.reallyleaveroom);
-                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        fileOperations.writeToFile("", "mychatapp_raum_" + room_key + ".txt");
-                        startActivity(new Intent(ChatActivity.this, MainActivity.class));
-                        if (fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
-                            markAsFav();
-                        }
-                        Intent intent = new Intent("leaveroom");
-                        intent.putExtra("roomkey", room_key);
-                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-                        Toast.makeText(getApplicationContext(), R.string.roomleaved, Toast.LENGTH_SHORT).show();
+        if (item.getItemId() == R.id.roominfo) {
+            openInfo();
+            return true;
+        } else if (item.getItemId() == R.id.roomfav) {
+            markAsFav();
+            return true;
+        } else if (item.getItemId() == R.id.roomsearch) {
+            return super.onOptionsItemSelected(item);
+        } else if (item.getItemId() == R.id.roomphotos) {
+            openImageList();
+            return true;
+        } else if (item.getItemId() == R.id.roompinboard) {
+            openPinboard();
+            return true;
+        } else if (item.getItemId() == R.id.roommute) {
+            if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
+                fileOperations.writeToFile("1", "mychatapp_" + room_key + "_mute.txt");
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(room_key);
+                Toast.makeText(this, R.string.roommuted, Toast.LENGTH_SHORT).show();
+            } else {
+                fileOperations.writeToFile("0", "mychatapp_" + room_key + "_mute.txt");
+                FirebaseMessaging.getInstance().subscribeToTopic(room_key);
+                Toast.makeText(this, R.string.roomunmuted, Toast.LENGTH_SHORT).show();
+            }
+            invalidateOptionsMenu();
+            return true;
+        } else if (item.getItemId() == R.id.roombackup) {
+            if (messageList.size() > 1) {
+                writeBackup(createBackup());
+            } else {
+                Toast.makeText(this, R.string.nomessagesfound, Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        } else if (item.getItemId() == R.id.roomleave) {
+            AlertDialog.Builder builder;
+            if (theme == Theme.DARK) {
+                builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
+            } else {
+                builder = new AlertDialog.Builder(this);
+            }
+            builder.setTitle(R.string.reallyleaveroom);
+            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    fileOperations.writeToFile("", "mychatapp_raum_" + room_key + ".txt");
+                    startActivity(new Intent(ChatActivity.this, MainActivity.class));
+                    if (fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
+                        markAsFav();
                     }
-                });
-                builder.setNegativeButton(R.string.no, null);
-                AlertDialog alert = builder.create();
-                alert.show();
-                return true;
-            case android.R.id.home:
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(userReceiver);
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(forwardReceiver);
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(fullscreenReceiver);
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
-                View view = this.getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    Intent intent = new Intent("leaveroom");
+                    intent.putExtra("roomkey", room_key);
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                    Toast.makeText(getApplicationContext(), R.string.roomleaved, Toast.LENGTH_SHORT).show();
                 }
-                if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
-                    fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
-                    if (!input_msg.getText().toString().trim().isEmpty()) {
-                        Toast.makeText(this, R.string.messagesaved, Toast.LENGTH_SHORT).show();
-                    }
+            });
+            builder.setNegativeButton(R.string.no, null);
+            AlertDialog alert = builder.create();
+            alert.show();
+            return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(userReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(forwardReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(fullscreenReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
+            View view = this.getCurrentFocus();
+            if (view != null) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+            if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+                fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+                if (!input_msg.getText().toString().trim().isEmpty()) {
+                    Toast.makeText(this, R.string.messagesaved, Toast.LENGTH_SHORT).show();
                 }
-                if (!messageList.isEmpty()) {
-                    fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
-                }
-                fileOperations.writeToFile("0", "mychatapp_current.txt");
-                startActivity(new Intent(ChatActivity.this, MainActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            }
+            if (!messageList.isEmpty()) {
+                fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
+            }
+            fileOperations.writeToFile("0", "mychatapp_current.txt");
+            startActivity(new Intent(ChatActivity.this, MainActivity.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
