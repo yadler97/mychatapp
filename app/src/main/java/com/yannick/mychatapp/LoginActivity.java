@@ -13,7 +13,6 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +38,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.exifinterface.media.ExifInterface;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
@@ -73,9 +73,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private Theme theme;
-    private EditText inputEmail, inputPassword;
-    private TextInputLayout inputEmailLayout, inputPasswordLayout;
-
     private ImageButton profileImage;
     private ImageButton profileBanner;
     private FirebaseStorage storage;
@@ -83,8 +80,7 @@ public class LoginActivity extends AppCompatActivity {
     private static String userID = "";
     private static final String birthday = "01.01.2000";
     private static String ownpi = "0";
-    private static final int colour = 0;
-    private int tmpcolor = -1;
+    private static int colour = 0;
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
     private StorageReference pathReference_image;
     private StorageReference pathReference_banner;
@@ -101,10 +97,10 @@ public class LoginActivity extends AppCompatActivity {
         ImageView imgSplash = findViewById(R.id.imgsplash);
         MaterialButton loginButton = findViewById(R.id.loginbutton);
         MaterialButton createButton = findViewById(R.id.createbutton);
-        inputEmail = findViewById(R.id.login_email);
-        inputPassword = findViewById(R.id.login_password);
-        inputEmailLayout = findViewById(R.id.login_email_layout);
-        inputPasswordLayout = findViewById(R.id.login_password_layout);
+        EditText inputEmail = findViewById(R.id.login_email);
+        EditText inputPassword = findViewById(R.id.login_password);
+        TextInputLayout inputEmailLayout = findViewById(R.id.login_email_layout);
+        TextInputLayout inputPasswordLayout = findViewById(R.id.login_password_layout);
 
         inputEmail.setTextColor(getResources().getColor(R.color.black));
         inputPassword.setTextColor(getResources().getColor(R.color.black));
@@ -639,7 +635,7 @@ public class LoginActivity extends AppCompatActivity {
                             int i = 0;
                             for (int c : getResources().getIntArray(R.array.favcolors)) {
                                 if (c == scolor) {
-                                    tmpcolor = i;
+                                    colour = i;
                                     GradientDrawable shape = new GradientDrawable();
                                     shape.setShape(GradientDrawable.OVAL);
                                     shape.setColor(getResources().getIntArray(R.array.favcolors)[i]);

@@ -121,7 +121,31 @@ public class ChatActivity extends AppCompatActivity {
 
     private Theme theme;
 
-    private String userID, room_key, key, temp_key, chat_msg, chat_user_id, time, img, passwd, caty, img_name, quote, imgurl, roomKey, admin, time_creation, desc, pin, mimeType, app_name, name, room_name, lastReadMessage, key_last, nmid, room_img;
+    private String userID;
+    private String room_key;
+    private String key;
+    private String temp_key;
+    private String chat_msg;
+    private String chat_user_id;
+    private String time;
+    private String img;
+    private String passwd;
+    private String caty;
+    private String img_name;
+    private String quote;
+    private String imgurl;
+    private String roomKey;
+    private String admin;
+    private String time_creation;
+    private String desc;
+    private String pin;
+    private String mimeType;
+    private String app_name;
+    private String name;
+    private String room_name;
+    private String lastReadMessage;
+    private String key_last;
+    private String room_img;
     private String lastSearch = "";
 
     private DatabaseReference root;
@@ -142,14 +166,14 @@ public class ChatActivity extends AppCompatActivity {
     private User user = new User();
     private TextView noMessageFound;
 
-    private ArrayList<Message> messageList = new ArrayList<>();
-    private ArrayList<User> userList = new ArrayList<>();
+    private final ArrayList<Message> messageList = new ArrayList<>();
+    private final ArrayList<User> userList = new ArrayList<>();
     private ArrayList<Message> searchResultList = new ArrayList<>();
-    private ArrayList<String> roomList = new ArrayList<>();
-    private ArrayList<String> roomKeysList = new ArrayList<>();
-    private ArrayList<String> imageList = new ArrayList<>();
-    private ArrayList<Message> pinnedList = new ArrayList<>();
-    private ArrayList<User> memberList = new ArrayList<>();
+    private final ArrayList<String> roomList = new ArrayList<>();
+    private final ArrayList<String> roomKeysList = new ArrayList<>();
+    private final ArrayList<String> imageList = new ArrayList<>();
+    private final ArrayList<Message> pinnedList = new ArrayList<>();
+    private final ArrayList<User> memberList = new ArrayList<>();
 
     private AlertDialog imageListAlert;
     private AlertDialog pinboardAlert;
@@ -189,8 +213,6 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton roomimage;
 
     private FirebaseAuth mAuth;
-
-    private int index = -1;
 
     private final FileOperations fileOperations = new FileOperations(this);
 
@@ -272,7 +294,7 @@ public class ChatActivity extends AppCompatActivity {
         userID = mAuth.getCurrentUser().getUid();
         room_name = getIntent().getExtras().get("room_name").toString();
         room_key = getIntent().getExtras().get("room_key").toString();
-        nmid = getIntent().getExtras().get("nmid").toString();
+        String nmid = getIntent().getExtras().get("nmid").toString();
         lastReadMessage = getIntent().getExtras().get("last_read_message").toString();
         lastReadMessageReached = (nmid.equals(lastReadMessage));
         setTitle(room_name);

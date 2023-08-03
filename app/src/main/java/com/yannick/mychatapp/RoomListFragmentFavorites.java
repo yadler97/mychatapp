@@ -34,7 +34,6 @@ public class RoomListFragmentFavorites extends Fragment {
     private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private final ArrayList<Room> roomList = new ArrayList<>();
     private TextView noRoomFound;
-    private Message newestMessage;
 
     private FileOperations fileOperations;
 
@@ -97,7 +96,6 @@ public class RoomListFragmentFavorites extends Fragment {
         for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
             final String name = uniqueKeySnapshot.getKey();
             for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
-                final String roomdatakey = roomSnapshot.getKey();
                 final Room room = roomSnapshot.getValue(Room.class);
                 room.setKey(name);
                 if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_raum_" + name + ".txt")) && fileOperations.readFromFile("mychatapp_" + name + "_fav.txt").equals("1")) {
@@ -116,12 +114,12 @@ public class RoomListFragmentFavorites extends Fragment {
                                     String quote = child.child("quote").getValue().toString();
                                     String time = child.child("time").getValue().toString();
 
+                                    Message newestMessage;
                                     if (!image.isEmpty()) {
                                         newestMessage = new Message(null, image, time, time, false, key, 13, "", "", quote, pin);
                                     } else {
                                         newestMessage = new Message(null, message, time, time, false, key, 1, "", "", quote, pin);
                                     }
-
                                     room.setnM(newestMessage);
 
                                     sortByTime(room, userid);

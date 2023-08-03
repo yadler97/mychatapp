@@ -70,8 +70,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         private final Button messagebutton;
         private final ExpandableTextView msg_exp;
         private final ImageView img;
-        private String message;
-        private int typ;
         private final Theme theme;
         private int pos;
         private final GestureDetector gestureDetector;
@@ -278,8 +276,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
         public void openSheetMenu() {
             clickedDataItem = messageList.get(pos);
-            message = clickedDataItem.getMsg();
-            typ = clickedDataItem.getTyp();
+            String message = clickedDataItem.getMsg();
+            int typ = clickedDataItem.getTyp();
 
             if (typ != 0) {
                 SheetMenu sheetMenu = new SheetMenu();
@@ -327,7 +325,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 intent.putExtra("quoteID", clickedDataItem.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else {
-                typ = clickedDataItem.getTyp();
+                int typ = clickedDataItem.getTyp();
                 if (typ == 13 || typ == 14 || typ == 15 || typ == 16) {
                     Intent intent = new Intent("fullscreenimage");
                     intent.putExtra("image", clickedDataItem.getMsg());

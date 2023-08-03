@@ -40,13 +40,11 @@ import java.util.ArrayList;
 public class RoomListFragmentMore extends Fragment {
 
     private ListView listView;
-    private String roomName;
     private Theme theme;
     private RoomAdapter adapter;
     private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private final ArrayList<Room> roomList = new ArrayList<>();
     private TextView noRoomFound;
-    private Message newestMessage;
 
     private FileOperations fileOperations;
 
@@ -125,7 +123,7 @@ public class RoomListFragmentMore extends Fragment {
                                     String quote = child.child("quote").getValue().toString();
                                     String time = child.child("time").getValue().toString();
 
-                                    newestMessage = new Message(null, message, time, time, false, key, 1, "", "", quote, pin);
+                                    Message newestMessage = new Message(null, message, time, time, false, key, 1, "", "", quote, pin);
 
                                     room.setnM(newestMessage);
                                     roomList.add(room);
@@ -152,7 +150,6 @@ public class RoomListFragmentMore extends Fragment {
     private void requestPassword(final Room room, final int position) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.enter_room, null);
-        roomName = room.getKey();
         final EditText input_field = view.findViewById(R.id.room_password);
         final TextInputLayout input_field_layout = view.findViewById(R.id.room_password_layout);
         input_field.addTextChangedListener(new TextWatcher() {
@@ -213,25 +210,26 @@ public class RoomListFragmentMore extends Fragment {
                     public void onClick(View view) {
                         if (!input_field.getText().toString().isEmpty()) {
                             if (input_field.getText().toString().trim().equals(room.getPasswd())) {
+                                String roomKey = room.getKey();
                                 Intent tabIntent = new Intent("tab");
                                 LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(tabIntent);
                                 Intent intent = new Intent(getActivity(), ChatActivity.class);
                                 intent.putExtra("room_name", room.getName());
-                                intent.putExtra("room_key", room.getKey());
-                                intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_raum_" + room.getKey() + "_nm.txt"));
+                                intent.putExtra("room_key", roomKey);
+                                intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_raum_" + roomKey + "_nm.txt"));
                                 if (room.getnM() != null) {
                                     intent.putExtra("nmid", room.getnM().getKey());
                                 } else {
-                                    intent.putExtra("nmid", room.getKey());
+                                    intent.putExtra("nmid", roomKey);
                                 }
                                 if (room.getnM() != null) {
-                                    fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_raum_" + room.getKey() + "_nm.txt");
+                                    fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_raum_" + roomKey + "_nm.txt");
                                 } else {
-                                    fileOperations.writeToFile(room.getKey(), "mychatapp_raum_" + room.getKey() + "_nm.txt");
+                                    fileOperations.writeToFile(roomKey, "mychatapp_raum_" + roomKey + "_nm.txt");
                                 }
                                 updateRoomList(position);
-                                fileOperations.writeToFile(room.getPasswd(), "mychatapp_raum_" + roomName + ".txt");
-                                FirebaseMessaging.getInstance().subscribeToTopic(room.getKey());
+                                fileOperations.writeToFile(room.getPasswd(), "mychatapp_raum_" + roomKey + ".txt");
+                                FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                                 alert.cancel();
                                 startActivity(intent);
                             } else {

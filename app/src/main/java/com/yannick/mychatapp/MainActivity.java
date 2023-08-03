@@ -98,7 +98,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
-    private String category, s_push, s_save, s_preview, s_camera, img_room, img_user, img_banner;
+    private String s_push, s_save, s_preview, s_camera, img_room, img_user, img_banner;
 
     private Theme theme;
 
@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter, View v,int position, long id) {
-                category = adapter.getItemAtPosition(position).toString();
+                String category = adapter.getItemAtPosition(position).toString();
                 for (int i = 0; i < kat.length; i++) {
                     if (kat[i].equals(category)) {
                         categoryIndex = i;
