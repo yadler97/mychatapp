@@ -522,16 +522,16 @@ public class ChatActivity extends AppCompatActivity {
             room.setKey(dataSnapshot.getRef().getParent().getKey());
             user = getUser(room.getAdmin());
 
-            String time_creation = room.getTime();
+            String creationTime = room.getTime();
 
             try {
-                time_creation = sdf_local.format(sdf_local.parse(time_creation));
+                creationTime = sdf_local.format(sdf_local.parse(creationTime));
             } catch (ParseException e) {
 
             }
-            String time_creation_con = time_creation.substring(6, 8) + "." + time_creation.substring(4,6) + "." + time_creation.substring(0, 4);
-            String text = getResources().getString(R.string.roomintro, time_creation_con, user.getName());
-            Message m = new Message(user, text, time_creation, false, room.getKey(), Message.Type.HEADER, "", "", "", "0");
+            String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
+            String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
+            Message m = new Message(user, text, creationTime, false, room.getKey(), Message.Type.HEADER, "", "", "", "0");
 
             messageList.add(m);
             if (!memberList.contains(m.getUser())) {
@@ -1670,11 +1670,11 @@ public class ChatActivity extends AppCompatActivity {
         intent.putExtra("roomName", room_name);
         intent.putExtra("admin", room.getAdmin());
         intent.putExtra("category", room.getCaty());
-        String time_creation_temp = "";
+        String creationTime = "";
         try {
-            time_creation_temp = sdf.format(sdf.parse(room.getTime()));
+            creationTime = sdf.format(sdf.parse(room.getTime()));
         } catch (ParseException e) {}
-        intent.putExtra("newestMessage", time_creation_temp);
+        intent.putExtra("newestMessage", creationTime);
         intent.putExtra("passwd", room.getPasswd());
         Message newest = messageList.get(messageList.size() - 1);
         if (messageList.size()!=1) {
