@@ -37,9 +37,9 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
     @Override
     public View getView(final int position, View view, ViewGroup parent) {
         View rowView;
-        int typ = pinnedList.get(position).getTyp();
+        Message.Type type = pinnedList.get(position).getType();
 
-        if (typ == 13 || typ == 14 || typ == 15 || typ == 16) {
+        if (Message.isImage(type)) {
             rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.pinned_image, parent, false);
         } else {
             rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.pinned_message, parent, false);
@@ -50,18 +50,18 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
         viewHolder.userText = rowView.findViewById(R.id.user);
         viewHolder.timeText = rowView.findViewById(R.id.time);
 
-        if (typ == 13 || typ == 14 || typ == 15 || typ == 16) {
+        if (Message.isImage(type)) {
             viewHolder.image = rowView.findViewById(R.id.image);
         } else {
             viewHolder.messageText = rowView.findViewById(R.id.message);
         }
 
-        String time = pinnedList.get(position).getbTime();
+        String time = pinnedList.get(position).getTime();
         String parsedTime = time.substring(0, 4) + "." + time.substring(4, 6) + "." + time.substring(6, 8) + " " + time.substring(9, 11) + ":" + time.substring(11, 13);
 
         viewHolder.userText.setText(pinnedList.get(position).getUser().getName());
         viewHolder.timeText.setText(parsedTime);
-        if (typ == 13 || typ == 14 || typ == 15 || typ == 16) {
+        if (Message.isImage(type)) {
             String imgurl = pinnedList.get(position).getMsg();
             StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
             StorageReference pathReference = storageRef.child("images/" + imgurl);

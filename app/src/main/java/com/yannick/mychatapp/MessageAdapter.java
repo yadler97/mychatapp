@@ -59,7 +59,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     private Context context;
     private FirebaseStorage storage;
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
-    private Message clickedDataItem;
     private final FirebaseAuth mAuth;
 
     private final FileOperations fileOperations = new FileOperations(context);
@@ -117,46 +116,40 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                         pos = getAdapterPosition();
                         if (pos != RecyclerView.NO_POSITION) {
                             int action = event.getActionMasked();
-                            if (action == MotionEvent.ACTION_DOWN) {
+                            if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                                 GradientDrawable shape = new GradientDrawable();
                                 shape.setShape(GradientDrawable.RECTANGLE);
                                 float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
                                 shape.setCornerRadii(corners);
-                                if (messageList.get(pos).isSender()) {
-                                    shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent_clicked));
+                                if (action == MotionEvent.ACTION_DOWN) {
+                                    if (messageList.get(pos).isSender()) {
+                                        shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent_clicked));
+                                    } else {
+                                        shape.setColor(ContextCompat.getColor(context, R.color.textbox_received_clicked));
+                                    }
                                 } else {
-                                    shape.setColor(ContextCompat.getColor(context, R.color.textbox_received_clicked));
+                                    if (messageList.get(pos).isSender()) {
+                                        shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent));
+                                    } else {
+                                        shape.setColor(ContextCompat.getColor(context, R.color.textbox_received));
+                                    }
                                 }
 
-                                int typ = messageList.get(pos).getTyp();
-                                if ((typ >= 5 && typ <= 12) || (typ >= 17 && typ <= 20)) {
+                                Message.Type type = messageList.get(pos).getType();
+                                if (Message.isQuote(type)
+                                        || Message.isDeletedQuote(type)
+                                        || Message.isQuoteImage(type)) {
                                     quotebox.setBackground(shape);
-                                } else if (typ == 21 || typ == 22 || typ == 23 || typ == 24 || typ == 25 || typ == 26 || typ == 27 || typ == 28 || typ == 29 || typ == 30 || typ == 31 || typ == 32 || typ == 33 || typ == 34 || typ == 35 || typ == 36) {
+                                } else if (Message.isForwardedMessage(type)
+                                        || Message.isLinkPreview(type)
+                                        || Message.isExpandable(type)
+                                        || Message.isForwardedExpandable(type)) {
                                     messagebox.setBackground(shape);
-                                } else if (typ == 1 || typ == 3 || typ == 2 || typ == 4) {
+                                } else if (Message.isBasicMessage(type)) {
                                     msg.setBackground(shape);
                                 }
                             }
-                            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                                GradientDrawable shape = new GradientDrawable();
-                                shape.setShape(GradientDrawable.RECTANGLE);
-                                float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
-                                shape.setCornerRadii(corners);
-                                if (messageList.get(pos).isSender()) {
-                                    shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent));
-                                } else {
-                                    shape.setColor(ContextCompat.getColor(context, R.color.textbox_received));
-                                }
 
-                                int typ = messageList.get(pos).getTyp();
-                                if ((typ >= 5 && typ <= 12) || (typ >= 17 && typ <= 20)) {
-                                    quotebox.setBackground(shape);
-                                } else if (typ == 21 || typ == 22 || typ == 23 || typ == 24 || typ == 25 || typ == 26 || typ == 27 || typ == 28 || typ == 29 || typ == 30 || typ == 31 || typ == 32 || typ == 33 || typ == 34 || typ == 35 || typ == 36) {
-                                    messagebox.setBackground(shape);
-                                } else if (typ == 1 || typ == 3 || typ == 2 || typ == 4) {
-                                    msg.setBackground(shape);
-                                }
-                            }
                             return gestureDetector.onTouchEvent(event);
                         }
                         return true;
@@ -233,80 +226,76 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             }
         }
 
-        public void runSelectedMenuOption(int typ, MenuItem item, String message) {
+        public void runSelectedMenuOption(Message.Type type, MenuItem item, Message message) {
             if (item.getItemId() == R.id.copy) {
                 ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("", message);
+                ClipData clip = ClipData.newPlainText("", message.getMsg());
                 clipboard.setPrimaryClip(clip);
                 Toast.makeText(context, R.string.messagecopied, Toast.LENGTH_SHORT).show();
             } else if (item.getItemId() == R.id.openprofile) {
                 Intent intent = new Intent("userprofile");
-                intent.putExtra("userid", clickedDataItem.getUser().getUserID());
+                intent.putExtra("userid", message.getUser().getUserID());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.forward) {
                 Intent intent = new Intent("forward");
-                intent.putExtra("forwardID", clickedDataItem.getKey());
+                intent.putExtra("forwardID", message.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.pin) {
                 Intent intent = new Intent("pinnen");
-                intent.putExtra("pinID", clickedDataItem.getKey());
+                intent.putExtra("pinID", message.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.jump) {
                 Intent intent = new Intent("quotedMessage");
-                intent.putExtra("quoteID", clickedDataItem.getQuote_key());
+                intent.putExtra("quoteID", message.getQuote_key());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            } else if (item.getItemId() == R.id.quote && typ != 13 && typ != 14 && typ != 15 && typ != 16) {
+            } else if (item.getItemId() == R.id.quote) {
                 Intent intent = new Intent("quote");
-                intent.putExtra("quoteID", clickedDataItem.getKey());
+                intent.putExtra("quoteID", message.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            } else if (item.getItemId() == R.id.quote && (typ == 13 || typ == 14 || typ == 15 || typ == 16)) {
-                Intent intent = new Intent("quote");
-                intent.putExtra("quoteID", clickedDataItem.getKey());
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            } else if (item.getItemId() == R.id.download && (typ == 13 || typ == 14 || typ == 15 || typ == 16)) {
+            } else if (item.getItemId() == R.id.download && Message.isImage(type)) {
                 Intent intent = new Intent("permission");
-                intent.putExtra("imgurl", message);
+                intent.putExtra("imgurl", message.getMsg());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            } else if (item.getItemId() == R.id.download && (typ == 17 || typ == 18 || typ == 19 || typ == 20)) {
+            } else if (item.getItemId() == R.id.download && Message.isQuoteImage(type)) {
                 Intent intent = new Intent("permission");
-                intent.putExtra("imgurl", clickedDataItem.getQuote_message());
+                intent.putExtra("imgurl", message.getQuote_message());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         }
 
         public void openSheetMenu() {
-            clickedDataItem = messageList.get(pos);
+            Message clickedDataItem = messageList.get(pos);
             String message = clickedDataItem.getMsg();
-            int typ = clickedDataItem.getTyp();
+            Message.Type type = clickedDataItem.getType();
 
-            if (typ != 0) {
+            if (type != Message.Type.HEADER) {
                 SheetMenu sheetMenu = new SheetMenu();
                 sheetMenu.setTitle(context.getResources().getString(R.string.selectanoption));
                 sheetMenu.setClick(new MenuItem.OnMenuItemClickListener() {
                     @Override
                     public boolean onMenuItemClick(MenuItem item) {
-                        runSelectedMenuOption(typ, item, message);
+                        runSelectedMenuOption(type, item, clickedDataItem);
                         return false;
                     }
                 });
 
-                if (typ == 1 || typ == 2 || typ == 3 || typ == 4 || typ == 5 || typ == 6 || typ == 7 || typ == 8 || typ == 9 || typ == 10 || typ == 11 || typ == 12 || typ == 21 || typ == 22 || typ == 23 || typ == 24 || typ == 29 || typ == 30 || typ == 31 || typ == 32) {
-                    if (clickedDataItem.getPin().equals("0")) {
-                        sheetMenu.setMenu(R.menu.menu_message);
-                    } else {
-                        sheetMenu.setMenu(R.menu.menu_message_unpin);
-                    }
-                } else if (typ == 13 || typ == 14 || typ == 15 || typ == 16) {
+                if (Message.isImage(type)) {
                     if (clickedDataItem.getPin().equals("0")) {
                         sheetMenu.setMenu(R.menu.menu_image);
                     } else {
                         sheetMenu.setMenu(R.menu.menu_image_unpin);
                     }
-                } else if (typ == 17 || typ == 18 || typ == 19 || typ == 20) {
+                } else if (Message.isQuoteImage(type)) {
                     if (clickedDataItem.getPin().equals("0")) {
                         sheetMenu.setMenu(R.menu.menu_quote_image);
                     } else {
                         sheetMenu.setMenu(R.menu.menu_quote_image_unpin);
+                    }
+                } else {
+                    if (clickedDataItem.getPin().equals("0")) {
+                        sheetMenu.setMenu(R.menu.menu_message);
+                    } else {
+                        sheetMenu.setMenu(R.menu.menu_message_unpin);
                     }
                 }
 
@@ -319,22 +308,22 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         }
 
         public void openFullScreenImage() {
-            clickedDataItem = messageList.get(pos);
+            Message clickedDataItem = messageList.get(pos);
             if (!clickedDataItem.getSearchString().equals("")) {
                 Intent intent = new Intent("quotedMessage");
                 intent.putExtra("quoteID", clickedDataItem.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else {
-                int typ = clickedDataItem.getTyp();
-                if (typ == 13 || typ == 14 || typ == 15 || typ == 16) {
+                Message.Type type = clickedDataItem.getType();
+                if (Message.isImage(type)) {
                     Intent intent = new Intent("fullscreenimage");
                     intent.putExtra("image", clickedDataItem.getMsg());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                } else if (typ == 17 || typ == 18 || typ == 19 || typ == 20) {
+                } else if (Message.isQuoteImage(type)) {
                     Intent intent = new Intent("fullscreenimage");
                     intent.putExtra("image", clickedDataItem.getQuote_message());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-                } else if (typ == 5 || typ == 6 || typ == 7 || typ == 8) {
+                } else if (Message.isQuote(type)) {
                     Intent intent = new Intent("quotedMessage");
                     intent.putExtra("quoteID", clickedDataItem.getQuote_key());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
@@ -370,7 +359,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     @Override
     public int getItemViewType(int position) {
         Message message = messageList.get(position);
-        return message.getTyp();
+        return message.getType().ordinal();
     }
 
     @Override
@@ -385,15 +374,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     public void onBindViewHolder(final MyViewHolder holder, int position) {
         holderList.add(holder);
         Message m = messageList.get(position);
-        int typ = m.getTyp();
+        Message.Type type = m.getType();
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.RECTANGLE);
         float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
         shape.setCornerRadii(corners);
-        if (typ != 13 && typ != 15 && typ != 14 && typ != 16 && typ != 25 && typ != 26 && typ != 27 && typ != 28) {
+        if (!Message.isImage(type) && !Message.isLinkPreview(type)) {
             if (!m.getSearchString().isEmpty()) {
                 SpannableStringBuilder sbuilder = highlightSearchedText(m.getMsg(), m.getSearchString());
-                if (typ != 29 && typ != 30 && typ != 31 && typ != 32 && typ != 33 && typ != 34 && typ != 35 && typ != 36) {
+                if (!Message.isExpandable(type) && !Message.isForwardedExpandable(type)) {
                     holder.msg.setText(sbuilder);
                 } else {
                     holder.msg_exp.setText(sbuilder);
@@ -407,7 +396,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     });
                 }
             } else {
-                if (typ != 0 && typ != 29 && typ != 30 && typ != 31 && typ != 32 && typ != 33 && typ != 34 && typ != 35 && typ != 36) {
+                if (type != Message.Type.HEADER && !Message.isExpandable(type) && !Message.isForwardedExpandable(type)) {
                     try {
                         SpannableStringBuilder newBuilder = styleText(m.getMsg());
                         holder.msg.setText(newBuilder);
@@ -434,7 +423,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                                             }
                                         }).into(holder.msg);
                     }
-                } else if (typ == 29 || typ == 30 || typ == 31 || typ == 32 || typ == 33 || typ == 34 || typ == 35 || typ == 36) {
+                } else if (Message.isExpandable(type) || Message.isForwardedExpandable(type)) {
                     holder.msg_exp.setText(m.getMsg());
                     holder.msg_exp.setInterpolator(new LinearInterpolator());
                     holder.messagebutton.setOnClickListener(new View.OnClickListener() {
@@ -448,7 +437,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     holder.msg.setText(m.getMsg());
                 }
             }
-        } else if (typ == 13 || typ == 15 || typ == 14 || typ == 16) {
+        } else if (Message.isImage(type)) {
             String imgurl = m.getMsg();
             StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
             StorageReference pathReference = storageRef.child("images/" + imgurl);
@@ -471,7 +460,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask();
             jsoupAsyncTask.execute(m.getMsg(), String.valueOf(position));
         }
-        if (typ != 0) {
+        if (type != Message.Type.HEADER) {
             String time = m.getTime();
             if (!time.isEmpty()) {
                 holder.time.setText(time.substring(9, 11) + ":" + time.substring(11, 13));
@@ -479,7 +468,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 holder.time.setText("");
             }
             if (!m.isSender()) {
-                if ((typ + 2) % 4 != 0) {
+                if (!Message.isConMessage(type)) {
                     holder.name.setText(m.getUser().getName());
 
                     StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
@@ -498,8 +487,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         } else {
             shape.setColor(ContextCompat.getColor(context, R.color.textbox_time));
         }
-        if ((typ >= 5 && typ <= 12) || (typ >= 17 && typ <= 20)) {
-            if (!(typ >= 9 && typ <= 12)) {
+
+        if (Message.isQuote(type) || Message.isDeletedQuote(type) || Message.isQuoteImage(type)) {
+            if (!Message.isDeletedQuote(type)) {
                 String temp_userID = "";
                 for (Message m2 : messageList) {
                     if (m2.getKey().equals(m.getQuote_key())) {
@@ -513,7 +503,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     holder.quote_name.setText(m.getQuote_name());
                 }
             }
-            if (!(typ >= 17 && typ <= 20)) {
+            if (!Message.isQuoteImage(type)) {
                 holder.quote_message.setText(m.getQuote_message());
             } else {
                 String imgurl = m.getQuote_message();
@@ -539,9 +529,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             holder.quotebox_content.setBackground(shape_quote);
             holder.quotebox.setBackground(shape);
         }
-        if (typ == 1 || typ == 3 || typ == 0 || typ == 2 || typ == 4) {
+
+        if (type == Message.Type.HEADER || Message.isBasicMessage(type)) {
             holder.msg.setBackground(shape);
-        } else if (typ == 21 || typ == 22 || typ == 23 || typ == 24 || typ == 25 || typ == 26 || typ == 27 || typ == 28 || typ == 29 || typ == 30 || typ == 31 || typ == 32 || typ == 33 || typ == 34 || typ == 35 || typ == 36) {
+        } else if (Message.isForwardedMessage(type) || Message.isLinkPreview(type) || Message.isExpandable(type) || Message.isForwardedExpandable(type)) {
             holder.messagebox.setBackground(shape);
         }
     }

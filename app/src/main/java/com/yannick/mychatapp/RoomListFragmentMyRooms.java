@@ -120,9 +120,9 @@ public class RoomListFragmentMyRooms extends Fragment {
 
                                     Message newestMessage;
                                     if (!image.isEmpty()) {
-                                        newestMessage = new Message(null, image, time, time, false, key, 13, "", "", quote, pin);
+                                        newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, "", "", quote, pin);
                                     } else {
-                                        newestMessage = new Message(null, message, time, time, false, key, 1, "", "", quote, pin);
+                                        newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pin);
                                     }
                                     room.setnM(newestMessage);
 
@@ -165,12 +165,12 @@ public class RoomListFragmentMyRooms extends Fragment {
                     for (Room r : roomList) {
                         long t, t2;
                         if (r.getnM() != null) {
-                            t = Long.parseLong(r.getnM().getbTime().substring(0, 8) + r.getnM().getbTime().substring(9, 15));
+                            t = Long.parseLong(r.getnM().getTime().substring(0, 8) + r.getnM().getTime().substring(9, 15));
                         } else {
                             t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
                         }
                         if (room.getnM() != null) {
-                            t2 = Long.parseLong(room.getnM().getbTime().substring(0, 8) + room.getnM().getbTime().substring(9, 15));
+                            t2 = Long.parseLong(room.getnM().getTime().substring(0, 8) + room.getnM().getTime().substring(9, 15));
                         } else {
                             t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
                         }

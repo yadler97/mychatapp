@@ -123,7 +123,7 @@ public class RoomListFragmentMore extends Fragment {
                                     String quote = child.child("quote").getValue().toString();
                                     String time = child.child("time").getValue().toString();
 
-                                    Message newestMessage = new Message(null, message, time, time, false, key, 1, "", "", quote, pin);
+                                    Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pin);
 
                                     room.setnM(newestMessage);
                                     roomList.add(room);

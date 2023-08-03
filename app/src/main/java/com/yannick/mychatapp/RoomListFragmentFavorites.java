@@ -116,9 +116,9 @@ public class RoomListFragmentFavorites extends Fragment {
 
                                     Message newestMessage;
                                     if (!image.isEmpty()) {
-                                        newestMessage = new Message(null, image, time, time, false, key, 13, "", "", quote, pin);
+                                        newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, "", "", quote, pin);
                                     } else {
-                                        newestMessage = new Message(null, message, time, time, false, key, 1, "", "", quote, pin);
+                                        newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pin);
                                     }
                                     room.setnM(newestMessage);
 
@@ -161,12 +161,12 @@ public class RoomListFragmentFavorites extends Fragment {
                     for (Room r : roomList) {
                         long t, t2;
                         if (r.getnM() != null) {
-                            t = Long.parseLong(r.getnM().getbTime().substring(0, 8) + r.getnM().getbTime().substring(9, 15));
+                            t = Long.parseLong(r.getnM().getTime().substring(0, 8) + r.getnM().getTime().substring(9, 15));
                         } else {
                             t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
                         }
                         if (room.getnM() != null) {
-                            t2 = Long.parseLong(room.getnM().getbTime().substring(0, 8) + room.getnM().getbTime().substring(9, 15));
+                            t2 = Long.parseLong(room.getnM().getTime().substring(0, 8) + room.getnM().getTime().substring(9, 15));
                         } else {
                             t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
                         }
@@ -222,15 +222,26 @@ public class RoomListFragmentFavorites extends Fragment {
     public BroadcastReceiver favReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateRoomList(intent.getStringExtra("roomkey"), intent.getStringExtra("roomname"), intent.getStringExtra("admin"), intent.getStringExtra("caty"), intent.getStringExtra("newestMessage"), intent.getStringExtra("passwd"), intent.getStringExtra("nm_message"), intent.getStringExtra("nm_time"), intent.getStringExtra("nm_key"), intent.getIntExtra("nm_typ", 0));
+            updateRoomList(
+                    intent.getStringExtra("roomKey"),
+                    intent.getStringExtra("roomName"),
+                    intent.getStringExtra("admin"),
+                    intent.getStringExtra("category"),
+                    intent.getStringExtra("newestMessage"),
+                    intent.getStringExtra("passwd"),
+                    intent.getStringExtra("nmMessage"),
+                    intent.getStringExtra("nmTime"),
+                    intent.getStringExtra("nmKey"),
+                    Message.Type.valueOf(intent.getStringExtra("nmType"))
+            );
         }
     };
 
-    private void updateRoomList(String key, String name, String admin, String caty, String time, String passwd, String nm_msg, String nm_time, String nm_key, int nm_typ) {
+    private void updateRoomList(String key, String name, String admin, String caty, String time, String passwd, String nmMsg, String nmTime, String nmKey, Message.Type nmType) {
         if (fileOperations.readFromFile("mychatapp_" + key + "_fav.txt").equals("1")) {
             Room room = new Room(key, name, caty, time, passwd, admin);
-            if (!nm_msg.isEmpty()) {
-                Message newestMessage = new Message(null, nm_msg, nm_time, nm_time, false, nm_key, nm_typ, "", "", "", "");
+            if (!nmMsg.isEmpty()) {
+                Message newestMessage = new Message(null, nmMsg, nmTime, false, nmKey, nmType, "", "", "", "");
                 room.setnM(newestMessage);
             }
 
@@ -238,20 +249,20 @@ public class RoomListFragmentFavorites extends Fragment {
             if (!roomList.isEmpty()) {
                 for (Room r : roomList) {
                     Long t, t2;
-                    if (nm_msg.isEmpty()) {
+                    if (nmMsg.isEmpty()) {
                         if (r.getnM() != null) {
-                            t = Long.parseLong(r.getnM().getbTime().substring(0, 8) + r.getnM().getbTime().substring(9, 15));
+                            t = Long.parseLong(r.getnM().getTime().substring(0, 8) + r.getnM().getTime().substring(9, 15));
                         } else {
                             t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
                         }
                         t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
                     } else {
                         if (r.getnM() != null) {
-                            t = Long.parseLong(r.getnM().getbTime().substring(0, 8) + r.getnM().getbTime().substring(9, 15));
+                            t = Long.parseLong(r.getnM().getTime().substring(0, 8) + r.getnM().getTime().substring(9, 15));
                         } else {
                             t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
                         }
-                        t2 = Long.parseLong(room.getnM().getbTime().substring(0, 8) + room.getnM().getbTime().substring(9, 15));
+                        t2 = Long.parseLong(room.getnM().getTime().substring(0, 8) + room.getnM().getTime().substring(9, 15));
                     }
                     if (t < t2) {
                         break;

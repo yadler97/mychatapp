@@ -34,12 +34,20 @@ public class Room {
         return caty;
     }
 
+    public void setCaty(String caty) {
+        this.caty = caty;
+    }
+
     public String getTime() {
         return time;
     }
 
     public String getPasswd() {
         return passwd;
+    }
+
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
     }
 
     public String getKey() {
@@ -52,6 +60,10 @@ public class Room {
 
     public String getDesc() {
         return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
     public String getAdmin() {

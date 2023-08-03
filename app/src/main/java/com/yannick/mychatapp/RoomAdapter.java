@@ -69,13 +69,13 @@ public class RoomAdapter extends ArrayAdapter<Room> {
             viewHolder.categoryText.setText(context.getResources().getStringArray(R.array.categories)[Integer.parseInt(roomList.get(position).getCaty())]);
         } else {
             if (roomList.get(position).getnM() != null) {
-                if (roomList.get(position).getnM().getTyp() == 1) {
+                if (roomList.get(position).getnM().getType() == Message.Type.MESSAGE_RECEIVED) {
                     if (roomList.get(position).getnM().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
                         viewHolder.categoryText.setText(context.getResources().getString(R.string.you) + ": " + roomList.get(position).getnM().getMsg());
                     } else {
                         viewHolder.categoryText.setText(roomList.get(position).getnM().getUser().getName() + ": " + roomList.get(position).getnM().getMsg());
                     }
-                } else if (roomList.get(position).getnM().getTyp() == 13) {
+                } else if (roomList.get(position).getnM().getType() == Message.Type.IMAGE_RECEIVED) {
                     if (roomList.get(position).getnM().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
                         viewHolder.categoryText.setText(context.getResources().getString(R.string.yousharedapicture));
                     } else {
@@ -92,7 +92,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         }
         if (typ == 0 || typ == 1) {
             if (roomList.get(position).getnM() != null) {
-                viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getnM().getbTime()));
+                viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getnM().getTime()));
             } else {
                 viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getTime()));
             }
