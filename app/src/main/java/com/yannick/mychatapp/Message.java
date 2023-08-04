@@ -278,13 +278,44 @@ public class Message {
         }
     }
 
-    // TODO: to be extended
     public static Type getNonConTypeForConType(Type type) {
         switch (type) {
             case MESSAGE_RECEIVED_CON:
                 return Type.MESSAGE_RECEIVED;
             case MESSAGE_SENT_CON:
                 return Type.MESSAGE_SENT;
+            case QUOTE_RECEIVED_CON:
+                return Type.QUOTE_RECEIVED;
+            case QUOTE_SENT_CON:
+                return Type.QUOTE_SENT;
+            case QUOTE_RECEIVED_DELETED_CON:
+                return Type.QUOTE_RECEIVED_DELETED;
+            case QUOTE_SENT_DELETED_CON:
+                return Type.QUOTE_SENT_DELETED;
+            case IMAGE_RECEIVED_CON:
+                return Type.IMAGE_RECEIVED;
+            case IMAGE_SENT_CON:
+                return Type.IMAGE_SENT;
+            case QUOTE_IMAGE_RECEIVED_CON:
+                return Type.QUOTE_IMAGE_RECEIVED;
+            case QUOTE_IMAGE_SENT_CON:
+                return Type.QUOTE_IMAGE_SENT;
+            case FORWARDED_RECEIVED_CON:
+                return Type.FORWARDED_RECEIVED;
+            case FORWARDED_SENT_CON:
+                return Type.FORWARDED_SENT;
+            case LINK_PREVIEW_RECEIVED_CON:
+                return Type.LINK_PREVIEW_RECEIVED;
+            case LINK_PREVIEW_SENT_CON:
+                return Type.LINK_PREVIEW_SENT;
+            case EXPANDABLE_RECEIVED_CON:
+                return Type.EXPANDABLE_RECEIVED;
+            case EXPANDABLE_SENT_CON:
+                return Type.EXPANDABLE_SENT;
+            case FORWARDED_EXPANDABLE_RECEIVED_CON:
+                return Type.FORWARDED_EXPANDABLE_RECEIVED;
+            case FORWARDED_EXPANDABLE_SENT_CON:
+                return Type.FORWARDED_EXPANDABLE_SENT;
             default:
                 return Type.HEADER;
         }

@@ -9,10 +9,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
-import android.os.Build;
-import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -30,6 +26,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
@@ -207,14 +207,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                         if (pos != RecyclerView.NO_POSITION) {
                             int action = event.getActionMasked();
                             if (action == MotionEvent.ACTION_DOWN) {
-                                if (Build.VERSION.SDK_INT >= 23) {
-                                    img.setForeground(context.getResources().getDrawable(R.drawable.image_overlay));
-                                }
+                                img.setForeground(context.getResources().getDrawable(R.drawable.image_overlay));
                             }
                             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                                if (Build.VERSION.SDK_INT >= 23) {
-                                    img.setForeground(null);
-                                }
+                                img.setForeground(null);
                             }
                             return gestureDetector.onTouchEvent(event);
                         }

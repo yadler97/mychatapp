@@ -5,11 +5,11 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import androidx.appcompat.app.AppCompatActivity;
 import android.widget.ImageView;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
@@ -71,17 +71,15 @@ public class SplashActivity extends AppCompatActivity{
     }
 
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel("channel_id", "mychatapp", importance);
-            channel.enableLights(true);
-            channel.enableVibration(true);
-            channel.setLightColor(Color.YELLOW);
-            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
-            channel.setDescription("mychatapp description");
+        int importance = NotificationManager.IMPORTANCE_HIGH;
+        NotificationChannel channel = new NotificationChannel("channel_id", "mychatapp", importance);
+        channel.enableLights(true);
+        channel.enableVibration(true);
+        channel.setLightColor(Color.YELLOW);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+        channel.setDescription("mychatapp description");
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
     }
 }

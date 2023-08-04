@@ -59,7 +59,7 @@ public class RoomListFragmentMore extends Fragment {
         theme = Theme.getCurrentTheme(getContext());
         fileOperations = new FileOperations(getActivity());
 
-        adapter = new RoomAdapter(getContext(), roomList, 2);
+        adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MORE);
         listView.setAdapter(adapter);
 
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(searchReceiver, new IntentFilter("searchroom"));
@@ -259,7 +259,7 @@ public class RoomListFragmentMore extends Fragment {
                 ArrayList<Room> searchResultList = searchRoom(s);
 
                 if (!searchResultList.isEmpty()) {
-                    adapter = new RoomAdapter(getContext(), searchResultList, 2);
+                    adapter = new RoomAdapter(getContext(), searchResultList, RoomAdapter.RoomListType.MORE);
                     listView.setAdapter(adapter);
                     listView.setVisibility(View.VISIBLE);
                     noRoomFound.setText("");
@@ -269,7 +269,7 @@ public class RoomListFragmentMore extends Fragment {
                     noRoomFound.setText(R.string.noroomfound);
                 }
             } else {
-                adapter = new RoomAdapter(getContext(), roomList, 2);
+                adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MORE);
                 listView.setVisibility(View.VISIBLE);
                 if (!roomList.isEmpty()) {
                     noRoomFound.setText("");

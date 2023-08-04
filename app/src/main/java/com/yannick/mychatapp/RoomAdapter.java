@@ -25,7 +25,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
 
     private final Context context;
     private final ArrayList<Room> roomList;
-    private final int typ;
+    private final RoomListType type;
     private final SimpleDateFormat sdf_local = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private final FirebaseStorage storage;
     private final FirebaseAuth mAuth;
@@ -40,13 +40,19 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         CircleImageView roomImage;
     }
 
-    public RoomAdapter(Context context, ArrayList<Room> roomList, int typ) {
+    public RoomAdapter(Context context, ArrayList<Room> roomList, RoomListType type) {
         super(context, -1, roomList);
         this.context = context;
         this.roomList = roomList;
-        this.typ = typ;
+        this.type = type;
         storage = FirebaseStorage.getInstance();
         mAuth = FirebaseAuth.getInstance();
+    }
+
+    enum RoomListType {
+        MY_ROOMS,
+        FAVORITES,
+        MORE
     }
 
     public View getView(final int position, View convertView, ViewGroup parent) {
@@ -65,7 +71,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         viewHolder.roomImage = rowView.findViewById(R.id.roomimage);
 
         viewHolder.roomNameText.setText(roomList.get(position).getName());
-        if (typ == 2) {
+        if (type == RoomListType.MORE) {
             viewHolder.categoryText.setText(context.getResources().getStringArray(R.array.categories)[Integer.parseInt(roomList.get(position).getCategory())]);
         } else {
             if (roomList.get(position).getnM() != null) {
@@ -90,21 +96,21 @@ public class RoomAdapter extends ArrayAdapter<Room> {
                 }
             }
         }
-        if (typ == 0 || typ == 1) {
+        if (type == RoomListType.MY_ROOMS || type == RoomListType.FAVORITES) {
             if (roomList.get(position).getnM() != null) {
                 viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getnM().getTime()));
             } else {
                 viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getTime()));
             }
         }
-        if (typ == 1) {
+        if (type == RoomListType.FAVORITES) {
             viewHolder.lockText.setText("\u2764");
-        } else if (typ == 2) {
+        } else if (type == RoomListType.MORE) {
             viewHolder.lockText.setText("\uD83D\uDD12");
         }
 
         FileOperations fileOperations = new FileOperations(this.context);
-        if (typ == 0 || typ == 1) {
+        if (type == RoomListType.MY_ROOMS || type == RoomListType.FAVORITES) {
             if (roomList.get(position).getnM() != null) {
                 if (!roomList.get(position).getnM().getKey().equals(fileOperations.readFromFile("mychatapp_room_" + roomList.get(position).getKey() + "_nm.txt"))) {
                     if (Theme.getCurrentTheme(context) == Theme.DARK) {
@@ -116,7 +122,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
             }
         }
 
-        if (typ != 2) {
+        if (type != RoomListType.MORE) {
             if (fileOperations.readFromFile("mychatapp_" + roomList.get(position).getKey() + "_mute.txt").equals("1")) {
                 viewHolder.muteIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_muted));
                 if (Theme.getCurrentTheme(context) == Theme.DARK) {

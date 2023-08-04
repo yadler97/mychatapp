@@ -13,36 +13,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.OpenableColumns;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.exifinterface.media.ExifInterface;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -64,7 +44,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
-import androidx.appcompat.widget.SearchView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -72,10 +51,27 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
+
 import com.bumptech.glide.signature.ObjectKey;
 import com.chrisrenke.giv.GravityImageView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -884,7 +880,8 @@ public class ChatActivity extends AppCompatActivity {
             int compressFactor = 2;
             int height = bmp.getHeight();
             int width = bmp.getWidth();
-            if (getImgSize(filePath) > height * width) {
+            ImageOperations imageOperations = new ImageOperations(getContentResolver());
+            if (imageOperations.getImgSize(filePath) > height * width) {
                 compressFactor = 4;
             }
             if (type == 2) {
@@ -902,7 +899,7 @@ public class ChatActivity extends AppCompatActivity {
             }
             bmp = Bitmap.createScaledBitmap(bmp, width, height, false);
             try {
-                bmp = rotateImageIfRequired(this, bmp, filePath);
+                bmp = imageOperations.rotateImageIfRequired(this, bmp, filePath);
             } catch (IOException e) { }
             bmp.compress(Bitmap.CompressFormat.JPEG, compression, stream);
             byteArray = stream.toByteArray();
@@ -1177,18 +1174,13 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public boolean isStoragePermissionGranted() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                Log.v("DL","Permission is granted");
-                return true;
-            } else {
-                Log.v("DL","Permission is revoked");
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                return false;
-            }
-        } else {
-            Log.v("DL","Permission is granted");
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            Log.v("DL", "Permission is granted");
             return true;
+        } else {
+            Log.v("DL", "Permission is revoked");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            return false;
         }
     }
 
@@ -1443,43 +1435,6 @@ public class ChatActivity extends AppCompatActivity {
         alert.show();
     }
 
-    private Long getImgSize(Uri filePath) {
-        Cursor returnCursor = getContentResolver().query(filePath, null, null, null, null);
-        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-        returnCursor.moveToFirst();
-        return returnCursor.getLong(sizeIndex);
-    }
-
-    private static Bitmap rotateImage(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
-    }
-
-    private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
-
-        InputStream input = context.getContentResolver().openInputStream(selectedImage);
-        ExifInterface ei;
-        if (Build.VERSION.SDK_INT > 23) {
-            ei = new ExifInterface(input);
-        } else {
-            ei = new ExifInterface(selectedImage.getPath());
-        }
-
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
-            default:
-                return img;
-        }
-    }
-
     @Override
     public void onBackPressed() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(userReceiver);
@@ -1623,14 +1578,10 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
-                        if(android.os.Build.VERSION.SDK_INT >=24) {
-                            Uri fileURI = FileProvider.getUriForFile(ChatActivity.this,
-                                    BuildConfig.APPLICATION_ID+".fileprovider",
-                                    file);
-                            intent.setDataAndType(fileURI, mime);
-                        } else {
-                            intent.setDataAndType(Uri.fromFile(file), mime);
-                        }
+                        Uri fileURI = FileProvider.getUriForFile(ChatActivity.this,
+                                BuildConfig.APPLICATION_ID + ".fileprovider",
+                                file);
+                        intent.setDataAndType(fileURI, mime);
                         intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION|FLAG_GRANT_WRITE_URI_PERMISSION|FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                     }

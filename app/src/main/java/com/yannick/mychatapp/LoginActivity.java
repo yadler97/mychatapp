@@ -5,18 +5,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -38,7 +34,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.exifinterface.media.ExifInterface;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
@@ -808,7 +803,8 @@ public class LoginActivity extends AppCompatActivity {
         int compressFactor = 2;
         int height = bmp.getHeight();
         int width = bmp.getWidth();
-        if (getImgSize(filePath) > height * width) {
+        ImageOperations imageOperations = new ImageOperations(getContentResolver());
+        if (imageOperations.getImgSize(filePath) > height * width) {
             compressFactor = 4;
         }
         if (type == 0) {
@@ -826,7 +822,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         bmp = Bitmap.createScaledBitmap(bmp, width, height, false);
         try {
-            bmp = rotateImageIfRequired(this, bmp, filePath);
+            bmp = imageOperations.rotateImageIfRequired(this, bmp, filePath);
         } catch (IOException e) { }
         bmp.compress(Bitmap.CompressFormat.JPEG, compression, stream);
         byteArray = stream.toByteArray();
@@ -865,43 +861,6 @@ public class LoginActivity extends AppCompatActivity {
                 progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
             }
         });
-    }
-
-    private Long getImgSize(Uri filePath) {
-        Cursor returnCursor = getContentResolver().query(filePath, null, null, null, null);
-        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-        returnCursor.moveToFirst();
-        return returnCursor.getLong(sizeIndex);
-    }
-
-    private static Bitmap rotateImage(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
-    }
-
-    private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
-
-        InputStream input = context.getContentResolver().openInputStream(selectedImage);
-        ExifInterface ei;
-        if (Build.VERSION.SDK_INT > 23) {
-            ei = new ExifInterface(input);
-        } else {
-            ei = new ExifInterface(selectedImage.getPath());
-        }
-
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
-            default:
-                return img;
-        }
     }
 
     private void updateEditProfileImages() {

@@ -45,7 +45,7 @@ public class RoomListFragmentMyRooms extends Fragment {
         listView = view.findViewById(R.id.listView);
         noRoomFound = view.findViewById(R.id.keinraumgefunden);
 
-        adapter = new RoomAdapter(getContext(), roomList, 0);
+        adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MY_ROOMS);
         listView.setAdapter(adapter);
 
         fileOperations = new FileOperations(getActivity());
@@ -249,7 +249,7 @@ public class RoomListFragmentMyRooms extends Fragment {
                 ArrayList<Room> searchResultList = searchRoom(s);
 
                 if (!searchResultList.isEmpty()) {
-                    adapter = new RoomAdapter(getContext(), searchResultList, 0);
+                    adapter = new RoomAdapter(getContext(), searchResultList, RoomAdapter.RoomListType.MY_ROOMS);
                     listView.setAdapter(adapter);
                     listView.setVisibility(View.VISIBLE);
                     noRoomFound.setText("");
@@ -259,7 +259,7 @@ public class RoomListFragmentMyRooms extends Fragment {
                     noRoomFound.setText(R.string.noroomfound);
                 }
             } else {
-                adapter = new RoomAdapter(getContext(), roomList, 0);
+                adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MY_ROOMS);
                 listView.setVisibility(View.VISIBLE);
                 if (!roomList.isEmpty()) {
                     noRoomFound.setText("");
