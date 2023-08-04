@@ -109,7 +109,7 @@ public class RoomListFragmentMore extends Fragment {
             for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
                 final Room room = roomSnapshot.getValue(Room.class);
                 room.setKey(name);
-                if (!room.getPasswd().equals(fileOperations.readFromFile("mychatapp_raum_" + name + ".txt"))) {
+                if (!room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + name + ".txt"))) {
                     if (uniqueKeySnapshot.getChildrenCount() > 1) {
                         DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(name);
                         Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
@@ -216,19 +216,19 @@ public class RoomListFragmentMore extends Fragment {
                                 Intent intent = new Intent(getActivity(), ChatActivity.class);
                                 intent.putExtra("room_name", room.getName());
                                 intent.putExtra("room_key", roomKey);
-                                intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_raum_" + roomKey + "_nm.txt"));
+                                intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_room_" + roomKey + "_nm.txt"));
                                 if (room.getnM() != null) {
                                     intent.putExtra("nmid", room.getnM().getKey());
                                 } else {
                                     intent.putExtra("nmid", roomKey);
                                 }
                                 if (room.getnM() != null) {
-                                    fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_raum_" + roomKey + "_nm.txt");
+                                    fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
                                 } else {
-                                    fileOperations.writeToFile(roomKey, "mychatapp_raum_" + roomKey + "_nm.txt");
+                                    fileOperations.writeToFile(roomKey, "mychatapp_room_" + roomKey + "_nm.txt");
                                 }
                                 updateRoomList(position);
-                                fileOperations.writeToFile(room.getPasswd(), "mychatapp_raum_" + roomKey + ".txt");
+                                fileOperations.writeToFile(room.getPasswd(), "mychatapp_room_" + roomKey + ".txt");
                                 FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                                 alert.cancel();
                                 startActivity(intent);

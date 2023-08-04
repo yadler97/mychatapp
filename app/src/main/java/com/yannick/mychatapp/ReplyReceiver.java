@@ -7,13 +7,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import android.util.Log;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -55,7 +52,8 @@ public class ReplyReceiver extends BroadcastReceiver {
 
         updateNotification(context, intent.getIntExtra("push_id", 1));
 
-        writeToFile(temp_key, "mychatapp_raum_" + intent.getStringExtra("room_key") + "_nm.txt", context);
+        FileOperations fileOperations = new FileOperations(context);
+        fileOperations.writeToFile(temp_key, "mychatapp_room_" + intent.getStringExtra("room_key") + "_nm.txt");
     }
 
     private void updateNotification(Context context, int notifyId) {
@@ -66,15 +64,5 @@ public class ReplyReceiver extends BroadcastReceiver {
                 .setContentText(context.getResources().getString(R.string.messagesent));
 
         notificationManager.notify(notifyId, builder.build());
-    }
-
-    public void writeToFile(String text, String datei, Context context) {
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(datei, Context.MODE_PRIVATE));
-            outputStreamWriter.write(text);
-            outputStreamWriter.close();
-        } catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
     }
 }

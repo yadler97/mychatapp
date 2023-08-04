@@ -66,7 +66,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
 
         viewHolder.roomNameText.setText(roomList.get(position).getName());
         if (typ == 2) {
-            viewHolder.categoryText.setText(context.getResources().getStringArray(R.array.categories)[Integer.parseInt(roomList.get(position).getCaty())]);
+            viewHolder.categoryText.setText(context.getResources().getStringArray(R.array.categories)[Integer.parseInt(roomList.get(position).getCategory())]);
         } else {
             if (roomList.get(position).getnM() != null) {
                 if (roomList.get(position).getnM().getType() == Message.Type.MESSAGE_RECEIVED) {
@@ -106,7 +106,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         FileOperations fileOperations = new FileOperations(this.context);
         if (typ == 0 || typ == 1) {
             if (roomList.get(position).getnM() != null) {
-                if (!roomList.get(position).getnM().getKey().equals(fileOperations.readFromFile("mychatapp_raum_" + roomList.get(position).getKey() + "_nm.txt"))) {
+                if (!roomList.get(position).getnM().getKey().equals(fileOperations.readFromFile("mychatapp_room_" + roomList.get(position).getKey() + "_nm.txt"))) {
                     if (Theme.getCurrentTheme(context) == Theme.DARK) {
                         viewHolder.background.setBackgroundColor(context.getResources().getColor(R.color.roomhighlight_dark));
                     } else {

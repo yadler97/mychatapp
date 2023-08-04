@@ -102,7 +102,7 @@ public class RoomListFragmentMyRooms extends Fragment {
             for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
                 final Room room = roomSnapshot.getValue(Room.class);
                 room.setKey(name);
-                if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_raum_" + name + ".txt"))) {
+                if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + name + ".txt"))) {
                     if (uniqueKeySnapshot.getChildrenCount() > 1) {
                         DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(name);
                         Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
@@ -207,17 +207,17 @@ public class RoomListFragmentMyRooms extends Fragment {
     private void requestPassword(final Room room) {
         String roomKey = room.getKey();
 
-        if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_raum_" + roomKey + ".txt"))) {
+        if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + roomKey + ".txt"))) {
             Intent intent = new Intent(getContext(), ChatActivity.class);
             intent.putExtra("room_name", room.getName());
             intent.putExtra("room_key", roomKey);
-            intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_raum_" + roomKey + "_nm.txt"));
+            intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_room_" + roomKey + "_nm.txt"));
             if (room.getnM() != null) {
                 intent.putExtra("nmid", room.getnM().getKey());
-                fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_raum_" + roomKey + "_nm.txt");
+                fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
             } else {
                 intent.putExtra("nmid", roomKey);
-                fileOperations.writeToFile(room.getKey(), "mychatapp_raum_" + roomKey + "_nm.txt");
+                fileOperations.writeToFile(room.getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
             }
             adapter.notifyDataSetChanged();
             startActivity(intent);

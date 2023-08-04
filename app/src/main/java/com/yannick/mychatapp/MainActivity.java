@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private FirebaseStorage storage;
     private StorageReference storageRef;
-    private CircleImageView profilicon;
+    private CircleImageView profileImage;
     private ImageView banner;
     private ImageView banner_profile;
     private CircleImageView icon_profile;
@@ -448,17 +448,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                         if (!snapshot.exists()) {
                                                             DatabaseReference message_root = roomRoot.child("-0roomdata");
                                                             Map<String, Object> map = new HashMap<>();
-                                                            String currentDateandTime = sdf.format(new Date());
+                                                            String currentDateAndTime = sdf.format(new Date());
                                                             map.put("admin", currentUser.getUserID());
                                                             map.put("name", roomName);
-                                                            map.put("time", currentDateandTime);
+                                                            map.put("time", currentDateAndTime);
                                                             map.put("passwd", roomPassword);
                                                             map.put("desc", roomDescription);
-                                                            map.put("caty", String.valueOf(categoryIndex));
+                                                            map.put("category", String.valueOf(categoryIndex));
                                                             map.put("img", img_room);
                                                             message_root.updateChildren(map);
-                                                            fileOperations.writeToFile(roomPassword, "mychatapp_raum_" + roomKey + ".txt");
-                                                            fileOperations.writeToFile("-0roomdata", "mychatapp_raum_" + roomKey + "_nm.txt");
+                                                            fileOperations.writeToFile(roomPassword, "mychatapp_room_" + roomKey + ".txt");
+                                                            fileOperations.writeToFile("-0roomdata", "mychatapp_room_" + roomKey + "_nm.txt");
                                                             FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                                                             Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
                                                             alert.cancel();
@@ -501,8 +501,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.about_us, null);
 
-        TextView aboutus = view.findViewById(R.id.aboutus);
-        aboutus.setText(getResources().getString(R.string.copyright, BuildConfig.VERSION_NAME));
+        TextView aboutUs = view.findViewById(R.id.aboutus);
+        aboutUs.setText(getResources().getString(R.string.copyright, BuildConfig.VERSION_NAME));
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -538,9 +538,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.profile, null);
 
-        profilicon = view.findViewById(R.id.icon_profile);
-        TextView profilname = view.findViewById(R.id.name_profile);
-        TextView profilbio = view.findViewById(R.id.profile_bio);
+        profileImage = view.findViewById(R.id.icon_profile);
+        TextView profileName = view.findViewById(R.id.name_profile);
+        TextView profileDescription = view.findViewById(R.id.profile_bio);
         TextView birthday = view.findViewById(R.id.profile_birthday);
         TextView location = view.findViewById(R.id.profile_location);
         banner = view.findViewById(R.id.background_profile);
@@ -567,9 +567,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //.using(new FirebaseImageLoader())
                 .load(pathReference_image)
                 .centerCrop()
-                .into(profilicon);
+                .into(profileImage);
 
-        profilicon.setOnClickListener(new View.OnClickListener() {
+        profileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showFullscreenImage(0);
@@ -583,8 +583,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        profilname.setText(currentUser.getName());
-        profilbio.setText(currentUser.getProfileDescription());
+        profileName.setText(currentUser.getName());
+        profileDescription.setText(currentUser.getProfileDescription());
         birthday.setText(currentUser.getBirthday());
         location.setText(currentUser.getLocation());
 
@@ -1177,7 +1177,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         GlideApp.with(getApplicationContext())
                 .load(pathReference_image)
                 .centerCrop()
-                .into(profilicon);
+                .into(profileImage);
 
         pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
