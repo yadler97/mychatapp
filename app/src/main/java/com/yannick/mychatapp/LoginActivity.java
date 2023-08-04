@@ -77,8 +77,6 @@ public class LoginActivity extends AppCompatActivity {
     private static String ownpi = "0";
     private static int colour = 0;
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
-    private StorageReference pathReference_image;
-    private StorageReference pathReference_banner;
 
     private String img = "";
     private String banner = "";
@@ -865,7 +863,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void updateEditProfileImages() {
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        pathReference_image = storageRef.child("profile_images/" + img);
+        StorageReference pathReference_image = storageRef.child("profile_images/" + img);
         pathReference_image.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
             @Override
             public void onSuccess(StorageMetadata storageMetadata) {
@@ -877,7 +875,7 @@ public class LoginActivity extends AppCompatActivity {
                         .into(profileImage);
             }
         });
-        pathReference_banner = storageRef.child("profile_banners/" + banner);
+        StorageReference pathReference_banner = storageRef.child("profile_banners/" + banner);
         pathReference_banner.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
             @Override
             public void onSuccess(StorageMetadata storageMetadata) {
