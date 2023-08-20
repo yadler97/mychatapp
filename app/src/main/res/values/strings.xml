@@ -355,7 +355,13 @@
         "- A bug not showing the profile banner button in the \"Edit profile\" menu when the user has no own banner was fixed\n"
         "\n "</string>
 
-    <string name="copyright">"Yannick Adler, 2018–2019\nVersion %s\n\n"
+    <string name="v110_title">"Version 1.1.0 (August 20th, 2023)"</string>
+    <string name="v110_text">"- Many dependencies have been updated\n"
+        "- Android versions below Android 8.0 Oreo are no longer supported\n"
+        "- Many code improvements\n"
+        "\n "</string>
+
+    <string name="copyright">"Yannick Adler, 2018–2023\nVersion %s\n\n"
         "Used libraries:\n"
         "- Droidparts by Alex Yanchenko\n"
         "- Spectrum by The Blue Alliance\n"

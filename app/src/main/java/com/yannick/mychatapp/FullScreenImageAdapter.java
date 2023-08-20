@@ -18,16 +18,16 @@ import java.util.ArrayList;
 
 public class FullScreenImageAdapter extends PagerAdapter {
 
-    private Context mContext;
-    private ArrayList<String> imageList;
-    private LayoutInflater mLayoutInflater;
-    private int type;
+    private final Context context;
+    private final ArrayList<String> imageList;
+    private final LayoutInflater layoutInflater;
+    private final int type;
 
     public FullScreenImageAdapter(Context context, ArrayList<String> imageList, int type) {
-        mContext = context;
+        this.context = context;
         this.imageList = imageList;
         this.type = type;
-        mLayoutInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        layoutInflater = (LayoutInflater) this.context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
@@ -42,7 +42,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        View itemView = mLayoutInflater.inflate(R.layout.pager_item, container, false);
+        View itemView = layoutInflater.inflate(R.layout.pager_item, container, false);
 
         ImageView imageView = itemView.findViewById(R.id.imageView);
 
@@ -59,13 +59,13 @@ public class FullScreenImageAdapter extends PagerAdapter {
         }
 
         if (type == 0 || type == 1) {
-            GlideApp.with(mContext)
+            GlideApp.with(context)
                     .load(pathReference)
                     .placeholder(R.color.black)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .into(imageView);
         } else {
-            GlideApp.with(mContext)
+            GlideApp.with(context)
                     .load(pathReference)
                     .placeholder(R.color.black)
                     .into(imageView);
@@ -77,7 +77,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent("closefullscreen");
-                LocalBroadcastManager.getInstance(mContext).sendBroadcast(intent);
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         });
 

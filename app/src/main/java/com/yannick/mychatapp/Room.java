@@ -4,7 +4,7 @@ public class Room {
     private String key;
     private String name;
     private String admin;
-    private String caty;
+    private String category;
     private String time;
     private String passwd;
     private String desc;
@@ -16,10 +16,10 @@ public class Room {
 
     }
 
-    public Room(String key, String name, String caty, String time, String passwd, String admin) {
+    public Room(String key, String name, String category, String time, String passwd, String admin) {
         this.key = key;
         this.name = name;
-        this.caty = caty;
+        this.category = category;
         this.time = time;
         this.passwd = passwd;
         this.admin = admin;
@@ -30,8 +30,12 @@ public class Room {
         return name;
     }
 
-    public String getCaty() {
-        return caty;
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public String getTime() {
@@ -40,6 +44,10 @@ public class Room {
 
     public String getPasswd() {
         return passwd;
+    }
+
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
     }
 
     public String getKey() {
@@ -52,6 +60,10 @@ public class Room {
 
     public String getDesc() {
         return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
     public String getAdmin() {

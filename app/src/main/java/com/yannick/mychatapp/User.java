@@ -3,10 +3,10 @@ package com.yannick.mychatapp;
 public class User {
     private String userID;
     private String name;
-    private String bday;
-    private String bio;
-    private String loc;
-    private String favc;
+    private String birthday;
+    private String profileDescription;
+    private String location;
+    private String favColour;
     private String ownpi;
     private String img;
     private String banner;
@@ -15,13 +15,13 @@ public class User {
 
     }
 
-    public User(String userid, String name, String bday, String bio, String loc, String favc, String img, String banner) {
+    public User(String userid, String name, String birthday, String profileDescription, String location, String favColour, String img, String banner) {
         this.userID = userid;
         this.name = name;
-        this.bday = bday;
-        this.bio = bio;
-        this.loc = loc;
-        this.favc = favc;
+        this.birthday = birthday;
+        this.profileDescription = profileDescription;
+        this.location = location;
+        this.favColour = favColour;
         this.img = img;
         this.banner = banner;
     }
@@ -38,20 +38,20 @@ public class User {
         return name;
     }
 
-    public String getBday() {
-        return bday;
+    public String getBirthday() {
+        return birthday;
     }
 
-    public String getBio() {
-        return bio;
+    public String getProfileDescription() {
+        return profileDescription;
     }
 
-    public String getLoc() {
-        return loc;
+    public String getLocation() {
+        return location;
     }
 
-    public String getFavc() {
-        return favc;
+    public String getFavColour() {
+        return favColour;
     }
 
     public String getOwnpi() {
@@ -70,16 +70,16 @@ public class User {
         this.name = name;
     }
 
-    public void setBday(String bday) {
-        this.bday = bday;
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
     }
 
-    public void setBio(String bio) {
-        this.bio = bio;
+    public void setProfileDescription(String profileDescription) {
+        this.profileDescription = profileDescription;
     }
 
-    public void setLoc(String loc) {
-        this.loc = loc;
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public void setOwnpi(String ownpi) {

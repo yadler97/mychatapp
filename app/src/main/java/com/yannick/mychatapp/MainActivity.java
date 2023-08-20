@@ -8,41 +8,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.OpenableColumns;
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
-import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.fragment.app.FragmentManager;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.core.view.GravityCompat;
-import androidx.viewpager.widget.ViewPager;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -64,10 +41,28 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.core.view.GravityCompat;
+import androidx.viewpager.widget.ViewPager;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -81,13 +76,10 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -102,26 +94,29 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
-    private String kategorie, themetyp, hintergrundtyp, theme, s_push, s_save, s_preview, s_camera, img_room, img_user, img_banner;
+    private String s_push, s_save, s_preview, s_camera, img_room, img_user, img_banner;
+
+    private Theme theme;
+
+    private Background background;
     private User currentUser;
-    private DatabaseReference roomroot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
-    private DatabaseReference userroot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
-    private FloatingActionButton btn_add_room;
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
+    private DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private String[] kat;
-    private int katindex = 0;
+    private int categoryIndex = 0;
     private static int color = 0;
     private int tmpcolor = -1;
-    private ArrayList<String> userIdList = new ArrayList<>();
+    private final ArrayList<String> userIdList = new ArrayList<>();
     private boolean userListCreated = false;
     private TabLayout tabLayout;
-    private RoomlistFragmentMore rFragMore = new RoomlistFragmentMore();
-    private RoomlistFragmentFavorites rFragFavs = new RoomlistFragmentFavorites();
-    private RoomlistFragmentMyRooms rFragMyRooms = new RoomlistFragmentMyRooms();
+    private RoomListFragmentMore rFragMore = new RoomListFragmentMore();
+    private RoomListFragmentFavorites rFragFavs = new RoomListFragmentFavorites();
+    private RoomListFragmentMyRooms rFragMyRooms = new RoomListFragmentMyRooms();
 
     private FirebaseStorage storage;
     private StorageReference storageRef;
-    private CircleImageView profilicon;
+    private CircleImageView profileImage;
     private ImageView banner;
     private ImageView banner_profile;
     private CircleImageView icon_profile;
@@ -143,19 +138,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private FirebaseAuth mAuth;
 
+    private final FileOperations fileOperations = new FileOperations(this);
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        changeTheme();
+        changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         //if (savedInstanceState == null) {
             pageadapter = new SectionsPageAdapter(getSupportFragmentManager());
-            rFragMore = new RoomlistFragmentMore();
-            rFragMyRooms = new RoomlistFragmentMyRooms();
-            rFragFavs = new RoomlistFragmentFavorites();
+            rFragMore = new RoomListFragmentMore();
+            rFragMyRooms = new RoomListFragmentMyRooms();
+            rFragFavs = new RoomListFragmentFavorites();
         /*} else {
             rFragMyRooms = (RoomlistFragmentMyRooms)pageadapter.getItem(0);
             rFragFavs = (RoomlistFragmentFavorites)pageadapter.getItem(1);
@@ -178,10 +175,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mAuth = FirebaseAuth.getInstance();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(tabReceiver, new IntentFilter("tab"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(designReceiver, new IntentFilter("designOption"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(themeReceiver, new IntentFilter("themeOption"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(backgroundReceiver, new IntentFilter("backgroundOption"));
         LocalBroadcastManager.getInstance(this).registerReceiver(closeFullscreenReceiver, new IntentFilter("closefullscreen"));
 
-        writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", "mychatapp_current.txt");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -201,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             banner_profile.setBackground(getResources().getDrawable(R.drawable.side_nav_bar_dark));
         } else {
             banner_profile.setBackground(getResources().getDrawable(R.drawable.side_nav_bar));
@@ -209,7 +207,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         storage = FirebaseStorage.getInstance();
 
-        btn_add_room = findViewById(R.id.addroom);
+        FloatingActionButton btn_add_room = findViewById(R.id.addroom);
         btn_add_room.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -217,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        userroot.addListenerForSingleValueEvent(new ValueEventListener() {
+        userRoot.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot ds : dataSnapshot.getChildren()) {
@@ -268,10 +266,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter, View v,int position, long id) {
-                kategorie = adapter.getItemAtPosition(position).toString();
+                String category = adapter.getItemAtPosition(position).toString();
                 for (int i = 0; i < kat.length; i++) {
-                    if (kat[i].equals(kategorie)) {
-                        katindex = i;
+                    if (kat[i].equals(category)) {
+                        categoryIndex = i;
                     }
                 }
             }
@@ -356,7 +354,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         pathReference_roomimage = storageRef.child("room_images/" + "0");
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     .load(pathReference_roomimage)
                     .placeholder(R.drawable.side_nav_bar_dark)
@@ -383,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -420,16 +418,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     @Override
                     public void onClick(View view) {
-                        final String roomname = room_name.getText().toString().trim();
-                        final String roompassword = room_password.getText().toString().trim();
-                        final String roompasswordrepeat = room_password_repeat.getText().toString().trim();
-                        final String roomdesc = room_desc.getText().toString().trim();
-                        if (!roomname.isEmpty()) {
-                            if (!roomdesc.isEmpty()) {
-                                if (katindex!=0) {
-                                    if (!roompassword.isEmpty()) {
-                                        if (!roompasswordrepeat.isEmpty()) {
-                                            if (roompassword.equals(roompasswordrepeat)) {
+                        final String roomName = room_name.getText().toString().trim();
+                        final String roomPassword = room_password.getText().toString().trim();
+                        final String roomPasswordRepeat = room_password_repeat.getText().toString().trim();
+                        final String roomDescription = room_desc.getText().toString().trim();
+                        if (!roomName.isEmpty()) {
+                            if (!roomDescription.isEmpty()) {
+                                if (categoryIndex !=0) {
+                                    if (!roomPassword.isEmpty()) {
+                                        if (!roomPasswordRepeat.isEmpty()) {
+                                            if (roomPassword.equals(roomPasswordRepeat)) {
                                                 if (view != null) {
                                                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                                                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
@@ -438,26 +436,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                     searchView.setIconified(true);
                                                     searchView.setIconified(true);
                                                 }
-                                                final String room_key = roomroot.push().getKey();
-                                                roomroot = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key);
-                                                roomroot.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                final String roomKey = roomRoot.push().getKey();
+                                                roomRoot = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey);
+                                                roomRoot.addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(DataSnapshot snapshot) {
                                                         if (!snapshot.exists()) {
-                                                            DatabaseReference message_root = roomroot.child("-0roomdata");
+                                                            DatabaseReference message_root = roomRoot.child("-0roomdata");
                                                             Map<String, Object> map = new HashMap<>();
-                                                            String currentDateandTime = sdf.format(new Date());
+                                                            String currentDateAndTime = sdf.format(new Date());
                                                             map.put("admin", currentUser.getUserID());
-                                                            map.put("name", roomname);
-                                                            map.put("time", currentDateandTime);
-                                                            map.put("passwd", roompassword);
-                                                            map.put("desc", roomdesc);
-                                                            map.put("caty", String.valueOf(katindex));
+                                                            map.put("name", roomName);
+                                                            map.put("time", currentDateAndTime);
+                                                            map.put("passwd", roomPassword);
+                                                            map.put("desc", roomDescription);
+                                                            map.put("category", String.valueOf(categoryIndex));
                                                             map.put("img", img_room);
                                                             message_root.updateChildren(map);
-                                                            writeToFile(roompassword, "mychatapp_raum_" + room_key + ".txt");
-                                                            writeToFile("-0roomdata", "mychatapp_raum_" + room_key + "_nm.txt");
-                                                            FirebaseMessaging.getInstance().subscribeToTopic(room_key);
+                                                            fileOperations.writeToFile(roomPassword, "mychatapp_room_" + roomKey + ".txt");
+                                                            fileOperations.writeToFile("-0roomdata", "mychatapp_room_" + roomKey + "_nm.txt");
+                                                            FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                                                             Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
                                                             alert.cancel();
                                                         } else {
@@ -499,11 +497,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.about_us, null);
 
-        TextView aboutus = view.findViewById(R.id.aboutus);
-        aboutus.setText(getResources().getString(R.string.copyright, BuildConfig.VERSION_NAME));
+        TextView aboutUs = view.findViewById(R.id.aboutus);
+        aboutUs.setText(getResources().getString(R.string.copyright, BuildConfig.VERSION_NAME));
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -520,7 +518,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View view = inflater.inflate(R.layout.changelog, null);
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -536,15 +534,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.profile, null);
 
-        profilicon = view.findViewById(R.id.icon_profile);
-        TextView profilname = view.findViewById(R.id.name_profile);
-        TextView profilbio = view.findViewById(R.id.profile_bio);
+        profileImage = view.findViewById(R.id.icon_profile);
+        TextView profileName = view.findViewById(R.id.name_profile);
+        TextView profileDescription = view.findViewById(R.id.profile_bio);
         TextView birthday = view.findViewById(R.id.profile_birthday);
         TextView location = view.findViewById(R.id.profile_location);
         banner = view.findViewById(R.id.background_profile);
         AlertDialog.Builder builder;
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
             banner.setBackground(getResources().getDrawable(R.drawable.side_nav_bar_dark));
         } else {
@@ -565,9 +563,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //.using(new FirebaseImageLoader())
                 .load(pathReference_image)
                 .centerCrop()
-                .into(profilicon);
+                .into(profileImage);
 
-        profilicon.setOnClickListener(new View.OnClickListener() {
+        profileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showFullscreenImage(0);
@@ -581,10 +579,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        profilname.setText(currentUser.getName());
-        profilbio.setText(currentUser.getBio());
-        birthday.setText(currentUser.getBday());
-        location.setText(currentUser.getLoc());
+        profileName.setText(currentUser.getName());
+        profileDescription.setText(currentUser.getProfileDescription());
+        birthday.setText(currentUser.getBirthday());
+        location.setText(currentUser.getLocation());
 
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.myprofile)));
         builder.setView(view);
@@ -605,13 +603,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         View view = inflater.inflate(R.layout.edit_profile, null);
 
         final EditText username = view.findViewById(R.id.user_name);
-        final EditText profilbio = view.findViewById(R.id.user_bio);
+        final EditText profileDescription = view.findViewById(R.id.user_bio);
         final EditText birthday = view.findViewById(R.id.user_birthday);
         final EditText location = view.findViewById(R.id.user_location);
 
-        final TextInputLayout username_layout = view.findViewById(R.id.user_name_layout);
-        final TextInputLayout profilbio_layout = view.findViewById(R.id.user_bio_layout);
-        final TextInputLayout location_layout = view.findViewById(R.id.user_location_layout);
+        final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
+        final TextInputLayout profileDescriptionLayout = view.findViewById(R.id.user_bio_layout);
+        final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
         username.addTextChangedListener(new TextWatcher() {
             @Override
@@ -627,11 +625,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    username_layout.setError(null);
+                    usernameLayout.setError(null);
                 }
             }
         });
-        profilbio.addTextChangedListener(new TextWatcher() {
+        profileDescription.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -645,7 +643,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    profilbio_layout.setError(null);
+                    profileDescriptionLayout.setError(null);
                 }
             }
         });
@@ -663,12 +661,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    location_layout.setError(null);
+                    locationLayout.setError(null);
                 }
             }
         });
 
-        final ImageButton favcolor = view.findViewById(R.id.user_favcolor);
+        final ImageButton favColour = view.findViewById(R.id.user_favcolor);
         profileimage = view.findViewById(R.id.user_profile_image);
         profilebanner = view.findViewById(R.id.user_profile_banner);
 
@@ -676,7 +674,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final StorageReference pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
         final StorageReference pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
                     .load(pathReference_image)
@@ -731,13 +729,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         username.setText(currentUser.getName());
-        profilbio.setText(currentUser.getBio());
-        birthday.setText(currentUser.getBday());
-        location.setText(currentUser.getLoc());
+        profileDescription.setText(currentUser.getProfileDescription());
+        birthday.setText(currentUser.getBirthday());
+        location.setText(currentUser.getLocation());
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.OVAL);
         shape.setColor(getResources().getIntArray(R.array.favcolors)[color]);
-        favcolor.setBackground(shape);
+        favColour.setBackground(shape);
 
         birthday.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -746,23 +744,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        String datum;
+                        String date;
                         if (dayOfMonth < 10) {
-                            datum = "0" + dayOfMonth;
+                            date = "0" + dayOfMonth;
                         } else {
-                            datum = "" + dayOfMonth;
+                            date = "" + dayOfMonth;
                         }
                         monthOfYear = monthOfYear + 1;
                         if (monthOfYear < 10) {
-                            datum = datum + ".0" + monthOfYear + "." + year;
+                            date = date + ".0" + monthOfYear + "." + year;
                         } else {
-                            datum = datum + "." + monthOfYear + "." + year;
+                            date = date + "." + monthOfYear + "." + year;
                         }
 
-                        birthday.setText(datum);
+                        birthday.setText(date);
                     }
-                }, Integer.parseInt(currentUser.getBday().substring(6, 10)), Integer.parseInt(currentUser.getBday().substring(3, 5)) - 1, Integer.parseInt(currentUser.getBday().substring(0, 2)));
-                if (theme.equals("1")) {
+                }, Integer.parseInt(currentUser.getBirthday().substring(6, 10)), Integer.parseInt(currentUser.getBirthday().substring(3, 5)) - 1, Integer.parseInt(currentUser.getBirthday().substring(0, 2)));
+                if (theme == Theme.DARK) {
                     datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
                 }
                 Calendar c = Calendar.getInstance();
@@ -772,11 +770,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        favcolor.setOnClickListener(new View.OnClickListener() {
+        favColour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 SpectrumDialog.Builder builder;
-                if (theme.equals("1")) {
+                if (theme == Theme.DARK) {
                     builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
                 } else {
                     builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
@@ -792,7 +790,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     GradientDrawable shape = new GradientDrawable();
                                     shape.setShape(GradientDrawable.OVAL);
                                     shape.setColor(getResources().getIntArray(R.array.favcolors)[i]);
-                                    favcolor.setBackground(shape);
+                                    favColour.setBackground(shape);
                                 }
                                 i++;
                             }
@@ -803,7 +801,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -840,25 +838,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     @Override
                     public void onClick(View view) {
                         if (!username.getText().toString().isEmpty()) {
-                            if (!profilbio.getText().toString().isEmpty()) {
+                            if (!profileDescription.getText().toString().isEmpty()) {
                                 if (!location.getText().toString().isEmpty()) {
                                     if (!birthday.getText().toString().isEmpty()) {
                                         String old_name = currentUser.getName();
                                         int old_color = color;
                                         currentUser.setName(username.getText().toString());
-                                        currentUser.setBio(profilbio.getText().toString());
-                                        currentUser.setLoc(location.getText().toString());
-                                        currentUser.setBday(birthday.getText().toString());
+                                        currentUser.setProfileDescription(profileDescription.getText().toString());
+                                        currentUser.setLocation(location.getText().toString());
+                                        currentUser.setBirthday(birthday.getText().toString());
                                         if (tmpcolor >= 0) {
                                             color = tmpcolor;
                                         }
-                                        DatabaseReference user_root = userroot.child(currentUser.getUserID());
+                                        DatabaseReference user_root = userRoot.child(currentUser.getUserID());
                                         Map<String, Object> map = new HashMap<>();
                                         map.put("name", currentUser.getName());
-                                        map.put("bio", currentUser.getBio());
-                                        map.put("loc", currentUser.getLoc());
-                                        map.put("bday", currentUser.getBday().substring(6, 10) + currentUser.getBday().substring(3, 5) + currentUser.getBday().substring(0, 2));
-                                        map.put("favc", String.valueOf(color));
+                                        map.put("profileDescription", currentUser.getProfileDescription());
+                                        map.put("location", currentUser.getLocation());
+                                        map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
+                                        map.put("favColour", String.valueOf(color));
                                         if (!currentUser.getOwnpi().equals("1") && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
                                             img_user = UUID.randomUUID().toString();
                                             map.put("img", img_user);
@@ -900,13 +898,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
-                                    location_layout.setError(getResources().getString(R.string.enterlocation));
+                                    locationLayout.setError(getResources().getString(R.string.enterlocation));
                                 }
                             } else {
-                                profilbio_layout.setError(getResources().getString(R.string.enterbio));
+                                profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
                             }
                         } else {
-                            username_layout.setError(getResources().getString(R.string.entername));
+                            usernameLayout.setError(getResources().getString(R.string.entername));
                         }
                     }
                 });
@@ -920,17 +918,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.change_design, null);
 
-        themetyp = readFromFile("mychatapp_theme.txt");
-        hintergrundtyp = readFromFile("mychatapp_hintergrund.txt");
+        Theme currentTheme = Theme.getCurrentTheme(getApplicationContext());
+        Background currentBackground = Background.getCurrentBackground(getApplicationContext());
 
         GridView themeGrid = view.findViewById(R.id.gridview_themes);
-        themeGrid.setAdapter(new MenuAdapter(this, getResources().obtainTypedArray(R.array.themeDrawables), themetyp, theme, 0));
+        themeGrid.setAdapter(new ThemeAdapter(this, getResources().obtainTypedArray(R.array.themeDrawables), currentTheme, theme));
 
         GridView backgroundGrid = view.findViewById(R.id.gridview_backgrounds);
-        backgroundGrid.setAdapter(new MenuAdapter(this, getResources().obtainTypedArray(R.array.backgroundDrawables), hintergrundtyp, theme, 1));
+        backgroundGrid.setAdapter(new BackgroundAdapter(this, getResources().obtainTypedArray(R.array.backgroundDrawables), currentBackground, theme));
 
         AlertDialog.Builder builder;
-        if (this.theme.equals("1")) {
+        if (this.theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -962,11 +960,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     @Override
                     public void onClick(View view) {
-                        String currentTheme = readFromFile("mychatapp_theme.txt");
-                        //writeToFile(getResources().getStringArray(R.array.themes)[Integer.parseInt(themetyp)],"mychatapp_theme.txt");
-                        writeToFile(themetyp,"mychatapp_theme.txt");
-                        writeToFile(hintergrundtyp, "mychatapp_hintergrund.txt");
-                        if (!currentTheme.equals(readFromFile("mychatapp_theme.txt"))) {
+                        String currentTheme = fileOperations.readFromFile("mychatapp_theme.txt");
+                        fileOperations.writeToFile(theme.toString(),"mychatapp_theme.txt");
+                        fileOperations.writeToFile(background.toString(), "mychatapp_background.txt");
+                        if (!currentTheme.equals(fileOperations.readFromFile("mychatapp_theme.txt"))) {
                             FragmentManager mFragmentManager = getSupportFragmentManager();
                             mFragmentManager.beginTransaction().remove(rFragMore).commit();
                             mFragmentManager.beginTransaction().remove(rFragMyRooms).commit();
@@ -990,10 +987,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Switch save = view.findViewById(R.id.save);
         Switch preview = view.findViewById(R.id.preview);
         Switch camera = view.findViewById(R.id.camera);
-        s_push = readFromFile("mychatapp_settings_push.txt");
-        s_save = readFromFile("mychatapp_settings_save.txt");
-        s_preview = readFromFile("mychatapp_settings_preview.txt");
-        s_camera = readFromFile("mychatapp_settings_camera.txt");
+        s_push = fileOperations.readFromFile("mychatapp_settings_push.txt");
+        s_save = fileOperations.readFromFile("mychatapp_settings_save.txt");
+        s_preview = fileOperations.readFromFile("mychatapp_settings_preview.txt");
+        s_camera = fileOperations.readFromFile("mychatapp_settings_camera.txt");
         if (!s_push.equals("off")) {
             push.setChecked(true);
         }
@@ -1027,7 +1024,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
             push.setTextColor(getResources().getColor(R.color.white));
             save.setTextColor(getResources().getColor(R.color.white));
@@ -1041,10 +1038,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                writeToFile(s_push, "mychatapp_settings_push.txt");
-                writeToFile(s_save, "mychatapp_settings_save.txt");
-                writeToFile(s_preview, "mychatapp_settings_preview.txt");
-                writeToFile(s_camera, "mychatapp_settings_camera.txt");
+                fileOperations.writeToFile(s_push, "mychatapp_settings_push.txt");
+                fileOperations.writeToFile(s_save, "mychatapp_settings_save.txt");
+                fileOperations.writeToFile(s_preview, "mychatapp_settings_preview.txt");
+                fileOperations.writeToFile(s_camera, "mychatapp_settings_camera.txt");
                 Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();
             }
         });
@@ -1106,8 +1103,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onCreateOptionsMenu (Menu menu) {
-        MenuInflater myinflater = getMenuInflater();
-        myinflater.inflate(R.menu.menu_roomsearch, menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_roomsearch, menu);
 
         if(menu instanceof MenuBuilder){
             MenuBuilder m = (MenuBuilder) menu;
@@ -1144,51 +1141,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
-    public void writeToFile(String text, String datei) {
-        Context context = this;
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(datei, Context.MODE_PRIVATE));
-            outputStreamWriter.write(text);
-            outputStreamWriter.close();
-        }
-        catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
-    }
-
-    public String readFromFile(String datei) {
-        Context context = this;
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(datei);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
-    }
-
-    private void changeTheme() {
-        theme = readFromFile("mychatapp_theme.txt");
-        if (theme.equals("1")) {
+    private void changeTheme(Theme theme) {
+        this.theme = theme;
+        if (theme == Theme.DARK) {
             setTheme(R.style.Dark);
         } else {
             setTheme(R.style.AppTheme);
@@ -1218,7 +1173,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         GlideApp.with(getApplicationContext())
                 .load(pathReference_image)
                 .centerCrop()
-                .into(profilicon);
+                .into(profileImage);
 
         pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
@@ -1252,12 +1207,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void readUserData(final String userID) {
-        userroot.child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
+        userRoot.child(userID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 currentUser = dataSnapshot.getValue(User.class);
                 currentUser.setUserID(userID);
-                currentUser.setBday(currentUser.getBday().substring(6, 8) + "." + currentUser.getBday().substring(4, 6) + "." + currentUser.getBday().substring(0, 4));
+                currentUser.setBirthday(currentUser.getBirthday().substring(6, 8) + "." + currentUser.getBirthday().substring(4, 6) + "." + currentUser.getBirthday().substring(0, 4));
                 updateNavigationDrawerIcon();
                 text_profile.setText(currentUser.getName());
             }
@@ -1277,17 +1232,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     };
 
-    public BroadcastReceiver designReceiver = new BroadcastReceiver() {
+    public BroadcastReceiver themeReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String position = intent.getStringExtra("position");
-            String typ = intent.getStringExtra("typ");
+            int position = intent.getIntExtra("position", 0);
 
-            if (typ.equals("0")) {
-                themetyp = position;
-            } else {
-                hintergrundtyp = position;
-            }
+            theme = Theme.getByPosition(position);
+        }
+    };
+
+    public BroadcastReceiver backgroundReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int position = intent.getIntExtra("position", 0);
+
+            background = Background.getByPosition(position);
         }
     };
 
@@ -1326,7 +1285,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void uploadImage(Uri filePath, final int type) {
         final ProgressDialog progressDialog;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             progressDialog = new ProgressDialog(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             progressDialog = new ProgressDialog(this);
@@ -1372,7 +1331,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int compressFactor = 2;
         int height = bmp.getHeight();
         int width = bmp.getWidth();
-        if (getImgSize(filePath) > height * width) {
+        ImageOperations imageOperations = new ImageOperations(getContentResolver());
+        if (imageOperations.getImgSize(filePath) > height * width) {
             compressFactor = 4;
         }
         if (type == 0 || type == 2) {
@@ -1390,7 +1350,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         bmp = Bitmap.createScaledBitmap(bmp, width, height, false);
         try {
-            bmp = rotateImageIfRequired(this, bmp, filePath);
+            bmp = imageOperations.rotateImageIfRequired(this, bmp, filePath);
         } catch (IOException e) { }
         bmp.compress(Bitmap.CompressFormat.JPEG, compression, stream);
         byteArray = stream.toByteArray();
@@ -1407,14 +1367,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 progressDialog.dismiss();
                 if (type == 0) {
                     currentUser.setOwnpi("1");
-                    DatabaseReference user_root = userroot.child(currentUser.getUserID());
+                    DatabaseReference user_root = userRoot.child(currentUser.getUserID());
                     Map<String, Object> map = new HashMap<>();
                     map.put("ownpi", "1");
                     map.put("img", img_user);
                     user_root.updateChildren(map);
                 }
                 if (type == 1) {
-                    DatabaseReference user_root = userroot.child(currentUser.getUserID());
+                    DatabaseReference user_root = userRoot.child(currentUser.getUserID());
                     Map<String, Object> map = new HashMap<>();
                     map.put("banner", img_banner);
                     user_root.updateChildren(map);
@@ -1449,46 +1409,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private Long getImgSize(Uri filePath) {
-        Cursor returnCursor = getContentResolver().query(filePath, null, null, null, null);
-        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-        returnCursor.moveToFirst();
-        return returnCursor.getLong(sizeIndex);
-    }
-
-    private static Bitmap rotateImage(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
-    }
-
-    private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
-
-        InputStream input = context.getContentResolver().openInputStream(selectedImage);
-        ExifInterface ei;
-        if (Build.VERSION.SDK_INT > 23) {
-            ei = new ExifInterface(input);
-        } else {
-            ei = new ExifInterface(selectedImage.getPath());
-        }
-
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
-            default:
-                return img;
-        }
-    }
-
     private void showFullscreenImage(int type) {
         final View dialogView = getLayoutInflater().inflate(R.layout.fullscreen_image, null);
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             fullscreendialog = new Dialog(this,R.style.FullScreenImageDark);
         } else {
             fullscreendialog = new Dialog(this,R.style.FullScreenImage);
@@ -1537,7 +1460,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TextView setupHeader(String title) {
         TextView header = new TextView(this);
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             header.setBackgroundColor(getResources().getColor(R.color.dark_button));
         } else {
             header.setBackgroundColor(getResources().getColor(R.color.red));

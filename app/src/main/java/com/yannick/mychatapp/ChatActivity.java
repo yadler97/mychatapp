@@ -13,36 +13,16 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
-import android.media.ExifInterface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.provider.OpenableColumns;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.coordinatorlayout.widget.CoordinatorLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.view.menu.MenuBuilder;
-import androidx.recyclerview.widget.DefaultItemAnimator;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -64,7 +44,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
-import androidx.appcompat.widget.SearchView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -72,10 +51,27 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
+
 import com.bumptech.glide.signature.ObjectKey;
 import com.chrisrenke.giv.GravityImageView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -91,21 +87,18 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -121,12 +114,25 @@ public class ChatActivity extends AppCompatActivity {
 
     private EditText input_msg;
 
-    private String userID, room_key, key, temp_key, chat_msg, chat_user_id, time, img, passwd, caty, theme, img_name, zitat, imgurl, roomkey, admin, time_creation, desc, pin, mimeType, app_name, name, room_name, lastReadMessage, key_last, nmid, room_img;
+    private Theme theme;
+
+    private Room room;
+
+    private String userID;
+    private String room_key;
+    private String temp_key;
+    private String imgurl;
+    private final String roomDataKey = "-0roomdata";
+    private String app_name;
+    private String room_name;
+    private String lastReadMessage;
+    private String key_last;
+    private String room_img;
     private String lastSearch = "";
 
     private DatabaseReference root;
-    private DatabaseReference userroot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
-    private DatabaseReference roomroot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private FirebaseStorage storage;
     private StorageReference storageReference;
     private StorageReference storageReferenceRoomImages;
@@ -136,20 +142,20 @@ public class ChatActivity extends AppCompatActivity {
     private MessageAdapter mAdapter;
     private CoordinatorLayout layout;
     private GestureDetector gestureDetector;
-    private String zitatStatus = "";
+    private String quoteStatus = "";
     private int amount = 0;
     private int action = 0;
     private User user = new User();
     private TextView noMessageFound;
 
-    private ArrayList<Message> messageList = new ArrayList<>();
-    private ArrayList<User> userList = new ArrayList<>();
+    private final ArrayList<Message> messageList = new ArrayList<>();
+    private final ArrayList<User> userList = new ArrayList<>();
     private ArrayList<Message> searchResultList = new ArrayList<>();
-    private ArrayList<String> roomList = new ArrayList<>();
-    private ArrayList<String> roomKeysList = new ArrayList<>();
-    private ArrayList<String> imageList = new ArrayList<>();
-    private ArrayList<Message> pinnedList = new ArrayList<>();
-    private ArrayList<User> memberList = new ArrayList<>();
+    private final ArrayList<String> roomList = new ArrayList<>();
+    private final ArrayList<String> roomKeysList = new ArrayList<>();
+    private final ArrayList<String> imageList = new ArrayList<>();
+    private final ArrayList<Message> pinnedList = new ArrayList<>();
+    private final ArrayList<User> memberList = new ArrayList<>();
 
     private AlertDialog imageListAlert;
     private AlertDialog pinboardAlert;
@@ -161,7 +167,6 @@ public class ChatActivity extends AppCompatActivity {
     private boolean lastReadMessageReached = false;
 
     private ImageButton btn_image, btn_camera;
-    private Button btn_send_msg;
     private FloatingActionButton btn_scrolldown;
 
     private static final int PICK_IMAGE_REQUEST = 1;
@@ -176,8 +181,6 @@ public class ChatActivity extends AppCompatActivity {
     private String kategorie;
 
     private GravityImageView backgroundview;
-    private CircleImageView profilicon;
-    private ImageView banner;
 
     private TextView quote_text;
     private ImageButton quote_remove;
@@ -192,13 +195,13 @@ public class ChatActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
 
-    private int index = -1;
+    private final FileOperations fileOperations = new FileOperations(this);
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        changeTheme();
+        changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.chat_room);
 
         //Toolbar toolbar = findViewById(R.id.toolbar);
@@ -250,11 +253,11 @@ public class ChatActivity extends AppCompatActivity {
 
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
-        LocalBroadcastManager.getInstance(this).registerReceiver(zitatReceiver, new IntentFilter("zitieren"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(zitiertReceiver, new IntentFilter("zitiertenachricht"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(quoteReceiver, new IntentFilter("quote"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(quotedReceiver, new IntentFilter("quotedMessage"));
         LocalBroadcastManager.getInstance(this).registerReceiver(permissionReceiver, new IntentFilter("permission"));
         LocalBroadcastManager.getInstance(this).registerReceiver(userReceiver, new IntentFilter("userprofile"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(forwardReceiver, new IntentFilter("weiterleiten"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(forwardReceiver, new IntentFilter("forward"));
         LocalBroadcastManager.getInstance(this).registerReceiver(fullscreenReceiver, new IntentFilter("fullscreenimage"));
         LocalBroadcastManager.getInstance(this).registerReceiver(pinReceiver, new IntentFilter("pinnen"));
         LocalBroadcastManager.getInstance(this).registerReceiver(jumppinnedReceiver, new IntentFilter("jumppinned"));
@@ -264,7 +267,7 @@ public class ChatActivity extends AppCompatActivity {
         storageReference = storage.getReference();
 
         noMessageFound = findViewById(R.id.keinenachrichtgefunden);
-        btn_send_msg = findViewById(R.id.btn_send);
+        Button sendMessageButton = findViewById(R.id.btn_send);
         input_msg = findViewById(R.id.msg_input);
         btn_camera = findViewById(R.id.btn_camera);
         btn_image = findViewById(R.id.btn_image);
@@ -272,11 +275,11 @@ public class ChatActivity extends AppCompatActivity {
         userID = mAuth.getCurrentUser().getUid();
         room_name = getIntent().getExtras().get("room_name").toString();
         room_key = getIntent().getExtras().get("room_key").toString();
-        nmid = getIntent().getExtras().get("nmid").toString();
+        String nmid = getIntent().getExtras().get("nmid").toString();
         lastReadMessage = getIntent().getExtras().get("last_read_message").toString();
         lastReadMessageReached = (nmid.equals(lastReadMessage));
         setTitle(room_name);
-        writeToFile(room_key, "mychatapp_current.txt");
+        fileOperations.writeToFile(room_key, "mychatapp_current.txt");
 
         int pushID = 0;
         for (int i = 0; i < room_key.length(); ++i) {
@@ -285,8 +288,8 @@ public class ChatActivity extends AppCompatActivity {
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(pushID);
 
-        if (!readFromFile("mychatapp_settings_save.txt").equals("off")) {
-            input_msg.setText(readFromFile("mychatapp_" + room_key + "_eingabe.txt").replaceAll("<br />", "\n"));
+        if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+            input_msg.setText(fileOperations.readFromFile("mychatapp_" + room_key + "_eingabe.txt").replaceAll("<br />", "\n"));
         }
 
         gestureDetector = new GestureDetector(this, new SingleTapConfirm());
@@ -317,7 +320,7 @@ public class ChatActivity extends AppCompatActivity {
 
         root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key);
 
-        btn_send_msg.setOnClickListener(new View.OnClickListener() {
+        sendMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if(!input_msg.getText().toString().trim().isEmpty()) {
@@ -329,7 +332,7 @@ public class ChatActivity extends AppCompatActivity {
                     temp_key = root.push().getKey();
                     root.updateChildren(map);
 
-                    String currentDateandTime = sdf.format(new Date());
+                    String currentDateAndTime = sdf.format(new Date());
 
                     DatabaseReference message_root = root.child(temp_key);
                     Map<String, Object> map2 = new HashMap<String, Object>();
@@ -337,18 +340,18 @@ public class ChatActivity extends AppCompatActivity {
                     map2.put("msg", input_msg.getText().toString().trim());
                     map2.put("img", "");
                     map2.put("pin", "0");
-                    map2.put("quote", zitatStatus);
-                    map2.put("time", currentDateandTime);
+                    map2.put("quote", quoteStatus);
+                    map2.put("time", currentDateAndTime);
 
                     message_root.updateChildren(map2);
                     input_msg.getText().clear();
-                    zitatStatus = "";
+                    quoteStatus = "";
                     quote_text.setText("");
                     quote_image.setImageDrawable(null);
                     quote_image.setVisibility(View.GONE);
                     quote_layout.setVisibility(View.GONE);
-                    writeToFile("", "mychatapp_" + room_key + "_eingabe.txt");
-                    writeToFile(temp_key, "mychatapp_raum_" + room_key + "_nm.txt");
+                    fileOperations.writeToFile("", "mychatapp_" + room_key + "_eingabe.txt");
+                    fileOperations.writeToFile(temp_key, "mychatapp_room_" + room_key + "_nm.txt");
                 }
             }
         });
@@ -397,7 +400,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (gestureDetector.onTouchEvent(event)) {
-                    zitatStatus = "";
+                    quoteStatus = "";
                     quote_text.setText("");
                     quote_image.setImageDrawable(null);
                     quote_image.setVisibility(View.GONE);
@@ -417,7 +420,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        userroot.addChildEventListener(new ChildEventListener() {
+        userRoot.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 addUser(dataSnapshot);
@@ -480,18 +483,18 @@ public class ChatActivity extends AppCompatActivity {
             }
         }, 10);
 
-        roomroot.addValueEventListener(new ValueEventListener() {
+        roomRoot.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
-                    String raumkey = uniqueKeySnapshot.getKey();
-                    if (raumkey.equals(room_key)) {
+                    String roomKey = uniqueKeySnapshot.getKey();
+                    if (roomKey.equals(room_key)) {
                         amount = (int)uniqueKeySnapshot.getChildrenCount() - 1;
                     }
                     for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
                         Room room = roomSnapshot.getValue(Room.class);
-                        room.setKey(raumkey);
-                        if (room.getPasswd().equals(readFromFile("mychatapp_raum_" + raumkey + ".txt")) && !raumkey.equals(room_key)) {
+                        room.setKey(roomKey);
+                        if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + roomKey + ".txt")) && !roomKey.equals(room_key)) {
                             roomList.add(room.getName());
                             roomKeysList.add(room.getKey());
                         }
@@ -508,187 +511,147 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addMessage(DataSnapshot dataSnapshot, int index) {
-        Iterator i = dataSnapshot.getChildren().iterator();
+        if (firstMessage) {
+            firstMessage = false;
 
-        while (i.hasNext()){
-            if (firstMessage) {
-                firstMessage = false;
+            room = dataSnapshot.getValue(Room.class);
+            room.setKey(dataSnapshot.getRef().getParent().getKey());
+            user = getUser(room.getAdmin());
 
-                roomkey = dataSnapshot.getKey();
-                admin = (String) ((DataSnapshot) i.next()).getValue();
-                caty = (String) ((DataSnapshot) i.next()).getValue();
-                desc = (String) ((DataSnapshot) i.next()).getValue();
-                room_img = (String) ((DataSnapshot) i.next()).getValue();
-                name = (String) ((DataSnapshot) i.next()).getValue();
-                passwd = (String) ((DataSnapshot) i.next()).getValue();
-                time_creation = (String) ((DataSnapshot) i.next()).getValue();
-                /*Room room = dataSnapshot.getValue(Room.class);
-                Log.d("HEYHY", room.getCaty());
-                Log.d("HEYHY", room.getDesc());
-                Log.d("HEYHY", room.getName());
-                Log.d("HEYHY", room.getNewestMessage());
-                Log.d("HEYHY", room.getPasswd());
-                Log.d("HEYHY", room.getTime());
-                caty = room.getCaty();
-                desc = room.getDesc();
-                admin = room.getName();
-                newestMessage = room.getNewestMessage();
-                passwd = room.getPasswd();
-                time_creation = room.getTime();*/
-                user = getUser(admin);
+            String creationTime = room.getTime();
 
-                /*addUser(roomkey, admin, "", img, pin, zitat, time_creation, new MyCallback() {
-                    @Override
-                    public void onCallback(String roomkey, User user, String time_creation, String chat_msg, String img, String pin, String zitat) {
-                        //Log.d("HEYHY", chat_msg + " - " + user.getName());*/
-                        try {
-                            time_creation = sdf_local.format(sdf_local.parse(time_creation));
-                        } catch (ParseException e) {
+            try {
+                creationTime = sdf_local.format(sdf_local.parse(creationTime));
+            } catch (ParseException e) {
 
-                        }
-                        String time_creation_con = time_creation.substring(6, 8) + "." + time_creation.substring(4,6) + "." + time_creation.substring(0, 4);
-                        String text = getResources().getString(R.string.roomintro, time_creation_con, user.getName());
-                        Message m = new Message(user, text, time_creation, time_creation, false, roomkey, 0, "", "", "", "0");
+            }
+            String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
+            String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
+            Message m = new Message(user, text, creationTime, false, room.getKey(), Message.Type.HEADER, "", "", "", "0");
 
-                        messageList.add(m);
-                        if (!memberList.contains(m.getUser())) {
-                            memberList.add(m.getUser());
-                        }
+            messageList.add(m);
+            if (!memberList.contains(m.getUser())) {
+                memberList.add(m.getUser());
+            }
+        } else {
+            String key = dataSnapshot.getKey();
+            String chat_msg = dataSnapshot.child("msg").getValue().toString();
+            String img = dataSnapshot.child("img").getValue().toString();
+            String chat_user_id = dataSnapshot.child("name").getValue().toString();
+            String pin = dataSnapshot.child("pin").getValue().toString();
+            String quote = dataSnapshot.child("quote").getValue().toString();
+            String time = dataSnapshot.child("time").getValue().toString();
 
-                        //recyclerView.scrollToPosition(messageList.size() - 1);
-                        //btn_scrolldown.hide();
-                    /*}
-                });*/
-            } else {
-                key = dataSnapshot.getKey();
-                img = (String) ((DataSnapshot) i.next()).getValue();
-                chat_msg = (String) ((DataSnapshot) i.next()).getValue();
-                chat_user_id = (String) ((DataSnapshot) i.next()).getValue();
-                pin = (String) ((DataSnapshot) i.next()).getValue();
-                zitat = (String) ((DataSnapshot) i.next()).getValue();
-                time = (String) ((DataSnapshot) i.next()).getValue();
+            user = getUser(chat_user_id);
 
-                user = getUser(chat_user_id);
-                boolean sender = userID.equals(user.getUserID());
+            try {
+                time = sdf_local.format(sdf_local.parse(time));
+            } catch (ParseException e) {
 
-                try {
-                    time = sdf_local.format(sdf_local.parse(time));
-                } catch (ParseException e) {
+            }
+            if (lastReadMessage.equals(key_last) && !lastReadMessageReached) {
+                Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, false, "-", Message.Type.HEADER, "", "", "", "0");
+                messageList.add(m);
+            }
+            key_last = key;
 
-                }
-                if (lastReadMessage.equals(key_last) && !lastReadMessageReached) {
-                    Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, time, false, "-", 0, "", "", "", "0");
-                    messageList.add(m);
-                }
-                key_last = key;
-
-                if (index == -1 && !messageList.get(messageList.size() - 1).getTime().substring(0, 8).equals(time.substring(0, 8))) {
-                    String text = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
-                    Message m = new Message(user, text, time, time, false, "-", 0, "", "", "", "0");
-                    messageList.add(m);
-                }
-
-                int offset = 0;
-                int ind = (index == -1) ? messageList.size() : index;
-                if (messageList.size() - 1 > 0 && messageList.get(ind - 1).getTyp() != 0 && messageList.get(ind - 1).getUser().getUserID().equals(chat_user_id) && messageList.get(ind - 1).getbTime().substring(0, 13).equals(time.substring(0, 13))) {
-                    offset = sender ? 3 : 1;
-                    messageList.get(ind - 1).setTime("");
-                    mAdapter.notifyDataSetChanged();
-                } else {
-                    offset = sender ? 2 : 0;
-                }
-
-                Message m;
-                if (zitat.equals("")) {
-                    if (!chat_msg.equals("")) {
-                        if (chat_msg.length() > 11 && chat_msg.substring(0, 12).equals("(Forwarded) ")) {
-                            if (chat_msg.length() > 2000 + 12) {
-                                m = new Message(user, chat_msg.substring(12), time, time, sender, key, 33 + offset, "", "", "", pin);
-                            } else {
-                                m = new Message(user, chat_msg.substring(12), time, time, sender, key, 21 + offset, "", "", "", pin);
-                            }
-                        } else {
-                            if (chat_msg.length() > 2000) {
-                                m = new Message(user, chat_msg, time, time, sender, key, 29+offset, "", "", "", pin);
-                            } else {
-                                m = new Message(user, chat_msg, time, time, sender, key, 1 + offset, "", "", "", pin);
-                            }
-                        }
-                    } else {
-                        if (!imageList.contains(img)) {
-                            imageList.add(img);
-                        }
-                        m = new Message(user, img, time, time, sender, key, 13+offset, "", "", "", pin);
-                    }
-                } else {
-                    String quote_name, quote_message, quote_key;
-                    int quote_typ = 0;
-                    quote_message = getResources().getString(R.string.quotedmessagenolongeravailable);
-                    quote_name = "";
-                    quote_key = "";
-                    for (Message quote : messageList) {
-                        if (quote.getKey().equals(zitat)) {
-                            quote_message = quote.getMsg();
-                            quote_name = quote.getUser().getName();
-                            quote_key = quote.getKey();
-                            quote_typ = quote.getTyp();
-                            break;
-                        }
-                    }
-                    if (quote_typ != 13 && quote_typ != 15 && quote_typ != 14 && quote_typ != 16) {
-                        if (!quote_message.equals(getResources().getString(R.string.quotedmessagenolongeravailable))) {
-                            m = new Message(user, chat_msg, time, time, sender, key, 5+offset, quote_name, quote_message, quote_key, pin);
-                        } else {
-                            m = new Message(user, chat_msg, time, time, sender, key, 9+offset, quote_name, quote_message, quote_key, pin);
-                        }
-                    } else {
-                        m = new Message(user, chat_msg, time, time, sender, key, 17+offset, quote_name, quote_message, quote_key, pin);
-                    }
-                }
-                if (index != -1 && messageList.get(ind).getTime().equals("")) {
-                    m.setTime("");
-                }
-                if (index == -1) {
-                    messageList.add(m);
-                    if (!memberList.contains(m.getUser())) {
-                        memberList.add(m.getUser());
-                    }
-                    if (pin.equals("1")) {
-                        pinnedList.add(m);
-                    }
-                } else {
-                    ArrayList<Message> templist = new ArrayList<>(messageList);
-                    messageList.clear();
-                    templist.add(index+1, m);
-                    messageList.addAll(templist);
-                    mAdapter.notifyDataSetChanged();
-                }
-
-                /*addUser(key, chat_user_id, chat_msg, img, pin, zitat, time, new MyCallback() {
-                    @Override
-                    public void onCallback(String key, User user, String time, String chat_msg, String img, String pin, String zitat) {
-                        //Log.d("HEYHY", chat_msg + " - " + user.getName());
-
-
-                    }
-                });*/
+            if (index == -1 && !messageList.get(messageList.size() - 1).getTime().substring(0, 8).equals(time.substring(0, 8))) {
+                String text = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
+                Message m = new Message(user, text, time, false, "-", Message.Type.HEADER, "", "", "", "0");
+                messageList.add(m);
             }
 
-            recyclerView.scrollToPosition(messageList.size() - 1);
-            btn_scrolldown.hide();
+            boolean sender = userID.equals(user.getUserID());
+            boolean con = false;
+            int ind = (index == -1) ? messageList.size() : index;
+            if (messageList.size() - 1 > 0 && messageList.get(ind - 1).getType() != Message.Type.HEADER && messageList.get(ind - 1).getUser().getUserID().equals(chat_user_id) && messageList.get(ind - 1).getTime().substring(0, 13).equals(time.substring(0, 13))) {
+                con = true;
+                messageList.get(ind - 1).setTime("");
+                mAdapter.notifyDataSetChanged();
+            }
+
+            Message m;
+            if (quote.equals("")) {
+                if (!chat_msg.equals("")) {
+                    if (chat_msg.length() > 11 && chat_msg.substring(0, 12).equals("(Forwarded) ")) {
+                        if (chat_msg.length() > 2000 + 12) {
+                            m = new Message(user, chat_msg.substring(12), time, sender, key, Message.getFittingForwardedExpandableMessageType(sender, con), "", "", "", pin);
+                        } else {
+                            m = new Message(user, chat_msg.substring(12), time, sender, key, Message.getFittingForwardedMessageType(sender, con), "", "", "", pin);
+                        }
+                    } else {
+                        if (chat_msg.length() > 2000) {
+                            m = new Message(user, chat_msg, time, sender, key, Message.getFittingExpandableMessageType(sender, con), "", "", "", pin);
+                        } else {
+                            m = new Message(user, chat_msg, time, sender, key, Message.getFittingBasicMessageType(sender, con), "", "", "", pin);
+                        }
+                    }
+                } else {
+                    if (!imageList.contains(img)) {
+                        imageList.add(img);
+                    }
+                    m = new Message(user, img, time, sender, key, Message.getFittingImageMessageType(sender, con), "", "", "", pin);
+                }
+            } else {
+                Message.Type quoteType = Message.Type.HEADER;
+                String quoteMessage = getResources().getString(R.string.quotedmessagenolongeravailable);
+                String quoteName = "";
+                String quoteKey = "";
+                for (Message quoteMsg : messageList) {
+                    if (quoteMsg.getKey().equals(quote)) {
+                        quoteMessage = quoteMsg.getMsg();
+                        quoteName = quoteMsg.getUser().getName();
+                        quoteKey = quoteMsg.getKey();
+                        quoteType = quoteMsg.getType();
+                        break;
+                    }
+                }
+                if (quoteType != Message.Type.IMAGE_RECEIVED && quoteType != Message.Type.IMAGE_RECEIVED_CON && quoteType != Message.Type.IMAGE_SENT && quoteType != Message.Type.IMAGE_SENT_CON) {
+                    if (!quoteMessage.equals(getResources().getString(R.string.quotedmessagenolongeravailable))) {
+                        m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteMessageType(sender, con), quoteName, quoteMessage, quoteKey, pin);
+                    } else {
+                        m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteDeletedMessageType(sender, con), quoteName, quoteMessage, quoteKey, pin);
+                    }
+                } else {
+                    m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteImageMessageType(sender, con), quoteName, quoteMessage, quoteKey, pin);
+                }
+            }
+            if (index != -1 && messageList.get(ind).getTime().equals("")) {
+                m.setTime("");
+            }
+            if (index == -1) {
+                messageList.add(m);
+                if (!memberList.contains(m.getUser())) {
+                    memberList.add(m.getUser());
+                }
+                if (pin.equals("1")) {
+                    pinnedList.add(m);
+                }
+            } else {
+                ArrayList<Message> templist = new ArrayList<>(messageList);
+                messageList.clear();
+                templist.add(index+1, m);
+                messageList.addAll(templist);
+                mAdapter.notifyDataSetChanged();
+            }
+
+            /*addUser(key, chat_user_id, chat_msg, img, pin, quote, time, new MyCallback() {
+                @Override
+                public void onCallback(String key, User user, String time, String chat_msg, String img, String pin, String quote) {
+                    //Log.d("HEYHY", chat_msg + " - " + user.getName());
+
+
+                }
+            });*/
         }
+
+        recyclerView.scrollToPosition(messageList.size() - 1);
+        btn_scrolldown.hide();
     }
 
     private void removeMessage(DataSnapshot dataSnapshot) {
-        Iterator i = dataSnapshot.getChildren().iterator();
-
-        key = dataSnapshot.getKey();
-        img = (String) ((DataSnapshot) i.next()).getValue();
-        chat_msg = (String) ((DataSnapshot) i.next()).getValue();
-        chat_user_id = (String) ((DataSnapshot) i.next()).getValue();
-        pin = (String) ((DataSnapshot) i.next()).getValue();
-        zitat = (String) ((DataSnapshot) i.next()).getValue();
-        time = (String) ((DataSnapshot) i.next()).getValue();
+        String key = dataSnapshot.getKey();
+        String img = dataSnapshot.child("img").getValue().toString();
 
         if (!img.equals("")) {
             StorageReference storageRef = storage.getReferenceFromUrl(storageReference.toString());
@@ -701,18 +664,20 @@ public class ChatActivity extends AppCompatActivity {
         for (Message m : messageList) {
             if (!(m.getKey().equals(key))) {
                 tempMessageList.add(m);
-            } else if (m.getTyp() != 0 && m.getTyp() % 2 == 0 && !m.getTime().equals("")) {
+            } else if (m.getType() != Message.Type.HEADER && Message.isConMessage(m.getType()) && !m.getTime().equals("")) {
                 tempMessageList.get(tempMessageList.size()-1).setTime(m.getTime());
             }
         }
-        if (tempMessageList.get(tempMessageList.size()-1).getTyp() == 0 && tempMessageList.size()!=1) {
+
+        if (tempMessageList.get(tempMessageList.size()-1).getType() == Message.Type.HEADER && tempMessageList.size()!=1) {
             tempMessageList.remove(tempMessageList.size()-1);
         }
         for (int j = 1; j < tempMessageList.size()-1; j++) {
-            if (tempMessageList.get(j).getTyp() == 0 && tempMessageList.get(j+1).getTyp() == 0) {
+            if (tempMessageList.get(j).getType() == Message.Type.HEADER && tempMessageList.get(j+1).getType() == Message.Type.HEADER) {
                 tempMessageList.remove(j);
             }
         }
+
         messageList.clear();
         for (Message m : tempMessageList) {
             if (m.getQuote_key().equals(key)) {
@@ -722,26 +687,22 @@ public class ChatActivity extends AppCompatActivity {
                     m.setQuote_message(img);
                 }
                 m.setQuote_name("");
-                m.setTyp(m.getTyp()+4);
+                m.setType(Message.getQuoteDeletedTypeForQuoteType(m.getType()));
             }
             messageList.add(m);
         }
+
         mAdapter.notifyDataSetChanged();
     }
 
     private void changeMessage(DataSnapshot dataSnapshot) {
-        Iterator i = dataSnapshot.getChildren().iterator();
-
-        key = dataSnapshot.getKey();
-        img = (String) ((DataSnapshot) i.next()).getValue();
-        chat_msg = (String) ((DataSnapshot) i.next()).getValue();
-        chat_user_id = (String) ((DataSnapshot) i.next()).getValue();
-        pin = (String) ((DataSnapshot) i.next()).getValue();
-        zitat = (String) ((DataSnapshot) i.next()).getValue();
-        time = (String) ((DataSnapshot) i.next()).getValue();
+        String key = dataSnapshot.getKey();
+        String img = dataSnapshot.child("img").getValue().toString();
+        String chatMsg = dataSnapshot.child("msg").getValue().toString();
+        String chatUserId = dataSnapshot.child("name").getValue().toString();
 
         for (Message m : messageList) {
-            if (m.getTyp() != 0) {
+            if (m.getType() != Message.Type.HEADER) {
                 if (m.getKey().equals(key)) {
                     int index = messageList.indexOf(m);
                     addMessage(dataSnapshot, index);
@@ -754,14 +715,14 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
         for (Message m : messageList) {
-            if (m.getTyp() != 0) {
+            if (m.getType() != Message.Type.HEADER) {
                 if (m.getQuote_key().equals(key)) {
                     if (img.equals("")) {
-                        m.setQuote_message(chat_msg);
+                        m.setQuote_message(chatMsg);
                     } else {
                         m.setQuote_message(img);
                     }
-                    m.setQuote_name(getUser(chat_user_id).getName());
+                    m.setQuote_name(getUser(chatUserId).getName());
                 }
             }
         }
@@ -769,96 +730,100 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void setBackgroundImage() {
-        String hintergrund = readFromFile("mychatapp_hintergrund.txt");
-        if (getResources().getConfiguration().orientation != 2 && !hintergrund.isEmpty()) {
-            switch (Integer.parseInt(hintergrund)) {
-                case 1:
+        Background background = Background.getCurrentBackground(getApplicationContext());
+        if (getResources().getConfiguration().orientation != 2) {
+            switch (background) {
+                case BREATH_OF_THE_WILD:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_botw));
                     break;
-                case 2:
+                case SPLATOON_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_splatoon2));
                     break;
-                case 3:
+                case PERSONA_5:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_persona));
                     break;
-                case 4:
+                case KIMI_NO_NA_WA:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_kiminonawa));
                     break;
-                case 5:
+                case SUPER_MARIO_BROS:
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smb));
                     break;
-                case 6:
+                case SUPER_MARIO_MAKER:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smm));
                     break;
-                case 7:
+                case XENOBLADE_CHRONICLES_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_xc2));
                     break;
-                case 8:
+                case FIRE_EMBLEM_FATES:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_fef));
                     break;
-                case 9:
+                case SUPER_SMASH_BROS_ULTIMATE:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_ssbu));
                     break;
-                case 10:
+                case DETECTIVE_PIKACHU:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_dp));
                     break;
+                default:
+                    break;
             }
-        } else if (!hintergrund.isEmpty()) {
-            switch (Integer.parseInt(hintergrund)) {
-                case 1:
+        } else {
+            switch (background) {
+                case BREATH_OF_THE_WILD:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_botw_horizontal));
                     break;
-                case 2:
+                case SPLATOON_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_splatoon2_horizontal));
                     break;
-                case 3:
+                case PERSONA_5:
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_persona_horizontal));
                     break;
-                case 4:
+                case KIMI_NO_NA_WA:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_kiminonawa_horizontal));
                     break;
-                case 5:
+                case SUPER_MARIO_BROS:
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smb_horizontal));
                     break;
-                case 6:
+                case SUPER_MARIO_MAKER:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smm_horizontal));
                     break;
-                case 7:
+                case XENOBLADE_CHRONICLES_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_xc2_horizontal));
                     break;
-                case 8:
+                case FIRE_EMBLEM_FATES:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_fef_horizontal));
                     break;
-                case 9:
+                case SUPER_SMASH_BROS_ULTIMATE:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_ssbu_horizontal));
                     break;
-                case 10:
+                case DETECTIVE_PIKACHU:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
                     backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_dp_horizontal));
+                    break;
+                default:
                     break;
             }
         }
     }
 
-    private void changeTheme() {
-        theme = readFromFile("mychatapp_theme.txt");
-        if (theme.equals("1")) {
+    private void changeTheme(Theme theme) {
+        this.theme = theme;
+        if (theme == Theme.DARK) {
             setTheme(R.style.DarkChat);
         } else {
             setTheme(R.style.AppThemeChat);
@@ -871,7 +836,7 @@ public class ChatActivity extends AppCompatActivity {
             searchView.setIconified(true);
         }
         final ProgressDialog progressDialog;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             progressDialog = new ProgressDialog(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             progressDialog = new ProgressDialog(this);
@@ -879,12 +844,12 @@ public class ChatActivity extends AppCompatActivity {
         progressDialog.setTitle(R.string.upload);
         progressDialog.show();
 
-        img_name = UUID.randomUUID().toString();
+        String imgName = UUID.randomUUID().toString();
         StorageReference ref;
         if (type == 2) {
-            ref = storageReference.child("room_images/" + img_name);
+            ref = storageReference.child("room_images/" + imgName);
         } else {
-            ref = storageReference.child("images/" + img_name);
+            ref = storageReference.child("images/" + imgName);
         }
 
         byte[] byteArray = new byte[0];
@@ -915,7 +880,8 @@ public class ChatActivity extends AppCompatActivity {
             int compressFactor = 2;
             int height = bmp.getHeight();
             int width = bmp.getWidth();
-            if (getImgSize(filePath) > height * width) {
+            ImageOperations imageOperations = new ImageOperations(getContentResolver());
+            if (imageOperations.getImgSize(filePath) > height * width) {
                 compressFactor = 4;
             }
             if (type == 2) {
@@ -933,7 +899,7 @@ public class ChatActivity extends AppCompatActivity {
             }
             bmp = Bitmap.createScaledBitmap(bmp, width, height, false);
             try {
-                bmp = rotateImageIfRequired(this, bmp, filePath);
+                bmp = imageOperations.rotateImageIfRequired(this, bmp, filePath);
             } catch (IOException e) { }
             bmp.compress(Bitmap.CompressFormat.JPEG, compression, stream);
             byteArray = stream.toByteArray();
@@ -956,34 +922,34 @@ public class ChatActivity extends AppCompatActivity {
                     temp_key = root.push().getKey();
                     root.updateChildren(map);
 
-                    String currentDateandTime = sdf.format(new Date());
+                    String currentDateAndTime = sdf.format(new Date());
 
                     DatabaseReference message_root = root.child(temp_key);
                     Map<String, Object> map2 = new HashMap<String, Object>();
                     map2.put("name", userID);
                     map2.put("msg", "");
-                    map2.put("img", img_name);
+                    map2.put("img", imgName);
                     map2.put("pin", "0");
                     map2.put("quote", "");
-                    map2.put("time", currentDateandTime);
+                    map2.put("time", currentDateAndTime);
 
                     message_root.updateChildren(map2);
 
-                    zitatStatus = "";
+                    quoteStatus = "";
 
-                    if (type == 1 && !readFromFile("mychatapp_settings_camera.txt").equals("off")) {
-                        downloadImage(img_name, type);
+                    if (type == 1 && !fileOperations.readFromFile("mychatapp_settings_camera.txt").equals("off")) {
+                        downloadImage(imgName, type);
                     }
                 } else {
-                    DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomkey);
+                    DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomDataKey);
                     Map<String, Object> map = new HashMap<>();
-                    map.put("img", img_name);
+                    map.put("img", imgName);
                     message_root.updateChildren(map);
 
-                    room_img = img_name;
+                    room_img = imgName;
 
                     storageReferenceRoomImages = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                    final StorageReference pathReference = storageReferenceRoomImages.child("room_images/" + img_name);
+                    final StorageReference pathReference = storageReferenceRoomImages.child("room_images/" + imgName);
                     GlideApp.with(getApplicationContext())
                             .load(pathReference)
                             .centerCrop()
@@ -1038,8 +1004,7 @@ public class ChatActivity extends AppCompatActivity {
         String timeStamp = sdf.format(new Date()).substring(0, 15);
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File image = File.createTempFile(imageFileName, ".jpeg", storageDir);
-        return image;
+        return File.createTempFile(imageFileName, ".jpeg", storageDir);
     }
 
     @Override
@@ -1062,60 +1027,19 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private String readFromFile(String datei) {
-        Context context = this;
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(datei);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
-    }
-
-    public void writeToFile(String text, String datei) {
-        Context context = this;
-        try {
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(datei, Context.MODE_PRIVATE));
-            outputStreamWriter.write(text);
-            outputStreamWriter.close();
-        } catch (IOException e) {
-            Log.e("Exception", "File write failed: " + e.toString());
-        }
-    }
-
-    public BroadcastReceiver zitatReceiver = new BroadcastReceiver() {
+    public BroadcastReceiver quoteReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            zitatStatus = intent.getStringExtra("zitat");
+            quoteStatus = intent.getStringExtra("quoteID");
             for (Message m : messageList) {
-                if (m.getKey().equals(zitatStatus)) {
+                if (m.getKey().equals(quoteStatus)) {
                     String user;
                     if (m.getUser().getUserID().equals(userID)) {
                         user = getResources().getString(R.string.you);
                     } else {
                         user = m.getUser().getName();
                     }
-                    if (m.getTyp() != 13 && m.getTyp() != 14 && m.getTyp() != 15 && m.getTyp() != 16) {
+                    if (m.getType() != Message.Type.IMAGE_RECEIVED && m.getType() != Message.Type.IMAGE_RECEIVED_CON && m.getType() != Message.Type.IMAGE_SENT && m.getType() != Message.Type.IMAGE_SENT_CON) {
                         String text = user + " " + m.getMsg();
                         SpannableStringBuilder str = new SpannableStringBuilder(text);
                         str.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, user.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -1130,7 +1054,7 @@ public class ChatActivity extends AppCompatActivity {
                         StorageReference pathReference = storageRef.child("images/" + imgurl);
                         GlideApp.with(context)
                                 .load(pathReference)
-                                .placeholder(R.color.gray_material)
+                                .placeholder(R.color.grey)
                                 .centerCrop()
                                 .thumbnail(0.05f)
                                 .into(quote_image);
@@ -1145,7 +1069,7 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
-    public BroadcastReceiver zitiertReceiver = new BroadcastReceiver() {
+    public BroadcastReceiver quotedReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (!searchView.isIconified()) {
@@ -1153,10 +1077,10 @@ public class ChatActivity extends AppCompatActivity {
                 searchView.setIconified(true);
             }
             
-            String zitiert = intent.getStringExtra("zitat");
+            String quoted = intent.getStringExtra("quoteID");
             int pos = 0;
             for (Message m : messageList) {
-                if (m.getKey().equals(zitiert)) {
+                if (m.getKey().equals(quoted)) {
                     break;
                 } else {
                     pos++;
@@ -1196,7 +1120,7 @@ public class ChatActivity extends AppCompatActivity {
     public BroadcastReceiver forwardReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(final Context context, Intent intent) {
-            String message_id = intent.getStringExtra("weiterleitenID");
+            String message_id = intent.getStringExtra("forwardID");
             if (!roomList.isEmpty()) {
                 forwardMessage(message_id);
             } else {
@@ -1250,18 +1174,13 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public boolean isStoragePermissionGranted() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                Log.v("DL","Permission is granted");
-                return true;
-            } else {
-                Log.v("DL","Permission is revoked");
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
-                return false;
-            }
-        } else {
-            Log.v("DL","Permission is granted");
+        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            Log.v("DL", "Permission is granted");
             return true;
+        } else {
+            Log.v("DL", "Permission is revoked");
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            return false;
         }
     }
 
@@ -1288,16 +1207,16 @@ public class ChatActivity extends AppCompatActivity {
         final File rootPath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()+ "/" + app_name);
         if(!rootPath.exists()) {
             if (!rootPath.mkdirs()) {
-                Log.e("firebase ", "Erstellung des Ordners fehlgeschlagen");
+                Log.e("firebase ", "Creating dir failed");
             }
         }
 
         pathReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
             @Override
             public void onSuccess(StorageMetadata storageMetadata) {
-                mimeType = storageMetadata.getContentType();
-                String currentDateandTime = sdf.format(new Date());
-                final String filename = app_name + "_" + currentDateandTime.substring(0,15) + "." + mimeType.substring(6);
+                String mimeType = storageMetadata.getContentType();
+                String currentDateAndTime = sdf.format(new Date());
+                final String filename = app_name + "_" + currentDateAndTime.substring(0,15) + "." + mimeType.substring(6);
                 final File localFile = new File(rootPath,filename);
 
                 pathReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -1312,7 +1231,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         Toast.makeText(context, R.string.savingimagefailed, Toast.LENGTH_SHORT).show();
-                        Log.e("firebase ","Bild speichern fehlgeschlagen!: " +exception.toString());
+                        Log.e("firebase ","Saving image failed: " +exception.toString());
                     }
                 });
             }
@@ -1325,18 +1244,18 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu (Menu menu) {
-        MenuInflater myinflater = getMenuInflater();
-        if (!readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
-            if (!readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
-                myinflater.inflate(R.menu.menu_chatroom, menu);
+        MenuInflater inflater = getMenuInflater();
+        if (!fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
+            if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
+                inflater.inflate(R.menu.menu_chatroom, menu);
             } else {
-                myinflater.inflate(R.menu.menu_chatroom_unmute, menu);
+                inflater.inflate(R.menu.menu_chatroom_unmute, menu);
             }
         } else {
-            if (!readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
-                myinflater.inflate(R.menu.menu_chatroom_unfav, menu);
+            if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
+                inflater.inflate(R.menu.menu_chatroom_unfav, menu);
             } else {
-                myinflater.inflate(R.menu.menu_chatroom_unmute_unfav, menu);
+                inflater.inflate(R.menu.menu_chatroom_unmute_unfav, menu);
             }
         }
 
@@ -1390,91 +1309,90 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.roominfo:
-                openInfo();
-                return true;
-            case R.id.roomfav:
-                markAsFav();
-                return true;
-            case R.id.roomsearch:
-                return super.onOptionsItemSelected(item);
-            case R.id.roomphotos:
-                openImageList();
-                return true;
-            case R.id.roompinboard:
-                openPinboard();
-                return true;
-            case R.id.roommute:
-                if (!readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
-                    writeToFile("1", "mychatapp_" + room_key + "_mute.txt");
-                    FirebaseMessaging.getInstance().unsubscribeFromTopic(room_key);
-                    Toast.makeText(this, R.string.roommuted, Toast.LENGTH_SHORT).show();
-                } else {
-                    writeToFile("0", "mychatapp_" + room_key + "_mute.txt");
-                    FirebaseMessaging.getInstance().subscribeToTopic(room_key);
-                    Toast.makeText(this, R.string.roomunmuted, Toast.LENGTH_SHORT).show();
-                }
-                invalidateOptionsMenu();
-                return true;
-            case R.id.roombackup:
-                if (messageList.size() > 1) {
-                    writeBackup(createBackup());
-                } else {
-                    Toast.makeText(this, R.string.nomessagesfound, Toast.LENGTH_SHORT).show();
-                }
-                return true;
-            case R.id.roomleave:
-                AlertDialog.Builder builder;
-                if (theme.equals("1")) {
-                    builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
-                } else {
-                    builder = new AlertDialog.Builder(this);
-                }
-                builder.setTitle(R.string.reallyleaveroom);
-                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        writeToFile("", "mychatapp_raum_" + room_key + ".txt");
-                        startActivity(new Intent(ChatActivity.this, MainActivity.class));
-                        if (readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
-                            markAsFav();
-                        }
-                        Intent intent = new Intent("leaveroom");
-                        intent.putExtra("roomkey", room_key);
-                        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-                        Toast.makeText(getApplicationContext(), R.string.roomleaved, Toast.LENGTH_SHORT).show();
+        if (item.getItemId() == R.id.roominfo) {
+            openInfo();
+            return true;
+        } else if (item.getItemId() == R.id.roomfav) {
+            markAsFav();
+            return true;
+        } else if (item.getItemId() == R.id.roomsearch) {
+            return super.onOptionsItemSelected(item);
+        } else if (item.getItemId() == R.id.roomphotos) {
+            openImageList();
+            return true;
+        } else if (item.getItemId() == R.id.roompinboard) {
+            openPinboard();
+            return true;
+        } else if (item.getItemId() == R.id.roommute) {
+            if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
+                fileOperations.writeToFile("1", "mychatapp_" + room_key + "_mute.txt");
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(room_key);
+                Toast.makeText(this, R.string.roommuted, Toast.LENGTH_SHORT).show();
+            } else {
+                fileOperations.writeToFile("0", "mychatapp_" + room_key + "_mute.txt");
+                FirebaseMessaging.getInstance().subscribeToTopic(room_key);
+                Toast.makeText(this, R.string.roomunmuted, Toast.LENGTH_SHORT).show();
+            }
+            invalidateOptionsMenu();
+            return true;
+        } else if (item.getItemId() == R.id.roombackup) {
+            if (messageList.size() > 1) {
+                writeBackup(createBackup());
+            } else {
+                Toast.makeText(this, R.string.nomessagesfound, Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        } else if (item.getItemId() == R.id.roomleave) {
+            AlertDialog.Builder builder;
+            if (theme == Theme.DARK) {
+                builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
+            } else {
+                builder = new AlertDialog.Builder(this);
+            }
+            builder.setTitle(R.string.reallyleaveroom);
+            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    fileOperations.writeToFile("", "mychatapp_room_" + room_key + ".txt");
+                    startActivity(new Intent(ChatActivity.this, MainActivity.class));
+                    if (fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
+                        markAsFav();
                     }
-                });
-                builder.setNegativeButton(R.string.no, null);
-                AlertDialog alert = builder.create();
-                alert.show();
-                return true;
-            case android.R.id.home:
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(userReceiver);
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(forwardReceiver);
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(fullscreenReceiver);
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
-                LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
-                View view = this.getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                    Intent intent = new Intent("leaveroom");
+                    intent.putExtra("roomkey", room_key);
+                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                    Toast.makeText(getApplicationContext(), R.string.roomleaved, Toast.LENGTH_SHORT).show();
                 }
-                if (!readFromFile("mychatapp_settings_save.txt").equals("off")) {
-                    writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
-                    if (!input_msg.getText().toString().trim().isEmpty()) {
-                        Toast.makeText(this, R.string.messagesaved, Toast.LENGTH_SHORT).show();
-                    }
+            });
+            builder.setNegativeButton(R.string.no, null);
+            AlertDialog alert = builder.create();
+            alert.show();
+            return true;
+        } else if (item.getItemId() == android.R.id.home) {
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(userReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(forwardReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(fullscreenReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
+            LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
+            View view = this.getCurrentFocus();
+            if (view != null) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+            }
+            if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+                fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+                if (!input_msg.getText().toString().trim().isEmpty()) {
+                    Toast.makeText(this, R.string.messagesaved, Toast.LENGTH_SHORT).show();
                 }
-                if (!messageList.isEmpty()) {
-                    writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
-                }
-                writeToFile("0", "mychatapp_current.txt");
-                startActivity(new Intent(ChatActivity.this, MainActivity.class));
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+            }
+            if (!messageList.isEmpty()) {
+                fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_room_" + room_key + "_nm.txt");
+            }
+            fileOperations.writeToFile("0", "mychatapp_current.txt");
+            startActivity(new Intent(ChatActivity.this, MainActivity.class));
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
         }
     }
 
@@ -1488,16 +1406,16 @@ public class ChatActivity extends AppCompatActivity {
         final TextView room_amount_messages = view.findViewById(R.id.room_amount_messages);
 
         final ListView memberListView = view.findViewById(R.id.memberList);
-        memberListView.setAdapter(new MemberListAdapter(getApplicationContext(), memberList, admin));
+        memberListView.setAdapter(new MemberListAdapter(getApplicationContext(), memberList, room.getAdmin()));
 
-        String time = time_creation.substring(6, 8) + "." + time_creation.substring(4, 6) + "." + time_creation.substring(0, 4);
-        room_desc.setText(desc);
-        room_cat.setText(getResources().getStringArray(R.array.categories)[Integer.parseInt(caty)]);
+        String time = room.getTime().substring(6, 8) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(0, 4);
+        room_desc.setText(room.getDesc());
+        room_cat.setText(getResources().getStringArray(R.array.categories)[Integer.parseInt(room.getCategory())]);
         room_creation.setText(time);
         room_amount_messages.setText(String.valueOf(amount));
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(this);
@@ -1505,7 +1423,7 @@ public class ChatActivity extends AppCompatActivity {
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.roominfo)));
         builder.setView(view);
         builder.setPositiveButton(R.string.close, null);
-        if (admin.equals(userID)) {
+        if (room.getAdmin().equals(userID)) {
             builder.setNegativeButton(R.string.editroom, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -1517,43 +1435,6 @@ public class ChatActivity extends AppCompatActivity {
         alert.show();
     }
 
-    private Long getImgSize(Uri filePath) {
-        Cursor returnCursor = getContentResolver().query(filePath, null, null, null, null);
-        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-        returnCursor.moveToFirst();
-        return returnCursor.getLong(sizeIndex);
-    }
-
-    private static Bitmap rotateImage(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
-    }
-
-    private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
-
-        InputStream input = context.getContentResolver().openInputStream(selectedImage);
-        ExifInterface ei;
-        if (Build.VERSION.SDK_INT > 23) {
-            ei = new ExifInterface(input);
-        } else {
-            ei = new ExifInterface(selectedImage.getPath());
-        }
-
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
-            default:
-                return img;
-        }
-    }
-
     @Override
     public void onBackPressed() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(userReceiver);
@@ -1561,37 +1442,37 @@ public class ChatActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(fullscreenReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
-        if (!readFromFile("mychatapp_settings_save.txt").equals("off")) {
-            writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+        if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+            fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
         }
-        writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", "mychatapp_current.txt");
         if ((messageList.size() - 1) >= 0) {
-            writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
+            fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_room_" + room_key + "_nm.txt");
         }
         super.onBackPressed();
     }
 
     @Override
     public void onPause() {
-        if (!readFromFile("mychatapp_settings_save.txt").equals("off")) {
-            writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+        if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+            fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
         }
         if (!messageList.isEmpty()) {
-            writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_raum_" + room_key + "_nm.txt");
+            fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_room_" + room_key + "_nm.txt");
         }
-        writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", "mychatapp_current.txt");
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", "mychatapp_current.txt");
         super.onDestroy();
     }
 
     @Override
     public void onResume() {
-        writeToFile(room_key, "mychatapp_current.txt");
+        fileOperations.writeToFile(room_key, "mychatapp_current.txt");
         super.onResume();
     }
 
@@ -1612,17 +1493,17 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private ArrayList<Message> searchStringInMessage(ArrayList<Message> searchedMessageList, Message m, String text) {
-        if (m.getMsg().toLowerCase().contains(text.toLowerCase()) && m.getTyp() != 0 && m.getTyp() != 13 && m.getTyp() != 15 && m.getTyp() != 14 && m.getTyp() != 16) {
-            if (searchedMessageList.isEmpty() || !searchedMessageList.get(searchedMessageList.size() - 1).getbTime().substring(0, 8).equals(m.getbTime().substring(0, 8))) {
-                String time = m.getbTime().substring(6, 8) + "." + m.getbTime().substring(4, 6) + "." + m.getbTime().substring(0, 4);
-                Message m2 = new Message(user, time, m.getTime(), m.getbTime(), false, "-", 0, "", "", "", m.getPin());
+        if (m.getMsg().toLowerCase().contains(text.toLowerCase()) && m.getType() != Message.Type.HEADER && !Message.isImage(m.getType())) {
+            if (searchedMessageList.isEmpty() || !searchedMessageList.get(searchedMessageList.size() - 1).getTime().substring(0, 8).equals(m.getTime().substring(0, 8))) {
+                String time = m.getTime().substring(6, 8) + "." + m.getTime().substring(4, 6) + "." + m.getTime().substring(0, 4);
+                Message m2 = new Message(user, time, m.getTime(), false, "-", Message.Type.HEADER, "", "", "", m.getPin());
                 searchedMessageList.add(m2);
             }
             Message m2;
-            if (m.getTyp() % 2 == 0) {
-                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.getbTime(), m.isSender(), m.getKey(), m.getTyp()-1, m.getQuote_name(), m.getQuote_message(), m.getQuote_key(), m.getPin());
+            if (Message.isConMessage(m.getType())) {
+                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuote_name(), m.getQuote_message(), m.getQuote_key(), m.getPin());
             } else {
-                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.getbTime(), m.isSender(), m.getKey(), m.getTyp(), m.getQuote_name(), m.getQuote_message(), m.getQuote_key(), m.getPin());
+                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), m.getType(), m.getQuote_name(), m.getQuote_message(), m.getQuote_key(), m.getPin());
             }
             m2.setSearchString(text);
             searchedMessageList.add(m2);
@@ -1633,20 +1514,20 @@ public class ChatActivity extends AppCompatActivity {
     private String createBackup() {
         String currentDateAndTime = sdf_local.format(new Date());
         String fcdat = currentDateAndTime.substring(0, 4) + "." + currentDateAndTime.substring(4, 6) + "." + currentDateAndTime.substring(6, 8) + " " + currentDateAndTime.substring(9, 11) + ":" + currentDateAndTime.substring(11, 13) + ":" + currentDateAndTime.substring(13, 15);
-        String ftime = time_creation.substring(0, 4) + "." + time_creation.substring(4, 6) + "." + time_creation.substring(6, 8) + " " + time_creation.substring(9, 11) + ":" + time_creation.substring(11, 13) + ":" + time_creation.substring(13, 15);
+        String ftime = room.getTime().substring(0, 4) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(6, 8) + " " + room.getTime().substring(9, 11) + ":" + room.getTime().substring(11, 13) + ":" + room.getTime().substring(13, 15);
         String backup = getResources().getString(R.string.backupof) + " " + room_name + "\n" + getResources().getString(R.string.createdon) + ": " + fcdat + "\n\n" +
-                getResources().getString(R.string.category) + ": " + getResources().getStringArray(R.array.categories)[Integer.parseInt(caty)] + "\n" + getResources().getString(R.string.admin) + ": " + getUser(admin).getName() + "\n" + getResources().getString(R.string.foundation) + ": " + ftime + "\n" + getResources().getString(R.string.sentmessages) + ": " + amount + "\n----------------------------------------\n";
+                getResources().getString(R.string.category) + ": " + getResources().getStringArray(R.array.categories)[Integer.parseInt(room.getCategory())] + "\n" + getResources().getString(R.string.admin) + ": " + getUser(room.getAdmin()).getName() + "\n" + getResources().getString(R.string.foundation) + ": " + ftime + "\n" + getResources().getString(R.string.sentmessages) + ": " + amount + "\n----------------------------------------\n";
 
         String newDay = "";
         for (Message m : messageList) {
             String btimeDay = "";
-            if (m.getTyp() != 0) {
-                btimeDay = m.getbTime().substring(0, 4) + "." + m.getbTime().substring(4, 6) + "." + m.getbTime().substring(6, 8);
-                String btime = m.getbTime().substring(9, 11) + ":" + m.getbTime().substring(11, 13) + ":" + m.getbTime().substring(13, 15);
+            if (m.getType() != Message.Type.HEADER) {
+                btimeDay = m.getTime().substring(0, 4) + "." + m.getTime().substring(4, 6) + "." + m.getTime().substring(6, 8);
+                String btime = m.getTime().substring(9, 11) + ":" + m.getTime().substring(11, 13) + ":" + m.getTime().substring(13, 15);
                 if (!newDay.equals(btimeDay)) {
                     backup += "\n" + btimeDay + "\n";
                 }
-                if (m.getTyp() == 5 || m.getTyp() == 7 || m.getTyp() == 6 || m.getTyp() == 8 || m.getTyp() == 18 || m.getTyp() == 20) {
+                if (Message.isQuote(m.getType()) || m.getType() == Message.Type.QUOTE_IMAGE_RECEIVED_CON || m.getType() == Message.Type.QUOTE_IMAGE_SENT_CON) {
                     String quote = m.getQuote_message();
                     if (quote.length() > 40) {
                         quote = quote.substring(0, 40) + "...";
@@ -1697,20 +1578,16 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent(Intent.ACTION_VIEW);
-                        if(android.os.Build.VERSION.SDK_INT >=24) {
-                            Uri fileURI = FileProvider.getUriForFile(ChatActivity.this,
-                                    BuildConfig.APPLICATION_ID+".fileprovider",
-                                    file);
-                            intent.setDataAndType(fileURI, mime);
-                        } else {
-                            intent.setDataAndType(Uri.fromFile(file), mime);
-                        }
+                        Uri fileURI = FileProvider.getUriForFile(ChatActivity.this,
+                                BuildConfig.APPLICATION_ID + ".fileprovider",
+                                file);
+                        intent.setDataAndType(fileURI, mime);
                         intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION|FLAG_GRANT_WRITE_URI_PERMISSION|FLAG_ACTIVITY_NEW_TASK);
                         startActivity(intent);
                     }
                 });
         View sbView = snack.getView();
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             sbView.setBackgroundColor(getResources().getColor(R.color.dark_actionbar));
         } else {
             sbView.setBackgroundColor(getResources().getColor(R.color.red));
@@ -1740,37 +1617,37 @@ public class ChatActivity extends AppCompatActivity {
 
     private void markAsFav() {
         Intent intent = new Intent("favroom");
-        intent.putExtra("roomkey", room_key);
-        intent.putExtra("roomname", room_name);
-        intent.putExtra("admin", admin);
-        intent.putExtra("caty",caty);
-        String time_creation_temp = "";
+        intent.putExtra("roomKey", room_key);
+        intent.putExtra("roomName", room_name);
+        intent.putExtra("admin", room.getAdmin());
+        intent.putExtra("category", room.getCategory());
+        String creationTime = "";
         try {
-            time_creation_temp = sdf.format(sdf.parse(time_creation));
+            creationTime = sdf.format(sdf.parse(room.getTime()));
         } catch (ParseException e) {}
-        intent.putExtra("newestMessage",time_creation_temp);
-        intent.putExtra("passwd",passwd);
+        intent.putExtra("newestMessage", creationTime);
+        intent.putExtra("passwd", room.getPasswd());
         Message newest = messageList.get(messageList.size() - 1);
         if (messageList.size()!=1) {
-            intent.putExtra("nm_message", newest.getMsg());
+            intent.putExtra("nmMessage", newest.getMsg());
             String parsedTime = "";
             try {
-                parsedTime = sdf.format(sdf.parse(newest.getbTime()));
+                parsedTime = sdf.format(sdf.parse(newest.getTime()));
             } catch (ParseException e) {}
-            intent.putExtra("nm_time", parsedTime);
-            intent.putExtra("nm_key", newest.getKey());
-            intent.putExtra("nm_typ", newest.getTyp());
+            intent.putExtra("nmTime", parsedTime);
+            intent.putExtra("nmKey", newest.getKey());
+            intent.putExtra("nmType", newest.getType().toString());
         } else {
-            intent.putExtra("nm_message", "");
-            intent.putExtra("nm_time", "");
-            intent.putExtra("nm_key", "");
-            intent.putExtra("nm_typ", 0);
+            intent.putExtra("nmMessage", "");
+            intent.putExtra("nmTime", "");
+            intent.putExtra("nmKey", "");
+            intent.putExtra("nmType", Message.Type.HEADER.toString());
         }
-        if (!readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
-            writeToFile("1", "mychatapp_" + room_key + "_fav.txt");
+        if (!fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
+            fileOperations.writeToFile("1", "mychatapp_" + room_key + "_fav.txt");
             Toast.makeText(this, R.string.addedtofavorites, Toast.LENGTH_SHORT).show();
         } else {
-            writeToFile("0", "mychatapp_" + room_key + "_fav.txt");
+            fileOperations.writeToFile("0", "mychatapp_" + room_key + "_fav.txt");
             Toast.makeText(this, R.string.removedfromfavorites, Toast.LENGTH_SHORT).show();
         }
         invalidateOptionsMenu();
@@ -1778,33 +1655,21 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void addUser(DataSnapshot dataSnapshot) {
-        Iterator i = dataSnapshot.getChildren().iterator();
-
-        while (i.hasNext()){
-            String tmpuserid = dataSnapshot.getKey();
-            String tmpbanner = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpbday = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpbio = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpfavc = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpimg = (String) ((DataSnapshot) i.next()).getValue();
-            String tmploc = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpname = (String) ((DataSnapshot) i.next()).getValue();
-            String tmpownpi = (String) ((DataSnapshot) i.next()).getValue();
-            User user = new User(tmpuserid, tmpname, tmpbday, tmpbio, tmploc, tmpfavc, tmpimg, tmpbanner);
-            userList.add(user);
-        }
+        User user = dataSnapshot.getValue(User.class);
+        user.setUserID(dataSnapshot.getKey());
+        userList.add(user);
 
         userListCreated = true;
     }
 
-    public void addUser(final String key, final String user_id, final String chat_msg, final String img, final String pin, final String zitat, final String time, final MyCallback myCallback) {
-        userroot.child(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
+    public void addUser(final String key, final String user_id, final String chat_msg, final String img, final String pin, final String quote, final String time, final MyCallback myCallback) {
+        userRoot.child(user_id).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 User user = dataSnapshot.getValue(User.class);
                 user.setUserID(user_id);
                 userList.add(user);
-                myCallback.onCallback(key, user, time, chat_msg, img, pin, zitat);
+                myCallback.onCallback(key, user, time, chat_msg, img, pin, quote);
             }
 
             @Override
@@ -1819,15 +1684,15 @@ public class ChatActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.profile, null);
 
-        profilicon = view.findViewById(R.id.icon_profile);
-        TextView profilname = view.findViewById(R.id.name_profile);
-        TextView profilbio = view.findViewById(R.id.profile_bio);
+        CircleImageView profileIcon = view.findViewById(R.id.icon_profile);
+        TextView profileName = view.findViewById(R.id.name_profile);
+        TextView profileDescription = view.findViewById(R.id.profile_bio);
         TextView birthday = view.findViewById(R.id.profile_birthday);
         TextView location = view.findViewById(R.id.profile_location);
-        banner = view.findViewById(R.id.background_profile);
+        ImageView banner = view.findViewById(R.id.background_profile);
         AlertDialog.Builder builder;
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
             banner.setBackground(getResources().getDrawable(R.drawable.side_nav_bar_dark));
         } else {
@@ -1847,9 +1712,9 @@ public class ChatActivity extends AppCompatActivity {
         GlideApp.with(getApplicationContext())
                 .load(pathReference_image)
                 .centerCrop()
-                .into(profilicon);
+                .into(profileIcon);
 
-        profilicon.setOnClickListener(new View.OnClickListener() {
+        profileIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 showFullscreenImage(user_ID, 0);
@@ -1863,10 +1728,10 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        profilname.setText(user.getName());
-        profilbio.setText(user.getBio());
-        birthday.setText(user.getBday().substring(6, 8) + "." + user.getBday().substring(4, 6) + "." + user.getBday().substring(0, 4));
-        location.setText(user.getLoc());
+        profileName.setText(user.getName());
+        profileDescription.setText(user.getProfileDescription());
+        birthday.setText(user.getBirthday().substring(6, 8) + "." + user.getBirthday().substring(4, 6) + "." + user.getBirthday().substring(0, 4));
+        location.setText(user.getLocation());
 
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.profile, user.getName())));
         builder.setView(view);
@@ -1883,7 +1748,7 @@ public class ChatActivity extends AppCompatActivity {
         final ListView listView = view.findViewById(R.id.listView);
         listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, roomList));
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(this);
@@ -1897,7 +1762,7 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 int position = listView.getPositionForView(view);
-                String raumkey = roomKeysList.get(position);
+                String roomKey = roomKeysList.get(position);
                 Message fMessage = new Message();
                 for (Message m : messageList) {
                     if (m.getKey().equals(messageID)) {
@@ -1905,28 +1770,28 @@ public class ChatActivity extends AppCompatActivity {
                         break;
                     }
                 }
-                temp_key = roomroot.child(raumkey).push().getKey();
+                temp_key = roomRoot.child(roomKey).push().getKey();
 
-                String currentDateandTime = sdf.format(new Date());
+                String currentDateAndTime = sdf.format(new Date());
 
-                DatabaseReference message_root = roomroot.child(raumkey).child(temp_key);
-                Map<String, Object> map2 = new HashMap<>();
-                map2.put("name", userID);
-                if (fMessage.getTyp() == 13 || fMessage.getTyp() == 14 || fMessage.getTyp() == 15 || fMessage.getTyp() == 16) {
-                    map2.put("msg", "");
-                    map2.put("img", fMessage.getMsg());
+                DatabaseReference message_root = roomRoot.child(roomKey).child(temp_key);
+                Map<String, Object> map = new HashMap<>();
+                map.put("name", userID);
+                if (fMessage.getType() == Message.Type.IMAGE_RECEIVED || fMessage.getType() == Message.Type.IMAGE_RECEIVED_CON || fMessage.getType() == Message.Type.IMAGE_SENT || fMessage.getType() == Message.Type.IMAGE_SENT_CON) {
+                    map.put("msg", "");
+                    map.put("img", fMessage.getMsg());
                 } else {
-                    map2.put("msg", "(Forwarded) " + fMessage.getMsg());
-                    map2.put("img", "");
+                    map.put("msg", "(Forwarded) " + fMessage.getMsg());
+                    map.put("img", "");
                 }
-                map2.put("pin", "0");
-                map2.put("quote", zitatStatus);
-                map2.put("time", currentDateandTime);
+                map.put("pin", "0");
+                map.put("quote", quoteStatus);
+                map.put("time", currentDateAndTime);
 
-                message_root.updateChildren(map2);
-                writeToFile(temp_key, "mychatapp_raum_" + raumkey + "_nm.txt");
+                message_root.updateChildren(map);
+                fileOperations.writeToFile(temp_key, "mychatapp_room_" + roomKey + "_nm.txt");
                 alert.cancel();
-                if (fMessage.getTyp() == 13 || fMessage.getTyp() == 14 || fMessage.getTyp() == 15 || fMessage.getTyp() == 16) {
+                if (fMessage.getType() == Message.Type.IMAGE_RECEIVED || fMessage.getType() == Message.Type.IMAGE_RECEIVED_CON || fMessage.getType() == Message.Type.IMAGE_SENT || fMessage.getType() == Message.Type.IMAGE_SENT_CON) {
                     Toast.makeText(ChatActivity.this, R.string.imageforwarded, Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(ChatActivity.this, R.string.messageforwarded, Toast.LENGTH_SHORT).show();
@@ -1946,7 +1811,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private void showFullscreenImage(String image, int type) {
         final View dialogView = getLayoutInflater().inflate(R.layout.fullscreen_image, null);
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             fullscreendialog = new Dialog(this,R.style.FullScreenImageDark);
         } else {
             fullscreendialog = new Dialog(this,R.style.FullScreenImage);
@@ -2009,7 +1874,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             });
             AlertDialog.Builder builder;
-            if (theme.equals("1")) {
+            if (theme == Theme.DARK) {
                 builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
             } else {
                 builder = new AlertDialog.Builder(this);
@@ -2038,7 +1903,7 @@ public class ChatActivity extends AppCompatActivity {
             ListView pinListView = view.findViewById(R.id.pinboardList);
             pinListView.setAdapter(new PinboardAdapter(this, pinnedList));
             AlertDialog.Builder builder;
-            if (theme.equals("1")) {
+            if (theme == Theme.DARK) {
                 builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
             } else {
                 builder = new AlertDialog.Builder(this);
@@ -2079,7 +1944,7 @@ public class ChatActivity extends AppCompatActivity {
                     if (!pinnedList.isEmpty()) {
                         int index = 0;
                         for (Message pm : pinnedList) {
-                            if (Long.parseLong(pm.getbTime().substring(0, 8) + pm.getbTime().substring(9, 15)) > Long.parseLong(m.getbTime().substring(0, 8) + m.getbTime().substring(9, 15))) {
+                            if (Long.parseLong(pm.getTime().substring(0, 8) + pm.getTime().substring(9, 15)) > Long.parseLong(m.getTime().substring(0, 8) + m.getTime().substring(9, 15))) {
                                 break;
                             } else {
                                 index++;
@@ -2128,15 +1993,15 @@ public class ChatActivity extends AppCompatActivity {
         final TextInputLayout room_password_layout = view.findViewById(R.id.room_password_layout);
         final TextInputLayout room_password_repeat_layout = view.findViewById(R.id.room_password_repeat_layout);
 
-        edit_room_name.setText(room_name);
-        edit_room_desc.setText(desc);
-        edit_room_password.setText(passwd);
-        edit_room_password_repeat.setText(passwd);
+        edit_room_name.setText(room.getName());
+        edit_room_desc.setText(room.getDesc());
+        edit_room_password.setText(room.getPasswd());
+        edit_room_password_repeat.setText(room.getPasswd());
 
         final Spinner spinner = view.findViewById(R.id.spinner);
         roomimage = view.findViewById(R.id.room_image);
 
-        spinner.setSelection(Integer.parseInt(caty));
+        spinner.setSelection(Integer.parseInt(room.getCategory()));
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -2229,7 +2094,7 @@ public class ChatActivity extends AppCompatActivity {
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         final StorageReference pathReference_image = storageRef.child("room_images/" + room_img);
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     .load(pathReference_image)
                     .placeholder(R.drawable.side_nav_bar_dark)
@@ -2256,7 +2121,7 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(this);
@@ -2294,33 +2159,33 @@ public class ChatActivity extends AppCompatActivity {
 
                     @Override
                     public void onClick(View view) {
-                        final String roomname = edit_room_name.getText().toString().trim();
-                        final String roompassword = edit_room_password.getText().toString().trim();
-                        final String roompasswordrepeat = edit_room_password_repeat.getText().toString().trim();
-                        final String roomdesc = edit_room_desc.getText().toString().trim();
-                        if (!roomname.isEmpty()) {
-                            if (!roomdesc.isEmpty()) {
+                        final String roomName = edit_room_name.getText().toString().trim();
+                        final String roomPassword = edit_room_password.getText().toString().trim();
+                        final String roomPasswordRepeat = edit_room_password_repeat.getText().toString().trim();
+                        final String roomDescription = edit_room_desc.getText().toString().trim();
+                        if (!roomName.isEmpty()) {
+                            if (!roomDescription.isEmpty()) {
                                 if (katindex!=0) {
-                                    if (!roompassword.isEmpty()) {
-                                        if (!roompasswordrepeat.isEmpty()) {
-                                            if (roompassword.equals(roompasswordrepeat)) {
+                                    if (!roomPassword.isEmpty()) {
+                                        if (!roomPasswordRepeat.isEmpty()) {
+                                            if (roomPassword.equals(roomPasswordRepeat)) {
                                                 if (view != null) {
                                                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                                                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                                                 }
-                                                DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomkey);
+                                                DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomDataKey);
                                                 Map<String, Object> map = new HashMap<>();
-                                                map.put("name", roomname);
-                                                map.put("passwd", roompassword);
-                                                map.put("desc", roomdesc);
-                                                map.put("caty", String.valueOf(katindex));
+                                                map.put("name", roomName);
+                                                map.put("passwd", roomPassword);
+                                                map.put("desc", roomDescription);
+                                                map.put("category", String.valueOf(katindex));
                                                 message_root.updateChildren(map);
-                                                writeToFile(roompassword, "mychatapp_raum_" + room_key + ".txt");
-                                                setTitle(roomname);
+                                                fileOperations.writeToFile(roomPassword, "mychatapp_room_" + room_key + ".txt");
+                                                setTitle(roomName);
                                                 Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();
-                                                desc = roomdesc;
-                                                caty = String.valueOf(katindex);
-                                                passwd = roompassword;
+                                                room.setDesc(roomDescription);
+                                                room.setCategory(String.valueOf(katindex));
+                                                room.setPasswd(roomPassword);
                                                 alert.cancel();
                                                 openInfo();
                                             } else {
@@ -2352,7 +2217,7 @@ public class ChatActivity extends AppCompatActivity {
     private TextView setupHeader(String title) {
         TextView header = new TextView(this);
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             header.setBackgroundColor(getResources().getColor(R.color.dark_button));
         } else {
             header.setBackgroundColor(getResources().getColor(R.color.red));

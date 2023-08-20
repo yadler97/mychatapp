@@ -2,28 +2,23 @@ package com.yannick.mychatapp;
 
 import android.app.ActivityManager;
 import android.app.PendingIntent;
-import androidx.core.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
-import android.os.Build;
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.core.app.RemoteInput;
 import androidx.core.content.ContextCompat;
-import android.util.Log;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.List;
 
 import static android.content.ContentValues.TAG;
@@ -40,8 +35,9 @@ public class PushService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         mAuth = FirebaseAuth.getInstance();
-        if (!appInForeground(this) || (appInForeground(this) && !readFromFile("mychatapp_current.txt").equals(remoteMessage.getData().get("roomid")))) {
-            if (!readFromFile("mychatapp_settings_push.txt").equals("off") && !remoteMessage.getData().get("userid").equals(mAuth.getCurrentUser().getUid())) {
+        FileOperations fileOperations = new FileOperations(this);
+        if (!appInForeground(this) || (appInForeground(this) && !fileOperations.readFromFile("mychatapp_current.txt").equals(remoteMessage.getData().get("roomid")))) {
+            if (!fileOperations.readFromFile("mychatapp_settings_push.txt").equals("off") && !remoteMessage.getData().get("userid").equals(mAuth.getCurrentUser().getUid())) {
                 int pushID = 0;
                 for (int i = 0; i < remoteMessage.getData().get("roomid").length(); ++i) {
                     pushID += (int) remoteMessage.getData().get("roomid").charAt(i);
@@ -61,58 +57,40 @@ public class PushService extends FirebaseMessagingService {
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                 PendingIntent contentIntent = PendingIntent.getActivity(this, (int) (Math.random() * 100), intent, 0);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(getResources().getString(R.string.sendmessage)).build();
+                RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(getResources().getString(R.string.sendmessage)).build();
 
-                    NotificationCompat.Action replyAction =
-                            new NotificationCompat.Action.Builder(
-                                    R.drawable.ic_stat_ic_stat_onesignal_default,
-                                    getResources().getString(R.string.reply), getReplyPendingIntent(remoteMessage.getData().get("roomid"), pushID))
-                                    .addRemoteInput(remoteInput)
-                                    .setAllowGeneratedReplies(true)
-                                    .build();
+                NotificationCompat.Action replyAction =
+                        new NotificationCompat.Action.Builder(
+                                R.drawable.ic_stat_ic_stat_onesignal_default,
+                                getResources().getString(R.string.reply), getReplyPendingIntent(remoteMessage.getData().get("roomid"), pushID))
+                                .addRemoteInput(remoteInput)
+                                .setAllowGeneratedReplies(true)
+                                .build();
 
-                    NotificationCompat.Action markAsReadAction =
-                            new NotificationCompat.Action.Builder(
-                                    R.drawable.ic_stat_ic_stat_onesignal_default,
-                                    getResources().getString(R.string.markasread), getMarkAsReadPendingIntent(remoteMessage.getData().get("roomid"), pushID, remoteMessage.getData().get("messageid")))
-                                    .setAllowGeneratedReplies(true)
-                                    .build();
+                NotificationCompat.Action markAsReadAction =
+                        new NotificationCompat.Action.Builder(
+                                R.drawable.ic_stat_ic_stat_onesignal_default,
+                                getResources().getString(R.string.markasread), getMarkAsReadPendingIntent(remoteMessage.getData().get("roomid"), pushID, remoteMessage.getData().get("messageid")))
+                                .setAllowGeneratedReplies(true)
+                                .build();
 
-                    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
-                            .setContentTitle(remoteMessage.getData().get("roomname"))
-                            .setContentText(pushtext)
-                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                            .setStyle(new NotificationCompat.BigTextStyle())
-                            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                            .setLights(Color.YELLOW, 1000, 1000)
-                            .setColor(ContextCompat.getColor(getApplicationContext(), R.color.red))
-                            .setSmallIcon(R.drawable.ic_stat_ic_stat_onesignal_default)
-                            .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.ic_launcher))
-                            .setContentIntent(contentIntent)
-                            .addAction(replyAction)
-                            .addAction(markAsReadAction)
-                            .setAutoCancel(true);
+                NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
+                        .setContentTitle(remoteMessage.getData().get("roomname"))
+                        .setContentText(pushtext)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setStyle(new NotificationCompat.BigTextStyle())
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                        .setLights(Color.YELLOW, 1000, 1000)
+                        .setColor(ContextCompat.getColor(getApplicationContext(), R.color.red))
+                        .setSmallIcon(R.drawable.ic_stat_ic_stat_onesignal_default)
+                        .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.ic_launcher))
+                        .setContentIntent(contentIntent)
+                        .addAction(replyAction)
+                        .addAction(markAsReadAction)
+                        .setAutoCancel(true);
 
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-                    notificationManager.notify(pushID, notificationBuilder.build());
-                } else {
-                    NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
-                            .setContentTitle(remoteMessage.getData().get("roomname"))
-                            .setContentText(pushtext)
-                            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                            .setStyle(new NotificationCompat.BigTextStyle())
-                            .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                            .setLights(Color.YELLOW, 1000, 1000)
-                            .setColor(ContextCompat.getColor(getApplicationContext(), R.color.red))
-                            .setSmallIcon(R.drawable.ic_stat_ic_stat_onesignal_default)
-                            .setLargeIcon(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.ic_launcher))
-                            .setContentIntent(contentIntent)
-                            .setAutoCancel(true);
-
-                    NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-                    notificationManager.notify(pushID, notificationBuilder.build());
-                }
+                NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+                notificationManager.notify(pushID, notificationBuilder.build());
 
                 Log.d(TAG, "From: " + remoteMessage.getFrom());
 
@@ -154,35 +132,5 @@ public class PushService extends FirebaseMessagingService {
             }
         }
         return false;
-    }
-
-    private String readFromFile(String datei) {
-        Context context = getApplicationContext();
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(datei);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
     }
 }

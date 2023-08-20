@@ -1,83 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.yannick.mychatapp" >
+    xmlns:tools="http://schemas.android.com/tools" >
 
-<uses-permission android:name="android.permission.CAMERA" android:maxSdkVersion="22" />
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-<application
-    android:name="com.yannick.mychatapp.MyChatApp"
-    android:label="@string/app_name"
-    android:allowBackup="true"
-    android:icon="@mipmap/ic_launcher"
-    android:roundIcon="@mipmap/ic_launcher_round"
-    android:supportsRtl="true"
-    android:theme="@style/AppTheme" >
-    <meta-data android:name="com.samsung.android.icon_container.has_icon_container" android:value="true" />
-    <provider
-        android:name="androidx.core.content.FileProvider"
-        android:authorities="${applicationId}.fileprovider"
-        android:exported="false"
-        android:grantUriPermissions="true">
-        <meta-data
-            android:name="android.support.FILE_PROVIDER_PATHS"
-            android:resource="@xml/file_paths" />
-    </provider>
-    <activity
-        android:name=".SplashActivity"
-        android:theme="@style/AppTheme.NoActionBar"
-        android:windowSoftInputMode="stateHidden|adjustPan"
-        android:exported="true"
-        tools:ignore="AppLinkUrlError">
-        <intent-filter>
-            <!---<action android:name="android.intent.action.VIEW" />-->
-            <action android:name="android.intent.action.MAIN" />
+    <uses-permission android:name="android.permission.CAMERA" android:maxSdkVersion="22" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
-    <activity
-        android:name=".MainActivity"
-        android:launchMode="singleTask"
+    <application
+        android:name="com.yannick.mychatapp.MyChatApp"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme.NoActionBar"
-        android:windowSoftInputMode="stateHidden|adjustResize"
-        android:configChanges="orientation|keyboardHidden|screenSize" />
-    <activity
-        android:name=".ChatActivity"
-        android:parentActivityName=".MainActivity"
-        android:windowSoftInputMode="stateHidden|adjustResize"
-        android:configChanges="orientation|keyboardHidden|screenSize"
-        android:exported="false">
-        <intent-filter>
-            <action android:name="android.intent.action.SEARCH" />
-        </intent-filter>
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:requestLegacyExternalStorage="true"
+        android:theme="@style/AppTheme" >
+        <meta-data android:name="com.samsung.android.icon_container.has_icon_container" android:value="true" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+        <activity
+            android:name=".SplashActivity"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden|adjustPan"
+            android:exported="true"
+            tools:ignore="AppLinkUrlError">
+            <intent-filter>
+                <!---<action android:name="android.intent.action.VIEW" />-->
+                <action android:name="android.intent.action.MAIN" />
 
-        <meta-data
-            android:name="android.app.searchable"
-            android:resource="@xml/searchable" />
-    </activity>
-    <activity
-        android:name=".LoginActivity" >
-    </activity>
-    <service
-        android:name=".PushService"
-        android:enabled="true"
-        android:exported="true">
-        <intent-filter>
-            <action android:name="com.google.firebase.MESSAGING_EVENT" />
-        </intent-filter>
-    </service>
-    <receiver
-        android:name=".ReplyReceiver"
-        android:enabled="true"
-        android:exported="false" />
-    <receiver
-        android:name=".MarkAsReadReceiver"
-        android:enabled="true"
-        android:exported="false" />
-</application>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:launchMode="singleTask"
+            android:theme="@style/AppTheme.NoActionBar"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:configChanges="orientation|keyboardHidden|screenSize" />
+        <activity
+            android:name=".ChatActivity"
+            android:parentActivityName=".MainActivity"
+            android:windowSoftInputMode="stateHidden|adjustResize"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
+        </activity>
+        <activity
+            android:name=".LoginActivity" >
+        </activity>
+        <service
+            android:name=".PushService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <receiver
+            android:name=".ReplyReceiver"
+            android:enabled="true"
+            android:exported="false" />
+        <receiver
+            android:name=".MarkAsReadReceiver"
+            android:enabled="true"
+            android:exported="false" />
+    </application>
 
 </manifest>

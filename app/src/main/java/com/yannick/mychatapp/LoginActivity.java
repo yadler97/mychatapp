@@ -5,19 +5,14 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
-import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -60,12 +55,10 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,24 +67,16 @@ import java.util.UUID;
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
-    private String theme;
-    private ImageView imgsplash;
-    private MaterialButton loginbutton, createbutton;
-    private EditText inputemail, inputpassword;
-    private TextInputLayout inputemail_layout, inputpassword_layout;
-
-    private ImageButton profileimage;
-    private ImageButton profilebanner;
+    private Theme theme;
+    private ImageButton profileImage;
+    private ImageButton profileBanner;
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private static String userID = "";
-    private static String geburtstag = "01.01.2000";
+    private static final String birthday = "01.01.2000";
     private static String ownpi = "0";
-    private static int color = 0;
-    private int tmpcolor = -1;
-    private DatabaseReference userroot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
-    private StorageReference pathReference_image;
-    private StorageReference pathReference_banner;
+    private static int colour = 0;
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
 
     private String img = "";
     private String banner = "";
@@ -99,30 +84,30 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        changeTheme();
+        changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.activity_login);
 
-        imgsplash = findViewById(R.id.imgsplash);
-        loginbutton = findViewById(R.id.loginbutton);
-        createbutton = findViewById(R.id.createbutton);
-        inputemail = findViewById(R.id.login_email);
-        inputpassword = findViewById(R.id.login_password);
-        inputemail_layout = findViewById(R.id.login_email_layout);
-        inputpassword_layout = findViewById(R.id.login_password_layout);
+        ImageView imgSplash = findViewById(R.id.imgsplash);
+        MaterialButton loginButton = findViewById(R.id.loginbutton);
+        MaterialButton createButton = findViewById(R.id.createbutton);
+        EditText inputEmail = findViewById(R.id.login_email);
+        EditText inputPassword = findViewById(R.id.login_password);
+        TextInputLayout inputEmailLayout = findViewById(R.id.login_email_layout);
+        TextInputLayout inputPasswordLayout = findViewById(R.id.login_password_layout);
 
-        inputemail.setTextColor(getResources().getColor(R.color.black));
-        inputpassword.setTextColor(getResources().getColor(R.color.black));
+        inputEmail.setTextColor(getResources().getColor(R.color.black));
+        inputPassword.setTextColor(getResources().getColor(R.color.black));
 
-        if (theme.equals("1")) {
-            imgsplash.setImageResource(R.drawable.ic_splash_dark);
+        if (theme == Theme.DARK) {
+            imgSplash.setImageResource(R.drawable.ic_splash_dark);
         } else {
-            imgsplash.setImageResource(R.drawable.ic_splash);
+            imgSplash.setImageResource(R.drawable.ic_splash);
         }
 
         mAuth = FirebaseAuth.getInstance();
         storage = FirebaseStorage.getInstance();
 
-        inputemail.addTextChangedListener(new TextWatcher() {
+        inputEmail.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -136,12 +121,12 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    inputemail_layout.setError(null);
+                    inputEmailLayout.setError(null);
                 }
             }
         });
 
-        inputpassword.addTextChangedListener(new TextWatcher() {
+        inputPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -155,29 +140,29 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    inputpassword_layout.setError(null);
+                    inputPasswordLayout.setError(null);
                 }
             }
         });
 
-        loginbutton.setOnClickListener(new View.OnClickListener() {
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String email = inputemail.getText().toString().trim();
-                String password = inputpassword.getText().toString().trim();
+                String email = inputEmail.getText().toString().trim();
+                String password = inputPassword.getText().toString().trim();
                 if (!email.isEmpty()) {
                     if (!password.isEmpty()) {
                         login(email, password);
                     } else {
-                        inputpassword_layout.setError(getResources().getString(R.string.enterpassword));
+                        inputPasswordLayout.setError(getResources().getString(R.string.enterpassword));
                     }
                 } else {
-                    inputemail_layout.setError(getResources().getString(R.string.enteremail));
+                    inputEmailLayout.setError(getResources().getString(R.string.enteremail));
                 }
             }
         });
 
-        createbutton.setOnClickListener(new View.OnClickListener() {
+        createButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 createAccount();
@@ -219,10 +204,10 @@ public class LoginActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.resend_email, null);
 
-        final MaterialButton resendemailbutton = view.findViewById(R.id.resendemailbutton);
+        final MaterialButton resendEmailButton = view.findViewById(R.id.resendemailbutton);
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -240,7 +225,7 @@ public class LoginActivity extends AppCompatActivity {
 
         final AlertDialog alert = builder.create();
 
-        resendemailbutton.setOnClickListener(new View.OnClickListener() {
+        resendEmailButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 resendEmail();
@@ -258,11 +243,11 @@ public class LoginActivity extends AppCompatActivity {
 
         final EditText email = view.findViewById(R.id.account_email);
         final EditText password = view.findViewById(R.id.account_password);
-        final EditText password_repeat = view.findViewById(R.id.account_password_repeat);
+        final EditText passwordRepeat = view.findViewById(R.id.account_password_repeat);
 
-        final TextInputLayout email_layout = view.findViewById(R.id.account_email_layout);
-        final TextInputLayout password_layout = view.findViewById(R.id.account_password_layout);
-        final TextInputLayout password_repeat_layout = view.findViewById(R.id.account_password_repeat_layout);
+        final TextInputLayout emailLayout = view.findViewById(R.id.account_email_layout);
+        final TextInputLayout passwordLayout = view.findViewById(R.id.account_password_layout);
+        final TextInputLayout passwordRepeatLayout = view.findViewById(R.id.account_password_repeat_layout);
 
         email.addTextChangedListener(new TextWatcher() {
             @Override
@@ -278,7 +263,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    email_layout.setError(null);
+                    emailLayout.setError(null);
                 }
             }
         });
@@ -296,11 +281,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    password_layout.setError(null);
+                    passwordLayout.setError(null);
                 }
             }
         });
-        password_repeat.addTextChangedListener(new TextWatcher() {
+        passwordRepeat.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -314,7 +299,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    password_repeat_layout.setError(null);
+                    passwordRepeatLayout.setError(null);
                 }
             }
         });
@@ -324,7 +309,7 @@ public class LoginActivity extends AppCompatActivity {
         ownpi = "0";
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -364,24 +349,24 @@ public class LoginActivity extends AppCompatActivity {
                         if (!email.getText().toString().isEmpty()) {
                             if (!password.getText().toString().trim().isEmpty()) {
                                 if(password.getText().toString().trim().length()>=6)
-                                    if (!password_repeat.getText().toString().trim().isEmpty()) {
-                                        if (password.getText().toString().trim().equals(password_repeat.getText().toString().trim())) {
+                                    if (!passwordRepeat.getText().toString().trim().isEmpty()) {
+                                        if (password.getText().toString().trim().equals(passwordRepeat.getText().toString().trim())) {
                                             createAccountData(email.getText().toString().trim(), password.getText().toString().trim());
                                             alert.cancel();
                                         } else {
                                             Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
                                         }
                                     } else {
-                                        password_repeat_layout.setError(getResources().getString(R.string.repeatpassword));
+                                        passwordRepeatLayout.setError(getResources().getString(R.string.repeatpassword));
                                     }
                                 else {
-                                    password_layout.setError(getResources().getString(R.string.passwordmustcontainatleastsixcharacters));
+                                    passwordLayout.setError(getResources().getString(R.string.passwordmustcontainatleastsixcharacters));
                                 }
                             } else {
-                                password_layout.setError(getResources().getString(R.string.enterpassword));
+                                passwordLayout.setError(getResources().getString(R.string.enterpassword));
                             }
                         } else {
-                            email_layout.setError(getResources().getString(R.string.enteremail));
+                            emailLayout.setError(getResources().getString(R.string.enteremail));
                         }
                     }
                 });
@@ -392,7 +377,7 @@ public class LoginActivity extends AppCompatActivity {
         alert.show();
     }
 
-    private void createAccountAuth(final String email, final String password, final String name, final String bio, final String wohnort, final String geburtstag) {
+    private void createAccountAuth(final String email, final String password, final String name, final String description, final String location, final String birthday) {
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
@@ -406,13 +391,13 @@ public class LoginActivity extends AppCompatActivity {
                                 img = imguuid;
                             }
 
-                            DatabaseReference user_root = userroot.child(userID);
+                            DatabaseReference user_root = userRoot.child(userID);
                             Map<String, Object> map = new HashMap<>();
                             map.put("name", name);
-                            map.put("bio", bio);
-                            map.put("loc", wohnort);
-                            map.put("bday", geburtstag.substring(6, 10) + geburtstag.substring(3, 5) + geburtstag.substring(0, 2));
-                            map.put("favc", String.valueOf(color));
+                            map.put("profileDescription", description);
+                            map.put("location", location);
+                            map.put("birthday", birthday.substring(6, 10) + birthday.substring(3, 5) + birthday.substring(0, 2));
+                            map.put("favColour", String.valueOf(colour));
                             map.put("img", img);
                             map.put("banner", banner);
                             if (ownpi.equals("0")) {
@@ -429,7 +414,7 @@ public class LoginActivity extends AppCompatActivity {
                                         .beginConfig()
                                         .bold()
                                         .endConfig()
-                                        .buildRect(name.substring(0, 1), getResources().getIntArray(R.array.favcolors)[color]);
+                                        .buildRect(name.substring(0, 1), getResources().getIntArray(R.array.favcolors)[colour]);
                                 Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
                                 Canvas canvas = new Canvas(bitmap);
                                 drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -461,16 +446,16 @@ public class LoginActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.edit_profile, null);
 
-        final EditText username = view.findViewById(R.id.user_name);
-        final EditText profilbio = view.findViewById(R.id.user_bio);
-        final EditText birthday = view.findViewById(R.id.user_birthday);
-        final EditText location = view.findViewById(R.id.user_location);
+        final EditText usernameEdit = view.findViewById(R.id.user_name);
+        final EditText profileDescriptionEdit = view.findViewById(R.id.user_bio);
+        final EditText birthdayEdit = view.findViewById(R.id.user_birthday);
+        final EditText locationEdit = view.findViewById(R.id.user_location);
 
-        final TextInputLayout username_layout = view.findViewById(R.id.user_name_layout);
-        final TextInputLayout profilbio_layout = view.findViewById(R.id.user_bio_layout);
-        final TextInputLayout location_layout = view.findViewById(R.id.user_location_layout);
+        final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
+        final TextInputLayout profileDescriptionLayout = view.findViewById(R.id.user_bio_layout);
+        final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
-        username.addTextChangedListener(new TextWatcher() {
+        usernameEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -484,11 +469,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    username_layout.setError(null);
+                    usernameLayout.setError(null);
                 }
             }
         });
-        profilbio.addTextChangedListener(new TextWatcher() {
+        profileDescriptionEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -502,11 +487,11 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    profilbio_layout.setError(null);
+                    profileDescriptionLayout.setError(null);
                 }
             }
         });
-        location.addTextChangedListener(new TextWatcher() {
+        locationEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -520,29 +505,29 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    location_layout.setError(null);
+                    locationLayout.setError(null);
                 }
             }
         });
 
-        final ImageButton favcolor = view.findViewById(R.id.user_favcolor);
-        profileimage = view.findViewById(R.id.user_profile_image);
-        profilebanner = view.findViewById(R.id.user_profile_banner);
+        final ImageButton favColour = view.findViewById(R.id.user_favcolor);
+        profileImage = view.findViewById(R.id.user_profile_image);
+        profileBanner = view.findViewById(R.id.user_profile_banner);
 
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         final StorageReference pathReference_image = storageRef.child("profile_images/" + img);
         final StorageReference pathReference_banner = storageRef.child("profile_banners/" + banner);
 
-        birthday.setText(geburtstag);
+        birthdayEdit.setText(birthday);
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
                     .load(pathReference_image)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileimage);
+                    .into(profileImage);
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -550,7 +535,7 @@ public class LoginActivity extends AppCompatActivity {
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profilebanner);
+                    .into(profileBanner);
         } else {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -558,7 +543,7 @@ public class LoginActivity extends AppCompatActivity {
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileimage);
+                    .into(profileImage);
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -566,10 +551,10 @@ public class LoginActivity extends AppCompatActivity {
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profilebanner);
+                    .into(profileBanner);
         }
 
-        profileimage.setOnClickListener(new View.OnClickListener() {
+        profileImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
@@ -579,7 +564,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        profilebanner.setOnClickListener(new View.OnClickListener() {
+        profileBanner.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
@@ -591,33 +576,33 @@ public class LoginActivity extends AppCompatActivity {
 
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.OVAL);
-        shape.setColor(getResources().getIntArray(R.array.favcolors)[color]);
-        favcolor.setBackground(shape);
+        shape.setColor(getResources().getIntArray(R.array.favcolors)[colour]);
+        favColour.setBackground(shape);
 
-        birthday.setOnClickListener(new View.OnClickListener() {
+        birthdayEdit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 DatePickerDialog datePicker = new DatePickerDialog(view.getContext(), new DatePickerDialog.OnDateSetListener() {
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        String datum;
+                        String date;
                         if (dayOfMonth < 10) {
-                            datum = "0" + dayOfMonth;
+                            date = "0" + dayOfMonth;
                         } else {
-                            datum = "" + dayOfMonth;
+                            date = "" + dayOfMonth;
                         }
                         monthOfYear = monthOfYear + 1;
                         if (monthOfYear < 10) {
-                            datum = datum + ".0" + monthOfYear + "." + year;
+                            date = date + ".0" + monthOfYear + "." + year;
                         } else {
-                            datum = datum + "." + monthOfYear + "." + year;
+                            date = date + "." + monthOfYear + "." + year;
                         }
 
-                        birthday.setText(datum);
+                        birthdayEdit.setText(date);
                     }
-                }, Integer.parseInt(geburtstag.substring(6, 10)), Integer.parseInt(geburtstag.substring(3, 5)) - 1, Integer.parseInt(geburtstag.substring(0, 2)));
-                if (theme.equals("1")) {
+                }, Integer.parseInt(birthday.substring(6, 10)), Integer.parseInt(birthday.substring(3, 5)) - 1, Integer.parseInt(birthday.substring(0, 2)));
+                if (theme == Theme.DARK) {
                     datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
                 }
                 Calendar c = Calendar.getInstance();
@@ -627,27 +612,27 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        favcolor.setOnClickListener(new View.OnClickListener() {
+        favColour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 SpectrumDialog.Builder builder;
-                if (theme.equals("1")) {
+                if (theme == Theme.DARK) {
                     builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
                 } else {
                     builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
                 }
-                builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[color]).setFixedColumnCount(5).setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
+                builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[colour]).setFixedColumnCount(5).setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
                     @Override
                     public void onColorSelected(boolean positiveResult, @ColorInt int scolor) {
                         if (positiveResult) {
                             int i = 0;
                             for (int c : getResources().getIntArray(R.array.favcolors)) {
                                 if (c == scolor) {
-                                    tmpcolor = i;
+                                    colour = i;
                                     GradientDrawable shape = new GradientDrawable();
                                     shape.setShape(GradientDrawable.OVAL);
                                     shape.setColor(getResources().getIntArray(R.array.favcolors)[i]);
-                                    favcolor.setBackground(shape);
+                                    favColour.setBackground(shape);
                                 }
                                 i++;
                             }
@@ -658,7 +643,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         AlertDialog.Builder builder;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
@@ -696,16 +681,16 @@ public class LoginActivity extends AppCompatActivity {
                 b.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (!username.getText().toString().isEmpty()) {
-                            if (!profilbio.getText().toString().isEmpty()) {
-                                if (!location.getText().toString().isEmpty()) {
-                                    if (!birthday.getText().toString().isEmpty()) {
-                                        String name = username.getText().toString();
-                                        String bio = profilbio.getText().toString();
-                                        String wohnort = location.getText().toString();
-                                        String geburtstag = birthday.getText().toString();
+                        if (!usernameEdit.getText().toString().isEmpty()) {
+                            if (!profileDescriptionEdit.getText().toString().isEmpty()) {
+                                if (!locationEdit.getText().toString().isEmpty()) {
+                                    if (!birthdayEdit.getText().toString().isEmpty()) {
+                                        String username = usernameEdit.getText().toString();
+                                        String profileDescription = profileDescriptionEdit.getText().toString();
+                                        String location = locationEdit.getText().toString();
+                                        String birthday = birthdayEdit.getText().toString();
 
-                                        createAccountAuth(email, password, name, bio, wohnort, geburtstag);
+                                        createAccountAuth(email, password, username, profileDescription, location, birthday);
 
                                         if (view != null) {
                                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -717,13 +702,13 @@ public class LoginActivity extends AppCompatActivity {
                                         Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
-                                    location_layout.setError(getResources().getString(R.string.enterlocation));
+                                    locationLayout.setError(getResources().getString(R.string.enterlocation));
                                 }
                             } else {
-                                profilbio_layout.setError(getResources().getString(R.string.enterbio));
+                                profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
                             }
                         } else {
-                            username_layout.setError(getResources().getString(R.string.entername));
+                            usernameLayout.setError(getResources().getString(R.string.entername));
                         }
                     }
                 });
@@ -733,49 +718,19 @@ public class LoginActivity extends AppCompatActivity {
         alert.show();
     }
 
-    private void changeTheme() {
-        theme = readFromFile("mychatapp_theme.txt");
-        if (theme.equals("1")) {
+    private void changeTheme(Theme theme) {
+        this.theme = theme;
+        if (theme == Theme.DARK) {
             setTheme(R.style.SplashDark);
         } else {
             setTheme(R.style.Splash);
         }
     }
 
-    public String readFromFile(String datei) {
-        Context context = this;
-        String erg = "";
-
-        try {
-            InputStream inputStream = context.openFileInput(datei);
-
-            if ( inputStream != null ) {
-                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-                String receiveString = "";
-                StringBuilder stringBuilder = new StringBuilder();
-
-                while ( (receiveString = bufferedReader.readLine()) != null ) {
-                    stringBuilder.append(receiveString);
-                }
-
-                inputStream.close();
-                erg = stringBuilder.toString();
-            }
-        }
-        catch (FileNotFoundException e) {
-            Log.e("login activity", "File not found: " + e.toString());
-        } catch (IOException e) {
-            Log.e("login activity", "Can not read file: " + e.toString());
-        }
-
-        return erg;
-    }
-
     private TextView setupHeader(String title) {
         TextView header = new TextView(this);
 
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             header.setBackgroundColor(getResources().getColor(R.color.dark_button));
         } else {
             header.setBackgroundColor(getResources().getColor(R.color.red));
@@ -803,7 +758,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void uploadImage(Uri filePath, final int type) {
         final ProgressDialog progressDialog;
-        if (theme.equals("1")) {
+        if (theme == Theme.DARK) {
             progressDialog = new ProgressDialog(new ContextThemeWrapper(this, R.style.AlertDialogDark));
         } else {
             progressDialog = new ProgressDialog(this);
@@ -846,7 +801,8 @@ public class LoginActivity extends AppCompatActivity {
         int compressFactor = 2;
         int height = bmp.getHeight();
         int width = bmp.getWidth();
-        if (getImgSize(filePath) > height * width) {
+        ImageOperations imageOperations = new ImageOperations(getContentResolver());
+        if (imageOperations.getImgSize(filePath) > height * width) {
             compressFactor = 4;
         }
         if (type == 0) {
@@ -864,7 +820,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         bmp = Bitmap.createScaledBitmap(bmp, width, height, false);
         try {
-            bmp = rotateImageIfRequired(this, bmp, filePath);
+            bmp = imageOperations.rotateImageIfRequired(this, bmp, filePath);
         } catch (IOException e) { }
         bmp.compress(Bitmap.CompressFormat.JPEG, compression, stream);
         byteArray = stream.toByteArray();
@@ -881,7 +837,7 @@ public class LoginActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 if (type == 0) {
                     ownpi = "1";
-                    DatabaseReference user_root = userroot.child(userID);
+                    DatabaseReference user_root = userRoot.child(userID);
                     Map<String, Object> map = new HashMap<>();
                     map.put("ownpi", "1");
                     user_root.updateChildren(map);
@@ -905,46 +861,9 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private Long getImgSize(Uri filePath) {
-        Cursor returnCursor = getContentResolver().query(filePath, null, null, null, null);
-        int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
-        returnCursor.moveToFirst();
-        return returnCursor.getLong(sizeIndex);
-    }
-
-    private static Bitmap rotateImage(Bitmap source, float angle) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(angle);
-        return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
-    }
-
-    private static Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
-
-        InputStream input = context.getContentResolver().openInputStream(selectedImage);
-        ExifInterface ei;
-        if (Build.VERSION.SDK_INT > 23) {
-            ei = new ExifInterface(input);
-        } else {
-            ei = new ExifInterface(selectedImage.getPath());
-        }
-
-        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
-
-        switch (orientation) {
-            case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
-            case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
-            case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
-            default:
-                return img;
-        }
-    }
-
     private void updateEditProfileImages() {
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        pathReference_image = storageRef.child("profile_images/" + img);
+        StorageReference pathReference_image = storageRef.child("profile_images/" + img);
         pathReference_image.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
             @Override
             public void onSuccess(StorageMetadata storageMetadata) {
@@ -953,10 +872,10 @@ public class LoginActivity extends AppCompatActivity {
                         .load(pathReference_image)
                         .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                         .centerCrop()
-                        .into(profileimage);
+                        .into(profileImage);
             }
         });
-        pathReference_banner = storageRef.child("profile_banners/" + banner);
+        StorageReference pathReference_banner = storageRef.child("profile_banners/" + banner);
         pathReference_banner.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
             @Override
             public void onSuccess(StorageMetadata storageMetadata) {
@@ -966,7 +885,7 @@ public class LoginActivity extends AppCompatActivity {
                         .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                         .centerCrop()
                         .thumbnail(0.05f)
-                        .into(profilebanner);
+                        .into(profileBanner);
             }
         });
     }

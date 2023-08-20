@@ -355,7 +355,13 @@
         "- Ein Bug wurde behoben, der dafür sorgte, dass der Profilbanner-Button unter \"Profil bearbeiten\" nicht angezeigt wurde, wenn der User keinen eigenen Banner hat\n"
         "\n "</string>
 
-    <string name="copyright">"Yannick Adler, 2018–2019\nVersion %s\n\n"
+    <string name="v110_title">"Version 1.1.0 (20.08.2023)"</string>
+    <string name="v110_text">"- Zahlreiche Dependencies wurden geupdatet\n"
+        "- Android-Versionen unter Android 8.0 Oreo werden jetzt nicht mehr unterstützt\n"
+        "- Zahlreiche Verbesserungen am Code\n"
+        "\n "</string>
+
+    <string name="copyright">"Yannick Adler, 2018–2023\nVersion %s\n\n"
         "Genutzte Libraries:\n"
         "- Droidparts von Alex Yanchenko\n"
         "- Spectrum von The Blue Alliance\n"
