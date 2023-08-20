@@ -40,6 +40,8 @@ public class FileOperations {
             Log.e("FileOperations", "File not found: " + e.toString());
         } catch (IOException e) {
             Log.e("FileOperations", "Can not read file: " + e.toString());
+        } catch (NullPointerException e) {
+            Log.e("FileOperations", "NullPointerException: " + e.toString());
         }
 
         return result;
