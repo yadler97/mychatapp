@@ -55,7 +55,7 @@ public class PushService extends FirebaseMessagingService {
                 intent.putExtra("user_id", mAuth.getCurrentUser().getUid());
                 intent.putExtra("nmid", remoteMessage.getData().get("messageid"));
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                PendingIntent contentIntent = PendingIntent.getActivity(this, (int) (Math.random() * 100), intent, 0);
+                PendingIntent contentIntent = PendingIntent.getActivity(this, (int) (Math.random() * 100), intent, PendingIntent.FLAG_IMMUTABLE);
 
                 RemoteInput remoteInput = new RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(getResources().getString(R.string.sendmessage)).build();
 
