@@ -50,8 +50,7 @@ public class FileOperations {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(file, Context.MODE_PRIVATE));
             outputStreamWriter.write(text);
             outputStreamWriter.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             Log.e("FileOperations", "File write failed: " + e.toString());
         }
     }
