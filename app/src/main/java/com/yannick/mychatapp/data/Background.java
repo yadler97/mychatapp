@@ -1,8 +1,10 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.data;
 
 import android.content.Context;
 
-enum Background {
+import com.yannick.mychatapp.FileOperations;
+
+public enum Background {
     STANDARD,
     BREATH_OF_THE_WILD,
     SPLATOON_2,
@@ -14,6 +16,8 @@ enum Background {
     FIRE_EMBLEM_FATES,
     SUPER_SMASH_BROS_ULTIMATE,
     DETECTIVE_PIKACHU;
+
+    public static final String fileName = "mychatapp_background.txt";
 
     public static Background getByPosition(int position) {
         switch (position) {
@@ -44,7 +48,7 @@ enum Background {
 
     public static Background getCurrentBackground(Context context) {
         FileOperations fileOperations = new FileOperations(context);
-        String fileValue = fileOperations.readFromFile("mychatapp_background.txt");
+        String fileValue = fileOperations.readFromFile(fileName);
         if (!fileValue.isEmpty()) {
             return Background.valueOf(fileValue);
         }

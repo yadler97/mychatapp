@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +12,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.User;
 
 import java.util.ArrayList;
 

@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,6 +10,11 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.yannick.mychatapp.data.Background;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.SquareImageView;
+import com.yannick.mychatapp.data.Theme;
 
 import java.util.ArrayList;
 

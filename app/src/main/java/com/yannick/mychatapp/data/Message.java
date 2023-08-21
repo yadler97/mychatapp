@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.data;
 
 public class Message {
     private User user;
@@ -31,7 +31,7 @@ public class Message {
         this.pin = pin;
     }
 
-    enum Type {
+    public enum Type {
         HEADER,
         MESSAGE_RECEIVED,
         MESSAGE_RECEIVED_CON,

@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.data;
 
 public class User {
     private String userID;

@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.activities;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Theme;
 
 public class SplashActivity extends AppCompatActivity{
     private final static int SPLASH_OUT_TIME = 2000;

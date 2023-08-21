@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +13,8 @@ import android.widget.LinearLayout;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.R;
 
 import java.util.ArrayList;
 

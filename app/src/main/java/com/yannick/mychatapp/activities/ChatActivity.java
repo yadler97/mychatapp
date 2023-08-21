@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -60,6 +61,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.menu.MenuBuilder;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.DefaultItemAnimator;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -86,6 +88,24 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.yannick.mychatapp.data.Background;
+import com.yannick.mychatapp.BuildConfig;
+import com.yannick.mychatapp.CatchViewPager;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.adapters.FullScreenImageAdapter;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.adapters.ImageAdapter;
+import com.yannick.mychatapp.ImageOperations;
+import com.yannick.mychatapp.adapters.MemberListAdapter;
+import com.yannick.mychatapp.data.Message;
+import com.yannick.mychatapp.adapters.MessageAdapter;
+import com.yannick.mychatapp.MyCallback;
+import com.yannick.mychatapp.adapters.PinboardAdapter;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Room;
+import com.yannick.mychatapp.data.Theme;
+import com.yannick.mychatapp.data.User;
+import com.yannick.mychatapp.ZoomOutPageTransformer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -197,12 +217,16 @@ public class ChatActivity extends AppCompatActivity {
 
     private final FileOperations fileOperations = new FileOperations(this);
 
+    private SharedPreferences settings;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.chat_room);
+
+        settings = PreferenceManager.getDefaultSharedPreferences(this);
 
         //Toolbar toolbar = findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
@@ -288,7 +312,7 @@ public class ChatActivity extends AppCompatActivity {
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(pushID);
 
-        if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+        if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
             input_msg.setText(fileOperations.readFromFile("mychatapp_" + room_key + "_eingabe.txt").replaceAll("<br />", "\n"));
         }
 
@@ -937,7 +961,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     quoteStatus = "";
 
-                    if (type == 1 && !fileOperations.readFromFile("mychatapp_settings_camera.txt").equals("off")) {
+                    if (type == 1 && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
                         downloadImage(imgName, type);
                     }
                 } else {
@@ -1379,7 +1403,7 @@ public class ChatActivity extends AppCompatActivity {
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
-            if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+            if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
                 fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
                 if (!input_msg.getText().toString().trim().isEmpty()) {
                     Toast.makeText(this, R.string.messagesaved, Toast.LENGTH_SHORT).show();
@@ -1442,7 +1466,7 @@ public class ChatActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(fullscreenReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
-        if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+        if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
             fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
         }
         fileOperations.writeToFile("0", "mychatapp_current.txt");
@@ -1454,7 +1478,7 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
-        if (!fileOperations.readFromFile("mychatapp_settings_save.txt").equals("off")) {
+        if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
             fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
         }
         if (!messageList.isEmpty()) {

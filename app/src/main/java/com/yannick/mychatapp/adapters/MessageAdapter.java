@@ -1,10 +1,11 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -29,11 +30,19 @@ import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.activities.MainActivity;
+import com.yannick.mychatapp.data.Message;
+import com.yannick.mychatapp.PatternEditableBuilder;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Theme;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -438,7 +447,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
             StorageReference pathReference = storageRef.child("images/" + imgurl);
 
-            if (fileOperations.readFromFile("mychatapp_settings_preview.txt").equals("off")) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
+            if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {
                 GlideApp.with(context)
                         .load(pathReference)
                         .onlyRetrieveFromCache(true)

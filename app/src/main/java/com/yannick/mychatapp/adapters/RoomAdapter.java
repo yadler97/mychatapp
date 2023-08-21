@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
@@ -13,6 +13,12 @@ import android.widget.TextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.data.Message;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Room;
+import com.yannick.mychatapp.data.Theme;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -49,7 +55,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         mAuth = FirebaseAuth.getInstance();
     }
 
-    enum RoomListType {
+    public enum RoomListType {
         MY_ROOMS,
         FAVORITES,
         MORE

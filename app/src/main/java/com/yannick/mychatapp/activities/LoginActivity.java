@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.activities;
 
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
@@ -54,6 +54,10 @@ import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.ImageOperations;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Theme;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;

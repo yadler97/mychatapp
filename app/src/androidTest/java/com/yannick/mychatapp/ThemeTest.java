@@ -6,6 +6,8 @@ import static org.junit.Assert.assertEquals;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.yannick.mychatapp.data.Theme;
+
 public class ThemeTest {
 
     @Test

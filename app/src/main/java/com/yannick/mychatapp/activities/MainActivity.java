@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.activities;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -30,22 +31,22 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.view.GravityCompat;
+import androidx.preference.PreferenceManager;
 import androidx.viewpager.widget.ViewPager;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -75,6 +76,22 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
+import com.yannick.mychatapp.data.Background;
+import com.yannick.mychatapp.adapters.BackgroundAdapter;
+import com.yannick.mychatapp.BuildConfig;
+import com.yannick.mychatapp.CatchViewPager;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.adapters.FullScreenImageAdapter;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.ImageOperations;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.fragments.RoomListFragmentFavorites;
+import com.yannick.mychatapp.fragments.RoomListFragmentMore;
+import com.yannick.mychatapp.fragments.RoomListFragmentMyRooms;
+import com.yannick.mychatapp.adapters.SectionsPageAdapter;
+import com.yannick.mychatapp.data.Theme;
+import com.yannick.mychatapp.adapters.ThemeAdapter;
+import com.yannick.mychatapp.data.User;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -94,7 +111,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
-    private String s_push, s_save, s_preview, s_camera, img_room, img_user, img_banner;
+    private String img_room, img_user, img_banner;
 
     private Theme theme;
 
@@ -139,6 +156,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FirebaseAuth mAuth;
 
     private final FileOperations fileOperations = new FileOperations(this);
+
+    public static final String settingsPushNotificationsKey = "settingsPushNotifications";
+    public static final String settingsSaveEnteredTextKey = "settingsSaveEnteredText";
+    public static final String settingsPreviewImagesKey = "settingsPreviewImages";
+    public static final String settingsStoreCameraPicturesKey = "settingsStoreCameraPictures";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -960,10 +982,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     @Override
                     public void onClick(View view) {
-                        String currentTheme = fileOperations.readFromFile("mychatapp_theme.txt");
-                        fileOperations.writeToFile(theme.toString(),"mychatapp_theme.txt");
-                        fileOperations.writeToFile(background.toString(), "mychatapp_background.txt");
-                        if (!currentTheme.equals(fileOperations.readFromFile("mychatapp_theme.txt"))) {
+                        fileOperations.writeToFile(theme.toString(),Theme.fileName);
+                        fileOperations.writeToFile(background.toString(), Background.fileName);
+                        if (currentTheme != theme) {
                             FragmentManager mFragmentManager = getSupportFragmentManager();
                             mFragmentManager.beginTransaction().remove(rFragMore).commit();
                             mFragmentManager.beginTransaction().remove(rFragMyRooms).commit();
@@ -983,46 +1004,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.settings, null);
 
-        Switch push = view.findViewById(R.id.push);
-        Switch save = view.findViewById(R.id.save);
-        Switch preview = view.findViewById(R.id.preview);
-        Switch camera = view.findViewById(R.id.camera);
-        s_push = fileOperations.readFromFile("mychatapp_settings_push.txt");
-        s_save = fileOperations.readFromFile("mychatapp_settings_save.txt");
-        s_preview = fileOperations.readFromFile("mychatapp_settings_preview.txt");
-        s_camera = fileOperations.readFromFile("mychatapp_settings_camera.txt");
-        if (!s_push.equals("off")) {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        SwitchCompat push = view.findViewById(R.id.push);
+        SwitchCompat save = view.findViewById(R.id.save);
+        SwitchCompat preview = view.findViewById(R.id.preview);
+        SwitchCompat camera = view.findViewById(R.id.camera);
+        boolean s_push = sharedPref.getBoolean(settingsPushNotificationsKey, false);
+        boolean s_save = sharedPref.getBoolean(settingsSaveEnteredTextKey, false);
+        boolean s_preview = sharedPref.getBoolean(settingsPreviewImagesKey, false);
+        boolean s_camera = sharedPref.getBoolean(settingsStoreCameraPicturesKey, false);
+        if (s_push) {
             push.setChecked(true);
         }
-        if (!s_save.equals("off")) {
+        if (s_save) {
             save.setChecked(true);
         }
-        if (!s_preview.equals("off")) {
+        if (s_preview) {
             preview.setChecked(true);
         }
-        if (!s_camera.equals("off")) {
+        if (s_camera) {
             camera.setChecked(true);
         }
-        push.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                s_push = isChecked ? "on" : "off";
-            }
-        });
-        save.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                s_save = isChecked ? "on" : "off";
-            }
-        });
-        preview.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                s_preview = isChecked ? "on" : "off";
-            }
-        });
-        camera.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                s_camera = isChecked ? "on" : "off";
-            }
-        });
+
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
@@ -1038,10 +1042,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                fileOperations.writeToFile(s_push, "mychatapp_settings_push.txt");
-                fileOperations.writeToFile(s_save, "mychatapp_settings_save.txt");
-                fileOperations.writeToFile(s_preview, "mychatapp_settings_preview.txt");
-                fileOperations.writeToFile(s_camera, "mychatapp_settings_camera.txt");
+                SharedPreferences.Editor editor = sharedPref.edit();
+                editor.putBoolean(settingsPushNotificationsKey, push.isChecked());
+                editor.putBoolean(settingsSaveEnteredTextKey, save.isChecked());
+                editor.putBoolean(settingsPreviewImagesKey, preview.isChecked());
+                editor.putBoolean(settingsStoreCameraPicturesKey, camera.isChecked());
+                editor.apply();
+
                 Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();
             }
         });

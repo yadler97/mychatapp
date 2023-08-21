@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.fragments;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -34,6 +34,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.activities.ChatActivity;
+import com.yannick.mychatapp.adapters.RoomAdapter;
+import com.yannick.mychatapp.data.Message;
+import com.yannick.mychatapp.data.Room;
+import com.yannick.mychatapp.data.Theme;
 
 import java.util.ArrayList;
 
