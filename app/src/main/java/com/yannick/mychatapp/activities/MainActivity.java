@@ -120,7 +120,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
-    private String[] kat;
     private int categoryIndex = 0;
     private static int color = 0;
     private int tmpcolor = -1;
@@ -208,8 +207,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
         View v = navigationView.getHeaderView(0);
 
-        kat = getResources().getStringArray(R.array.categories);
-
         icon_profile = v.findViewById(R.id.icon_profile);
         text_profile = v.findViewById(R.id.name_profile);
         banner_profile = v.findViewById(R.id.banner_profile);
@@ -256,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(!userListCreated) {
+                if (!userListCreated) {
                     handler.postDelayed(this, 1000);
                 } else {
                     createUserProfile(mAuth.getCurrentUser().getUid());
@@ -289,8 +286,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onItemSelected(AdapterView<?> adapter, View v,int position, long id) {
                 String category = adapter.getItemAtPosition(position).toString();
-                for (int i = 0; i < kat.length; i++) {
-                    if (kat[i].equals(category)) {
+                String[] categories = getResources().getStringArray(R.array.categories);
+                for (int i = 0; i < categories.length; i++) {
+                    if (categories[i].equals(category)) {
                         categoryIndex = i;
                     }
                 }
@@ -398,7 +396,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), 2);
+                startActivityForResult(Intent.createChooser(intent, "Select Image"), 2);
             }
         });
 
@@ -736,7 +734,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), 0);
+                startActivityForResult(Intent.createChooser(intent, "Select Image"), 0);
             }
         });
 
@@ -746,7 +744,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), 1);
+                startActivityForResult(Intent.createChooser(intent, "Select Image"), 1);
             }
         });
 

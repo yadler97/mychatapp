@@ -140,14 +140,12 @@ public class ChatActivity extends AppCompatActivity {
 
     private String userID;
     private String room_key;
-    private String temp_key;
     private String imgurl;
     private final String roomDataKey = "-0roomdata";
     private String app_name;
     private String room_name;
     private String lastReadMessage;
     private String key_last;
-    private String room_img;
     private String lastSearch = "";
 
     private DatabaseReference root;
@@ -189,16 +187,14 @@ public class ChatActivity extends AppCompatActivity {
     private ImageButton btn_image, btn_camera;
     private FloatingActionButton btn_scrolldown;
 
-    private static final int PICK_IMAGE_REQUEST = 1;
-    private static final int CAPTURE_IMAGE_REQUEST = 2;
-    private static final int PICK_ROOM_IMAGE_REQUEST = 3;
+    private static final int PICK_IMAGE_REQUEST = 0;
+    private static final int CAPTURE_IMAGE_REQUEST = 1;
+    private static final int PICK_ROOM_IMAGE_REQUEST = 2;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private SimpleDateFormat sdf_local = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
 
-    private String[] kat;
     private int katindex = 0;
-    private String kategorie;
 
     private GravityImageView backgroundview;
 
@@ -257,7 +253,6 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        kat = getResources().getStringArray(R.array.categories);
         app_name = getResources().getString(R.string.app_name);
 
         btn_scrolldown.hide();
@@ -353,12 +348,12 @@ public class ChatActivity extends AppCompatActivity {
                         searchView.setIconified(true);
                     }
                     Map<String, Object> map = new HashMap<String, Object>();
-                    temp_key = root.push().getKey();
+                    String newMessageKey = root.push().getKey();
                     root.updateChildren(map);
 
                     String currentDateAndTime = sdf.format(new Date());
 
-                    DatabaseReference message_root = root.child(temp_key);
+                    DatabaseReference message_root = root.child(newMessageKey);
                     Map<String, Object> map2 = new HashMap<String, Object>();
                     map2.put("name", userID);
                     map2.put("msg", input_msg.getText().toString().trim());
@@ -375,7 +370,7 @@ public class ChatActivity extends AppCompatActivity {
                     quote_image.setVisibility(View.GONE);
                     quote_layout.setVisibility(View.GONE);
                     fileOperations.writeToFile("", "mychatapp_" + room_key + "_eingabe.txt");
-                    fileOperations.writeToFile(temp_key, "mychatapp_room_" + room_key + "_nm.txt");
+                    fileOperations.writeToFile(newMessageKey, "mychatapp_room_" + room_key + "_nm.txt");
                 }
             }
         });
@@ -870,7 +865,7 @@ public class ChatActivity extends AppCompatActivity {
 
         String imgName = UUID.randomUUID().toString();
         StorageReference ref;
-        if (type == 2) {
+        if (type == PICK_ROOM_IMAGE_REQUEST) {
             ref = storageReference.child("room_images/" + imgName);
         } else {
             ref = storageReference.child("images/" + imgName);
@@ -878,7 +873,7 @@ public class ChatActivity extends AppCompatActivity {
 
         byte[] byteArray = new byte[0];
         ContentResolver cR = getApplicationContext().getContentResolver();
-        if (cR.getType(filePath).equals("image/gif") && type != 2) {
+        if (cR.getType(filePath).equals("image/gif") && type != PICK_ROOM_IMAGE_REQUEST) {
             try {
                 InputStream iStream = getContentResolver().openInputStream(filePath);
                 byteArray = getBytes(iStream);
@@ -893,9 +888,9 @@ public class ChatActivity extends AppCompatActivity {
 
             Bitmap bmp = BitmapFactory.decodeStream(imageStream);
 
-            if (bmp.getWidth() < bmp.getHeight() && type == 2) {
+            if (bmp.getWidth() < bmp.getHeight() && type == PICK_ROOM_IMAGE_REQUEST) {
                 bmp = Bitmap.createBitmap(bmp, 0, bmp.getHeight()/2-bmp.getWidth()/2, bmp.getWidth(), bmp.getWidth());
-            } else if (bmp.getWidth() > bmp.getHeight() && type == 2) {
+            } else if (bmp.getWidth() > bmp.getHeight() && type == PICK_ROOM_IMAGE_REQUEST) {
                 bmp = Bitmap.createBitmap(bmp, bmp.getWidth()/2-bmp.getHeight()/2, 0, bmp.getHeight(), bmp.getHeight());
             }
 
@@ -908,7 +903,7 @@ public class ChatActivity extends AppCompatActivity {
             if (imageOperations.getImgSize(filePath) > height * width) {
                 compressFactor = 4;
             }
-            if (type == 2) {
+            if (type == PICK_ROOM_IMAGE_REQUEST) {
                 while (height * width > 500 * 500) {
                     height /= 1.1;
                     width /= 1.1;
@@ -941,14 +936,14 @@ public class ChatActivity extends AppCompatActivity {
                 progressDialog.dismiss();
                 Toast.makeText(ChatActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
 
-                if (type != 2) {
+                if (type != PICK_ROOM_IMAGE_REQUEST) {
                     Map<String, Object> map = new HashMap<String, Object>();
-                    temp_key = root.push().getKey();
+                    String newMessageKey = root.push().getKey();
                     root.updateChildren(map);
 
                     String currentDateAndTime = sdf.format(new Date());
 
-                    DatabaseReference message_root = root.child(temp_key);
+                    DatabaseReference message_root = root.child(newMessageKey);
                     Map<String, Object> map2 = new HashMap<String, Object>();
                     map2.put("name", userID);
                     map2.put("msg", "");
@@ -961,7 +956,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     quoteStatus = "";
 
-                    if (type == 1 && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
+                    if (type == CAPTURE_IMAGE_REQUEST && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
                         downloadImage(imgName, type);
                     }
                 } else {
@@ -970,7 +965,7 @@ public class ChatActivity extends AppCompatActivity {
                     map.put("img", imgName);
                     message_root.updateChildren(map);
 
-                    room_img = imgName;
+                    room.setImg(imgName);
 
                     storageReferenceRoomImages = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
                     final StorageReference pathReference = storageReferenceRoomImages.child("room_images/" + imgName);
@@ -1001,7 +996,7 @@ public class ChatActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), PICK_IMAGE_REQUEST);
+        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST);
     }
 
     private void takePicture() {
@@ -1034,20 +1029,20 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null ) {
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null ) {
             Uri filePath = data.getData();
-            if(filePath != null) {
-                uploadImage(filePath, 0);
+            if (filePath != null) {
+                uploadImage(filePath, PICK_IMAGE_REQUEST);
             }
         }
         if (requestCode == CAPTURE_IMAGE_REQUEST && resultCode == RESULT_OK) {
             if (photoURI != null) {
-                uploadImage(photoURI, 1);
+                uploadImage(photoURI, CAPTURE_IMAGE_REQUEST);
             }
         }
         if (requestCode == PICK_ROOM_IMAGE_REQUEST) {
             Uri filePath = data.getData();
-            uploadImage(filePath, 2);
+            uploadImage(filePath, PICK_ROOM_IMAGE_REQUEST);
         }
     }
 
@@ -1119,8 +1114,8 @@ public class ChatActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             imgurl = intent.getStringExtra("imgurl");
             action = 1;
-            if(isStoragePermissionGranted()) {
-                downloadImage(imgurl, 0);
+            if (isStoragePermissionGranted()) {
+                downloadImage(imgurl, PICK_IMAGE_REQUEST);
             }
         }
     };
@@ -1211,10 +1206,10 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.v("DL","Permission is granted");
             if (action == 1) {
-                downloadImage(imgurl, 0);
+                downloadImage(imgurl, PICK_IMAGE_REQUEST);
             } else if (action == 2) {
                 takePicture();
             } else if (action == 3) {
@@ -1247,7 +1242,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                         notifyGallery(localFile.getAbsolutePath());
-                        if (type == 0) {
+                        if (type == PICK_IMAGE_REQUEST) {
                             createSnackbar(localFile, mimeType, getResources().getString(R.string.imagesaved));
                         }
                     }
@@ -1794,14 +1789,14 @@ public class ChatActivity extends AppCompatActivity {
                         break;
                     }
                 }
-                temp_key = roomRoot.child(roomKey).push().getKey();
+                String newMessageKey = roomRoot.child(roomKey).push().getKey();
 
                 String currentDateAndTime = sdf.format(new Date());
 
-                DatabaseReference message_root = roomRoot.child(roomKey).child(temp_key);
+                DatabaseReference message_root = roomRoot.child(roomKey).child(newMessageKey);
                 Map<String, Object> map = new HashMap<>();
                 map.put("name", userID);
-                if (fMessage.getType() == Message.Type.IMAGE_RECEIVED || fMessage.getType() == Message.Type.IMAGE_RECEIVED_CON || fMessage.getType() == Message.Type.IMAGE_SENT || fMessage.getType() == Message.Type.IMAGE_SENT_CON) {
+                if (Message.isImage(fMessage.getType())) {
                     map.put("msg", "");
                     map.put("img", fMessage.getMsg());
                 } else {
@@ -1813,9 +1808,9 @@ public class ChatActivity extends AppCompatActivity {
                 map.put("time", currentDateAndTime);
 
                 message_root.updateChildren(map);
-                fileOperations.writeToFile(temp_key, "mychatapp_room_" + roomKey + "_nm.txt");
+                fileOperations.writeToFile(newMessageKey, "mychatapp_room_" + roomKey + "_nm.txt");
                 alert.cancel();
-                if (fMessage.getType() == Message.Type.IMAGE_RECEIVED || fMessage.getType() == Message.Type.IMAGE_RECEIVED_CON || fMessage.getType() == Message.Type.IMAGE_SENT || fMessage.getType() == Message.Type.IMAGE_SENT_CON) {
+                if (Message.isImage(fMessage.getType())) {
                     Toast.makeText(ChatActivity.this, R.string.imageforwarded, Toast.LENGTH_SHORT).show();
                 } else {
                     Toast.makeText(ChatActivity.this, R.string.messageforwarded, Toast.LENGTH_SHORT).show();
@@ -2030,9 +2025,10 @@ public class ChatActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapter, View v,int position, long id) {
-                kategorie = adapter.getItemAtPosition(position).toString();
-                for (int i = 0; i < kat.length; i++) {
-                    if (kat[i].equals(kategorie)) {
+                String category = adapter.getItemAtPosition(position).toString();
+                String[] categories = getResources().getStringArray(R.array.categories);
+                for (int i = 0; i < categories.length; i++) {
+                    if (categories[i].equals(category)) {
                         katindex = i;
                     }
                 }
@@ -2116,7 +2112,7 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference pathReference_image = storageRef.child("room_images/" + room_img);
+        final StorageReference pathReference_image = storageRef.child("room_images/" + room.getImg());
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
@@ -2140,7 +2136,7 @@ public class ChatActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), PICK_ROOM_IMAGE_REQUEST);
+                startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_ROOM_IMAGE_REQUEST);
             }
         });
 

@@ -564,7 +564,7 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), 0);
+                startActivityForResult(Intent.createChooser(intent, "Select Image"), 0);
             }
         });
 
@@ -574,7 +574,7 @@ public class LoginActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), 1);
+                startActivityForResult(Intent.createChooser(intent, "Select Image"), 1);
             }
         });
 
@@ -752,9 +752,9 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK && data != null && data.getData() != null ) {
+        if (resultCode == RESULT_OK && data != null && data.getData() != null ) {
             Uri filePath = data.getData();
-            if(filePath != null) {
+            if (filePath != null) {
                 uploadImage(filePath, requestCode);
             }
         }
