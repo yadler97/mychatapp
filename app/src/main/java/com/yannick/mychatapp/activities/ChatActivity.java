@@ -161,10 +161,9 @@ public class ChatActivity extends AppCompatActivity {
     private CoordinatorLayout layout;
     private GestureDetector gestureDetector;
     private String quoteStatus = "";
-    private int amount = 0;
+    private int messageCount = 0;
     private int action = 0;
     private User user = new User();
-    private TextView noMessageFound;
 
     private final ArrayList<Message> messageList = new ArrayList<>();
     private final ArrayList<User> userList = new ArrayList<>();
@@ -183,8 +182,6 @@ public class ChatActivity extends AppCompatActivity {
     private boolean cancelFullscreenImage = false;
     private boolean imageListOpened = false;
     private boolean lastReadMessageReached = false;
-
-    private ImageButton btn_image, btn_camera;
     private FloatingActionButton btn_scrolldown;
 
     private static final int PICK_IMAGE_REQUEST = 0;
@@ -199,15 +196,12 @@ public class ChatActivity extends AppCompatActivity {
     private GravityImageView backgroundview;
 
     private TextView quote_text;
-    private ImageButton quote_remove;
     private LinearLayout quote_layout;
     private ImageView quote_image;
 
     private SearchView searchView;
 
     private Dialog fullscreendialog;
-
-    private ImageButton roomimage;
 
     private FirebaseAuth mAuth;
 
@@ -231,7 +225,7 @@ public class ChatActivity extends AppCompatActivity {
         layout = findViewById(R.id.coordinatorlayout);
         backgroundview = findViewById(R.id.backgroundview);
         quote_text = findViewById(R.id.quote_text);
-        quote_remove = findViewById(R.id.quote_remove);
+        ImageButton quote_remove = findViewById(R.id.quote_remove);
         quote_layout = findViewById(R.id.quote_layout);
         quote_image = findViewById(R.id.quote_image);
 
@@ -285,11 +279,10 @@ public class ChatActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
 
-        noMessageFound = findViewById(R.id.keinenachrichtgefunden);
         Button sendMessageButton = findViewById(R.id.btn_send);
         input_msg = findViewById(R.id.msg_input);
-        btn_camera = findViewById(R.id.btn_camera);
-        btn_image = findViewById(R.id.btn_image);
+        ImageButton btn_camera = findViewById(R.id.btn_camera);
+        ImageButton btn_image = findViewById(R.id.btn_image);
 
         userID = mAuth.getCurrentUser().getUid();
         room_name = getIntent().getExtras().get("room_name").toString();
@@ -508,7 +501,7 @@ public class ChatActivity extends AppCompatActivity {
                 for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
                     String roomKey = uniqueKeySnapshot.getKey();
                     if (roomKey.equals(room_key)) {
-                        amount = (int)uniqueKeySnapshot.getChildrenCount() - 1;
+                        messageCount = (int)uniqueKeySnapshot.getChildrenCount() - 1;
                     }
                     for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
                         Room room = roomSnapshot.getValue(Room.class);
@@ -967,13 +960,15 @@ public class ChatActivity extends AppCompatActivity {
 
                     room.setImg(imgName);
 
+                    ImageButton roomImageButton = findViewById(R.id.room_image);
+
                     storageReferenceRoomImages = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
                     final StorageReference pathReference = storageReferenceRoomImages.child("room_images/" + imgName);
                     GlideApp.with(getApplicationContext())
                             .load(pathReference)
                             .centerCrop()
                             .thumbnail(0.05f)
-                            .into(roomimage);
+                            .into(roomImageButton);
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -1298,6 +1293,7 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String s) {
+                TextView noMessageFound = findViewById(R.id.no_message_found);
                 if (!s.trim().isEmpty()) {
                     searchResultList = searchMessage(s);
 
@@ -1431,7 +1427,7 @@ public class ChatActivity extends AppCompatActivity {
         room_desc.setText(room.getDesc());
         room_cat.setText(getResources().getStringArray(R.array.categories)[Integer.parseInt(room.getCategory())]);
         room_creation.setText(time);
-        room_amount_messages.setText(String.valueOf(amount));
+        room_amount_messages.setText(String.valueOf(messageCount));
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -1535,7 +1531,7 @@ public class ChatActivity extends AppCompatActivity {
         String fcdat = currentDateAndTime.substring(0, 4) + "." + currentDateAndTime.substring(4, 6) + "." + currentDateAndTime.substring(6, 8) + " " + currentDateAndTime.substring(9, 11) + ":" + currentDateAndTime.substring(11, 13) + ":" + currentDateAndTime.substring(13, 15);
         String ftime = room.getTime().substring(0, 4) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(6, 8) + " " + room.getTime().substring(9, 11) + ":" + room.getTime().substring(11, 13) + ":" + room.getTime().substring(13, 15);
         String backup = getResources().getString(R.string.backupof) + " " + room_name + "\n" + getResources().getString(R.string.createdon) + ": " + fcdat + "\n\n" +
-                getResources().getString(R.string.category) + ": " + getResources().getStringArray(R.array.categories)[Integer.parseInt(room.getCategory())] + "\n" + getResources().getString(R.string.admin) + ": " + getUser(room.getAdmin()).getName() + "\n" + getResources().getString(R.string.foundation) + ": " + ftime + "\n" + getResources().getString(R.string.sentmessages) + ": " + amount + "\n----------------------------------------\n";
+                getResources().getString(R.string.category) + ": " + getResources().getStringArray(R.array.categories)[Integer.parseInt(room.getCategory())] + "\n" + getResources().getString(R.string.admin) + ": " + getUser(room.getAdmin()).getName() + "\n" + getResources().getString(R.string.foundation) + ": " + ftime + "\n" + getResources().getString(R.string.sentmessages) + ": " + messageCount + "\n----------------------------------------\n";
 
         String newDay = "";
         for (Message m : messageList) {
@@ -2018,7 +2014,7 @@ public class ChatActivity extends AppCompatActivity {
         edit_room_password_repeat.setText(room.getPasswd());
 
         final Spinner spinner = view.findViewById(R.id.spinner);
-        roomimage = view.findViewById(R.id.room_image);
+        ImageButton roomImageButton = view.findViewById(R.id.room_image);
 
         spinner.setSelection(Integer.parseInt(room.getCategory()));
 
@@ -2120,17 +2116,17 @@ public class ChatActivity extends AppCompatActivity {
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(roomimage);
+                    .into(roomImageButton);
         } else {
             GlideApp.with(getApplicationContext())
                     .load(pathReference_image)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(roomimage);
+                    .into(roomImageButton);
         }
 
-        roomimage.setOnClickListener(new View.OnClickListener() {
+        roomImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();

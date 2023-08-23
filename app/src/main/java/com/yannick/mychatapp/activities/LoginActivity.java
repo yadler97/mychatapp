@@ -72,8 +72,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private Theme theme;
-    private ImageButton profileImage;
-    private ImageButton profileBanner;
     private FirebaseStorage storage;
     private StorageReference storageRef;
     private static String userID = "";
@@ -515,8 +513,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         final ImageButton favColour = view.findViewById(R.id.user_favcolor);
-        profileImage = view.findViewById(R.id.user_profile_image);
-        profileBanner = view.findViewById(R.id.user_profile_banner);
+        final ImageButton profileImageButton = view.findViewById(R.id.user_profile_image);
+        final ImageButton profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         final StorageReference pathReference_image = storageRef.child("profile_images/" + img);
@@ -531,7 +529,7 @@ public class LoginActivity extends AppCompatActivity {
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileImage);
+                    .into(profileImageButton);
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -539,7 +537,7 @@ public class LoginActivity extends AppCompatActivity {
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileBanner);
+                    .into(profileBannerButton);
         } else {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -547,7 +545,7 @@ public class LoginActivity extends AppCompatActivity {
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileImage);
+                    .into(profileImageButton);
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -555,10 +553,10 @@ public class LoginActivity extends AppCompatActivity {
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileBanner);
+                    .into(profileBannerButton);
         }
 
-        profileImage.setOnClickListener(new View.OnClickListener() {
+        profileImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
@@ -568,7 +566,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        profileBanner.setOnClickListener(new View.OnClickListener() {
+        profileBannerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
@@ -868,6 +866,10 @@ public class LoginActivity extends AppCompatActivity {
     private void updateEditProfileImages() {
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference pathReference_image = storageRef.child("profile_images/" + img);
+
+        final ImageButton profileImageButton = findViewById(R.id.user_profile_image);
+        final ImageButton profileBannerButton = findViewById(R.id.user_profile_banner);
+
         pathReference_image.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
             @Override
             public void onSuccess(StorageMetadata storageMetadata) {
@@ -876,7 +878,7 @@ public class LoginActivity extends AppCompatActivity {
                         .load(pathReference_image)
                         .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                         .centerCrop()
-                        .into(profileImage);
+                        .into(profileImageButton);
             }
         });
         StorageReference pathReference_banner = storageRef.child("profile_banners/" + banner);
@@ -889,7 +891,7 @@ public class LoginActivity extends AppCompatActivity {
                         .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                         .centerCrop()
                         .thumbnail(0.05f)
-                        .into(profileBanner);
+                        .into(profileBannerButton);
             }
         });
     }

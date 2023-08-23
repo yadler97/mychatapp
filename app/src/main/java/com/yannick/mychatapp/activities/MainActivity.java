@@ -137,9 +137,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private ImageView banner_profile;
     private CircleImageView icon_profile;
     private TextView text_profile;
-    private ImageButton profileimage;
-    private ImageButton profilebanner;
-    private ImageButton roomimage;
 
     private StorageReference pathReference_image;
     private StorageReference pathReference_banner;
@@ -277,7 +274,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final TextInputLayout room_password_repeat_layout = view.findViewById(R.id.room_password_repeat_layout);
 
         final Spinner spinner = view.findViewById(R.id.spinner);
-        roomimage = view.findViewById(R.id.room_image);
+        final ImageButton roomImageButton = view.findViewById(R.id.room_image);
 
         Random rand = new Random();
         img_room = "standard" + (rand.nextInt(4)+1);
@@ -380,17 +377,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(roomimage);
+                    .into(roomImageButton);
         } else {
             GlideApp.with(getApplicationContext())
                     .load(pathReference_roomimage)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(roomimage);
+                    .into(roomImageButton);
         }
 
-        roomimage.setOnClickListener(new View.OnClickListener() {
+        roomImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
@@ -687,8 +684,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         final ImageButton favColour = view.findViewById(R.id.user_favcolor);
-        profileimage = view.findViewById(R.id.user_profile_image);
-        profilebanner = view.findViewById(R.id.user_profile_banner);
+        final ImageButton profileImageButton = view.findViewById(R.id.user_profile_image);
+        final ImageButton profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         final StorageReference pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
@@ -701,7 +698,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileimage);
+                    .into(profileImageButton);
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -709,7 +706,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profilebanner);
+                    .into(profileBannerButton);
         } else {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -717,7 +714,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileimage);
+                    .into(profileImageButton);
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -725,10 +722,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profilebanner);
+                    .into(profileBannerButton);
         }
 
-        profileimage.setOnClickListener(new View.OnClickListener() {
+        profileImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
@@ -738,7 +735,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        profilebanner.setOnClickListener(new View.OnClickListener() {
+        profileBannerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent();
@@ -1189,19 +1186,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateEditProfileImages() {
+        final ImageButton profileImageButton = findViewById(R.id.user_profile_image);
+        final ImageButton profileBannerButton = findViewById(R.id.user_profile_banner);
+
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
         GlideApp.with(getApplicationContext())
                 .load(pathReference_image)
                 .centerCrop()
-                .into(profileimage);
+                .into(profileImageButton);
 
         pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
                 .load(pathReference_banner)
                 .centerCrop()
                 .thumbnail(0.05f)
-                .into(profilebanner);
+                .into(profileBannerButton);
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -1391,11 +1391,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
                 Toast.makeText(MainActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
                 if (type == 2) {
+                    final ImageButton roomImageButton = findViewById(R.id.room_image);
+
                     pathReference_roomimage = storageRef.child("room_images/" + img_room);
                     GlideApp.with(getApplicationContext())
                             .load(pathReference_roomimage)
                             .centerCrop()
-                            .into(roomimage);
+                            .into(roomImageButton);
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
