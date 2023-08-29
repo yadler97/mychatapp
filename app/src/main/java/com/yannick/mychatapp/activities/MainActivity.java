@@ -463,8 +463,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                             map.put("category", String.valueOf(categoryIndex));
                                                             map.put("img", img_room);
                                                             message_root.updateChildren(map);
-                                                            fileOperations.writeToFile(roomPassword, "mychatapp_room_" + roomKey + ".txt");
-                                                            fileOperations.writeToFile("-0roomdata", "mychatapp_room_" + roomKey + "_nm.txt");
+                                                            fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
+                                                            fileOperations.writeToFile("-0roomdata", String.format(FileOperations.newestMessageFilePattern, roomKey));
                                                             FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                                                             Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
                                                             alert.cancel();

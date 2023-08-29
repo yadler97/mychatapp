@@ -53,7 +53,7 @@ public class ReplyReceiver extends BroadcastReceiver {
         updateNotification(context, intent.getIntExtra("push_id", 1));
 
         FileOperations fileOperations = new FileOperations(context);
-        fileOperations.writeToFile(temp_key, "mychatapp_room_" + intent.getStringExtra("room_key") + "_nm.txt");
+        fileOperations.writeToFile(temp_key, String.format(FileOperations.newestMessageFilePattern, intent.getStringExtra("room_key")));
     }
 
     private void updateNotification(Context context, int notifyId) {

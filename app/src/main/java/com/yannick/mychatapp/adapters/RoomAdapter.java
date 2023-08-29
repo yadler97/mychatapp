@@ -118,7 +118,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         FileOperations fileOperations = new FileOperations(this.context);
         if (type == RoomListType.MY_ROOMS || type == RoomListType.FAVORITES) {
             if (roomList.get(position).getnM() != null) {
-                if (!roomList.get(position).getnM().getKey().equals(fileOperations.readFromFile("mychatapp_room_" + roomList.get(position).getKey() + "_nm.txt"))) {
+                if (!roomList.get(position).getnM().getKey().equals(fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomList.get(position).getKey())))) {
                     if (Theme.getCurrentTheme(context) == Theme.DARK) {
                         viewHolder.background.setBackgroundColor(context.getResources().getColor(R.color.roomhighlight_dark));
                     } else {
@@ -129,7 +129,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         }
 
         if (type != RoomListType.MORE) {
-            if (fileOperations.readFromFile("mychatapp_" + roomList.get(position).getKey() + "_mute.txt").equals("1")) {
+            if (fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomList.get(position).getKey())).equals("1")) {
                 viewHolder.muteIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_muted));
                 if (Theme.getCurrentTheme(context) == Theme.DARK) {
                     viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);

@@ -105,7 +105,7 @@ public class RoomListFragmentFavorites extends Fragment {
             for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
                 final Room room = roomSnapshot.getValue(Room.class);
                 room.setKey(roomKey);
-                if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + roomKey + ".txt")) && fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+                if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
                     if (uniqueKeySnapshot.getChildrenCount() > 1) {
                         DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(roomKey);
                         Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
@@ -209,17 +209,17 @@ public class RoomListFragmentFavorites extends Fragment {
 
     private void requestPassword(final Room room) {
         String roomKey = room.getKey();
-        if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + roomKey + ".txt"))) {
+        if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
             Intent intent = new Intent(getContext(), ChatActivity.class);
             intent.putExtra("room_name", room.getName());
             intent.putExtra("room_key", roomKey);
-            intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_room_" + roomKey + "_nm.txt"));
+            intent.putExtra("last_read_message", fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomKey)));
             if (room.getnM() != null) {
                 intent.putExtra("nmid", room.getnM().getKey());
-                fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
+                fileOperations.writeToFile(room.getnM().getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
             } else {
                 intent.putExtra("nmid", roomKey);
-                fileOperations.writeToFile(room.getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
+                fileOperations.writeToFile(room.getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
             }
             adapter.notifyDataSetChanged();
             startActivity(intent);
@@ -245,7 +245,7 @@ public class RoomListFragmentFavorites extends Fragment {
     };
 
     private void updateRoomList(String key, String name, String admin, String category, String time, String passwd, String nmMsg, String nmTime, String nmKey, Message.Type nmType) {
-        if (fileOperations.readFromFile("mychatapp_" + key + "_fav.txt").equals("1")) {
+        if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, key)).equals("1")) {
             Room room = new Room(key, name, category, time, passwd, admin);
             if (!nmMsg.isEmpty()) {
                 Message newestMessage = new Message(null, nmMsg, nmTime, false, nmKey, nmType, "", "", "", "");
