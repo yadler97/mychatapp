@@ -350,7 +350,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onClick(View view) {
                         if (!email.getText().toString().isEmpty()) {
                             if (!password.getText().toString().trim().isEmpty()) {
-                                if(password.getText().toString().trim().length()>=6)
+                                if (password.getText().toString().trim().length()>=6)
                                     if (!passwordRepeat.getText().toString().trim().isEmpty()) {
                                         if (password.getText().toString().trim().equals(passwordRepeat.getText().toString().trim())) {
                                             createAccountData(email.getText().toString().trim(), password.getText().toString().trim());
@@ -389,8 +389,7 @@ public class LoginActivity extends AppCompatActivity {
                             userID = user.getUid();
 
                             if (ownpi.equals("0")) {
-                                String imguuid = UUID.randomUUID().toString();
-                                img = imguuid;
+                                img = UUID.randomUUID().toString();
                             }
 
                             DatabaseReference user_root = userRoot.child(userID);

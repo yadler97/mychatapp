@@ -104,9 +104,9 @@ public class RoomListFragmentMyRooms extends Fragment {
     private void addRoomToList(DataSnapshot dataSnapshot) {
         roomList.clear();
 
-        for(final DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
+        for (final DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
             final String name = uniqueKeySnapshot.getKey();
-            for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
+            for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
                 final Room room = roomSnapshot.getValue(Room.class);
                 room.setKey(name);
                 if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + name + ".txt"))) {

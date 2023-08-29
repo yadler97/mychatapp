@@ -49,7 +49,7 @@ public class BackgroundAdapter extends BaseAdapter {
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
         if (position == 0) {
-            if(theme == Theme.DARK) {
+            if (theme == Theme.DARK) {
                 imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
             } else {
                 imageView.setBorderColor(context.getResources().getColor(R.color.red));
@@ -65,7 +65,7 @@ public class BackgroundAdapter extends BaseAdapter {
                 v.setBorderColor(context.getResources().getColor(R.color.grey));
                 v.setBorderWidth((float)2);
             }
-            if(theme == Theme.DARK) {
+            if (theme == Theme.DARK) {
                 imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
             } else {
                 imageView.setBorderColor(context.getResources().getColor(R.color.red));
@@ -80,7 +80,7 @@ public class BackgroundAdapter extends BaseAdapter {
                     v.setBorderColor(context.getResources().getColor(R.color.grey));
                     v.setBorderWidth((float)2);
                 }
-                if(theme == Theme.DARK) {
+                if (theme == Theme.DARK) {
                     imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
                 } else {
                     imageView.setBorderColor(context.getResources().getColor(R.color.red));

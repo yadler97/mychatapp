@@ -111,7 +111,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 @Override
                 public boolean onTouch(View view, MotionEvent event) {
                     pos = getAdapterPosition();
-                    if(pos != RecyclerView.NO_POSITION) {
+                    if (pos != RecyclerView.NO_POSITION) {
                         return gestureDetector.onTouchEvent(event);
                     }
                     return false;
@@ -270,7 +270,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
         public void openSheetMenu() {
             Message clickedDataItem = messageList.get(pos);
-            String message = clickedDataItem.getMsg();
             Message.Type type = clickedDataItem.getType();
 
             if (type != Message.Type.HEADER) {
@@ -592,7 +591,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     private static SpannableStringBuilder highlightSearchedText(String text, String textToBold) {
         SpannableStringBuilder builder = new SpannableStringBuilder();
 
-        if(textToBold.length() > 0 && !textToBold.trim().equals("")) {
+        if (textToBold.length() > 0 && !textToBold.trim().equals("")) {
             int startingIndex = text.toLowerCase().indexOf(textToBold.toLowerCase());
             int endingIndex = startingIndex + textToBold.length();
             builder.append(text);

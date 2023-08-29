@@ -13,6 +13,11 @@ import java.io.OutputStreamWriter;
 public class FileOperations {
     Context context;
 
+    public final static String favFilePattern = "mychatapp_%s_fav.txt";
+    public final static String muteFilePattern = "mychatapp_%s_mute.txt";
+    public final static String currentInputFilePattern = "mychatapp_%s_currentInput.txt";
+    public final static String currentRoomFile = "mychatapp_currentRoom.txt";
+
     public FileOperations(Context context) {
         this.context = context;
     }

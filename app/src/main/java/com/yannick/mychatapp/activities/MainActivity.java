@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -166,18 +167,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //if (savedInstanceState == null) {
-            pageadapter = new SectionsPageAdapter(getSupportFragmentManager());
-            rFragMore = new RoomListFragmentMore();
-            rFragMyRooms = new RoomListFragmentMyRooms();
-            rFragFavs = new RoomListFragmentFavorites();
-        /*} else {
-            rFragMyRooms = (RoomlistFragmentMyRooms)pageadapter.getItem(0);
-            rFragFavs = (RoomlistFragmentFavorites)pageadapter.getItem(1);
-            rFragMore = (RoomlistFragmentMore)pageadapter.getItem(2);
-            pageadapter.clearAdapter();
-            pageadapter = new SectionsPageAdapter(getSupportFragmentManager());
-        }*/
+        pageadapter = new SectionsPageAdapter(getSupportFragmentManager());
+        rFragMore = new RoomListFragmentMore();
+        rFragMyRooms = new RoomListFragmentMyRooms();
+        rFragFavs = new RoomListFragmentFavorites();
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -197,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LocalBroadcastManager.getInstance(this).registerReceiver(backgroundReceiver, new IntentFilter("backgroundOption"));
         LocalBroadcastManager.getInstance(this).registerReceiver(closeFullscreenReceiver, new IntentFilter("closefullscreen"));
 
-        fileOperations.writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", FileOperations.currentRoomFile);
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         NavigationView navigationView = findViewById(R.id.nav_view);
@@ -1065,7 +1058,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -1108,7 +1100,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_roomsearch, menu);
 
-        if(menu instanceof MenuBuilder){
+        if (menu instanceof MenuBuilder){
             MenuBuilder m = (MenuBuilder) menu;
             m.setOptionalIconsVisible(true);
         }
@@ -1263,7 +1255,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
                 decorView.setSystemUiVisibility(uiOptions);
                 fullscreendialog.dismiss();
-            } catch (NullPointerException npe) {}
+            } catch (NullPointerException npe) {
+                Log.e("NullPointerException", npe.toString());
+            }
         }
     };
 
@@ -1280,9 +1274,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK && data != null && data.getData() != null ) {
+        if (resultCode == RESULT_OK && data != null && data.getData() != null ) {
             Uri filePath = data.getData();
-            if(filePath != null) {
+            if (filePath != null) {
                 uploadImage(filePath, requestCode);
             }
         }

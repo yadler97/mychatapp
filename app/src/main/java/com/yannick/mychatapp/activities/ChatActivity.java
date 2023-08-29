@@ -139,11 +139,11 @@ public class ChatActivity extends AppCompatActivity {
     private Room room;
 
     private String userID;
-    private String room_key;
+    private String roomKey;
     private String imgurl;
     private final String roomDataKey = "-0roomdata";
     private String app_name;
-    private String room_name;
+    private String roomName;
     private String lastReadMessage;
     private String key_last;
     private String lastSearch = "";
@@ -285,23 +285,23 @@ public class ChatActivity extends AppCompatActivity {
         ImageButton btn_image = findViewById(R.id.btn_image);
 
         userID = mAuth.getCurrentUser().getUid();
-        room_name = getIntent().getExtras().get("room_name").toString();
-        room_key = getIntent().getExtras().get("room_key").toString();
+        roomName = getIntent().getExtras().get("room_name").toString();
+        roomKey = getIntent().getExtras().get("room_key").toString();
         String nmid = getIntent().getExtras().get("nmid").toString();
         lastReadMessage = getIntent().getExtras().get("last_read_message").toString();
         lastReadMessageReached = (nmid.equals(lastReadMessage));
-        setTitle(room_name);
-        fileOperations.writeToFile(room_key, "mychatapp_current.txt");
+        setTitle(roomName);
+        fileOperations.writeToFile(roomKey, FileOperations.currentInputFilePattern);
 
         int pushID = 0;
-        for (int i = 0; i < room_key.length(); ++i) {
-            pushID += (int) room_key.charAt(i);
+        for (int i = 0; i < roomKey.length(); ++i) {
+            pushID += (int) roomKey.charAt(i);
         }
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(pushID);
 
         if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
-            input_msg.setText(fileOperations.readFromFile("mychatapp_" + room_key + "_eingabe.txt").replaceAll("<br />", "\n"));
+            input_msg.setText(fileOperations.readFromFile(String.format(FileOperations.currentInputFilePattern, roomKey)).replaceAll("<br />", "\n"));
         }
 
         gestureDetector = new GestureDetector(this, new SingleTapConfirm());
@@ -330,12 +330,12 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key);
+        root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey);
 
         sendMessageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!input_msg.getText().toString().trim().isEmpty()) {
+                if (!input_msg.getText().toString().trim().isEmpty()) {
                     if (!searchView.isIconified()) {
                         searchView.setIconified(true);
                         searchView.setIconified(true);
@@ -362,8 +362,8 @@ public class ChatActivity extends AppCompatActivity {
                     quote_image.setImageDrawable(null);
                     quote_image.setVisibility(View.GONE);
                     quote_layout.setVisibility(View.GONE);
-                    fileOperations.writeToFile("", "mychatapp_" + room_key + "_eingabe.txt");
-                    fileOperations.writeToFile(newMessageKey, "mychatapp_room_" + room_key + "_nm.txt");
+                    fileOperations.writeToFile("", String.format(FileOperations.currentInputFilePattern, roomKey));
+                    fileOperations.writeToFile(newMessageKey, "mychatapp_room_" + roomKey + "_nm.txt");
                 }
             }
         });
@@ -462,7 +462,7 @@ public class ChatActivity extends AppCompatActivity {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(!userListCreated) {
+                if (!userListCreated) {
                     handler.postDelayed(this, 1000);
                 } else {
                     root.addChildEventListener(new ChildEventListener() {
@@ -498,15 +498,15 @@ public class ChatActivity extends AppCompatActivity {
         roomRoot.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
+                for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
                     String roomKey = uniqueKeySnapshot.getKey();
-                    if (roomKey.equals(room_key)) {
+                    if (roomKey.equals(ChatActivity.this.roomKey)) {
                         messageCount = (int)uniqueKeySnapshot.getChildrenCount() - 1;
                     }
-                    for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
+                    for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
                         Room room = roomSnapshot.getValue(Room.class);
                         room.setKey(roomKey);
-                        if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + roomKey + ".txt")) && !roomKey.equals(room_key)) {
+                        if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + roomKey + ".txt")) && !roomKey.equals(ChatActivity.this.roomKey)) {
                             roomList.add(room.getName());
                             roomKeysList.add(room.getKey());
                         }
@@ -953,7 +953,7 @@ public class ChatActivity extends AppCompatActivity {
                         downloadImage(imgName, type);
                     }
                 } else {
-                    DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomDataKey);
+                    DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey).child(roomDataKey);
                     Map<String, Object> map = new HashMap<>();
                     map.put("img", imgName);
                     message_root.updateChildren(map);
@@ -1219,7 +1219,7 @@ public class ChatActivity extends AppCompatActivity {
 
         final Context context = getApplicationContext();
         final File rootPath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()+ "/" + app_name);
-        if(!rootPath.exists()) {
+        if (!rootPath.exists()) {
             if (!rootPath.mkdirs()) {
                 Log.e("firebase ", "Creating dir failed");
             }
@@ -1245,7 +1245,7 @@ public class ChatActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception exception) {
                         Toast.makeText(context, R.string.savingimagefailed, Toast.LENGTH_SHORT).show();
-                        Log.e("firebase ","Saving image failed: " +exception.toString());
+                        Log.e("firebase", "Saving image failed: " + exception.toString());
                     }
                 });
             }
@@ -1259,21 +1259,21 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu (Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        if (!fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
-            if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
+        if (!fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
                 inflater.inflate(R.menu.menu_chatroom, menu);
             } else {
                 inflater.inflate(R.menu.menu_chatroom_unmute, menu);
             }
         } else {
-            if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
+            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
                 inflater.inflate(R.menu.menu_chatroom_unfav, menu);
             } else {
                 inflater.inflate(R.menu.menu_chatroom_unmute_unfav, menu);
             }
         }
 
-        if(menu instanceof MenuBuilder){
+        if (menu instanceof MenuBuilder){
             MenuBuilder m = (MenuBuilder) menu;
             m.setOptionalIconsVisible(true);
         }
@@ -1339,13 +1339,13 @@ public class ChatActivity extends AppCompatActivity {
             openPinboard();
             return true;
         } else if (item.getItemId() == R.id.roommute) {
-            if (!fileOperations.readFromFile("mychatapp_" + room_key + "_mute.txt").equals("1")) {
-                fileOperations.writeToFile("1", "mychatapp_" + room_key + "_mute.txt");
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(room_key);
+            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+                fileOperations.writeToFile("1", String.format(FileOperations.muteFilePattern, roomKey));
+                FirebaseMessaging.getInstance().unsubscribeFromTopic(roomKey);
                 Toast.makeText(this, R.string.roommuted, Toast.LENGTH_SHORT).show();
             } else {
-                fileOperations.writeToFile("0", "mychatapp_" + room_key + "_mute.txt");
-                FirebaseMessaging.getInstance().subscribeToTopic(room_key);
+                fileOperations.writeToFile("0", String.format(FileOperations.muteFilePattern, roomKey));
+                FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                 Toast.makeText(this, R.string.roomunmuted, Toast.LENGTH_SHORT).show();
             }
             invalidateOptionsMenu();
@@ -1368,13 +1368,13 @@ public class ChatActivity extends AppCompatActivity {
             builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    fileOperations.writeToFile("", "mychatapp_room_" + room_key + ".txt");
+                    fileOperations.writeToFile("", "mychatapp_room_" + roomKey + ".txt");
                     startActivity(new Intent(ChatActivity.this, MainActivity.class));
-                    if (fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
+                    if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
                         markAsFav();
                     }
                     Intent intent = new Intent("leaveroom");
-                    intent.putExtra("roomkey", room_key);
+                    intent.putExtra("roomkey", roomKey);
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
                     Toast.makeText(getApplicationContext(), R.string.roomleaved, Toast.LENGTH_SHORT).show();
                 }
@@ -1395,15 +1395,15 @@ public class ChatActivity extends AppCompatActivity {
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
             if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
-                fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+                fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), String.format(FileOperations.currentInputFilePattern, roomKey));
                 if (!input_msg.getText().toString().trim().isEmpty()) {
                     Toast.makeText(this, R.string.messagesaved, Toast.LENGTH_SHORT).show();
                 }
             }
             if (!messageList.isEmpty()) {
-                fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_room_" + room_key + "_nm.txt");
+                fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
             }
-            fileOperations.writeToFile("0", "mychatapp_current.txt");
+            fileOperations.writeToFile("0", FileOperations.currentRoomFile);
             startActivity(new Intent(ChatActivity.this, MainActivity.class));
             return true;
         } else {
@@ -1458,11 +1458,11 @@ public class ChatActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
         if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
-            fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+            fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), String.format(FileOperations.currentInputFilePattern, roomKey));
         }
-        fileOperations.writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", FileOperations.currentRoomFile);
         if ((messageList.size() - 1) >= 0) {
-            fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_room_" + room_key + "_nm.txt");
+            fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
         }
         super.onBackPressed();
     }
@@ -1470,24 +1470,24 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     public void onPause() {
         if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
-            fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), "mychatapp_" + room_key + "_eingabe.txt");
+            fileOperations.writeToFile(input_msg.getText().toString().trim().replaceAll("\\n", "<br />"), String.format(FileOperations.currentInputFilePattern, roomKey));
         }
         if (!messageList.isEmpty()) {
-            fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_room_" + room_key + "_nm.txt");
+            fileOperations.writeToFile(messageList.get(messageList.size() - 1).getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
         }
-        fileOperations.writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", FileOperations.currentRoomFile);
         super.onPause();
     }
 
     @Override
     public void onDestroy() {
-        fileOperations.writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", FileOperations.currentRoomFile);
         super.onDestroy();
     }
 
     @Override
     public void onResume() {
-        fileOperations.writeToFile(room_key, "mychatapp_current.txt");
+        fileOperations.writeToFile(roomKey, FileOperations.currentRoomFile);
         super.onResume();
     }
 
@@ -1530,7 +1530,7 @@ public class ChatActivity extends AppCompatActivity {
         String currentDateAndTime = sdf_local.format(new Date());
         String fcdat = currentDateAndTime.substring(0, 4) + "." + currentDateAndTime.substring(4, 6) + "." + currentDateAndTime.substring(6, 8) + " " + currentDateAndTime.substring(9, 11) + ":" + currentDateAndTime.substring(11, 13) + ":" + currentDateAndTime.substring(13, 15);
         String ftime = room.getTime().substring(0, 4) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(6, 8) + " " + room.getTime().substring(9, 11) + ":" + room.getTime().substring(11, 13) + ":" + room.getTime().substring(13, 15);
-        String backup = getResources().getString(R.string.backupof) + " " + room_name + "\n" + getResources().getString(R.string.createdon) + ": " + fcdat + "\n\n" +
+        String backup = getResources().getString(R.string.backupof) + " " + roomName + "\n" + getResources().getString(R.string.createdon) + ": " + fcdat + "\n\n" +
                 getResources().getString(R.string.category) + ": " + getResources().getStringArray(R.array.categories)[Integer.parseInt(room.getCategory())] + "\n" + getResources().getString(R.string.admin) + ": " + getUser(room.getAdmin()).getName() + "\n" + getResources().getString(R.string.foundation) + ": " + ftime + "\n" + getResources().getString(R.string.sentmessages) + ": " + messageCount + "\n----------------------------------------\n";
 
         String newDay = "";
@@ -1567,7 +1567,7 @@ public class ChatActivity extends AppCompatActivity {
                 path.mkdirs();
             }
 
-            final File file = new File(path, getResources().getString(R.string.app_name) + "_" + room_name.replace(" ", "") + "_Backup.txt");
+            final File file = new File(path, getResources().getString(R.string.app_name) + "_" + roomName.replace(" ", "") + "_Backup.txt");
 
             try {
                 file.createNewFile();
@@ -1632,8 +1632,8 @@ public class ChatActivity extends AppCompatActivity {
 
     private void markAsFav() {
         Intent intent = new Intent("favroom");
-        intent.putExtra("roomKey", room_key);
-        intent.putExtra("roomName", room_name);
+        intent.putExtra("roomKey", roomKey);
+        intent.putExtra("roomName", roomName);
         intent.putExtra("admin", room.getAdmin());
         intent.putExtra("category", room.getCategory());
         String creationTime = "";
@@ -1658,11 +1658,11 @@ public class ChatActivity extends AppCompatActivity {
             intent.putExtra("nmKey", "");
             intent.putExtra("nmType", Message.Type.HEADER.toString());
         }
-        if (!fileOperations.readFromFile("mychatapp_" + room_key + "_fav.txt").equals("1")) {
-            fileOperations.writeToFile("1", "mychatapp_" + room_key + "_fav.txt");
+        if (!fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+            fileOperations.writeToFile("1", String.format(FileOperations.favFilePattern, roomKey));
             Toast.makeText(this, R.string.addedtofavorites, Toast.LENGTH_SHORT).show();
         } else {
-            fileOperations.writeToFile("0", "mychatapp_" + room_key + "_fav.txt");
+            fileOperations.writeToFile("0", String.format(FileOperations.favFilePattern, roomKey));
             Toast.makeText(this, R.string.removedfromfavorites, Toast.LENGTH_SHORT).show();
         }
         invalidateOptionsMenu();
@@ -2189,14 +2189,14 @@ public class ChatActivity extends AppCompatActivity {
                                                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                                                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                                                 }
-                                                DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(room_key).child(roomDataKey);
+                                                DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey).child(roomDataKey);
                                                 Map<String, Object> map = new HashMap<>();
                                                 map.put("name", roomName);
                                                 map.put("passwd", roomPassword);
                                                 map.put("desc", roomDescription);
                                                 map.put("category", String.valueOf(katindex));
                                                 message_root.updateChildren(map);
-                                                fileOperations.writeToFile(roomPassword, "mychatapp_room_" + room_key + ".txt");
+                                                fileOperations.writeToFile(roomPassword, "mychatapp_room_" + roomKey + ".txt");
                                                 setTitle(roomName);
                                                 Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();
                                                 room.setDesc(roomDescription);

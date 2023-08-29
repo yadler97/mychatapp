@@ -100,14 +100,14 @@ public class RoomListFragmentFavorites extends Fragment {
     private void addRoomToList(DataSnapshot dataSnapshot) {
         roomList.clear();
 
-        for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
-            final String name = uniqueKeySnapshot.getKey();
-            for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
+        for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
+            final String roomKey = uniqueKeySnapshot.getKey();
+            for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
                 final Room room = roomSnapshot.getValue(Room.class);
-                room.setKey(name);
-                if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + name + ".txt")) && fileOperations.readFromFile("mychatapp_" + name + "_fav.txt").equals("1")) {
+                room.setKey(roomKey);
+                if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + roomKey + ".txt")) && fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
                     if (uniqueKeySnapshot.getChildrenCount() > 1) {
-                        DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(name);
+                        DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(roomKey);
                         Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
                         lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
