@@ -1280,16 +1280,7 @@ public class ChatActivity extends AppCompatActivity {
             openPinboard();
             return true;
         } else if (item.getItemId() == R.id.roommute) {
-            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
-                fileOperations.writeToFile("1", String.format(FileOperations.muteFilePattern, roomKey));
-                FirebaseMessaging.getInstance().unsubscribeFromTopic(roomKey);
-                Toast.makeText(this, R.string.roommuted, Toast.LENGTH_SHORT).show();
-            } else {
-                fileOperations.writeToFile("0", String.format(FileOperations.muteFilePattern, roomKey));
-                FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
-                Toast.makeText(this, R.string.roomunmuted, Toast.LENGTH_SHORT).show();
-            }
-            invalidateOptionsMenu();
+            muteRoom();
             return true;
         } else if (item.getItemId() == R.id.roombackup) {
             if (messageList.size() > 1) {
@@ -1299,27 +1290,7 @@ public class ChatActivity extends AppCompatActivity {
             }
             return true;
         } else if (item.getItemId() == R.id.roomleave) {
-            AlertDialog.Builder builder;
-            if (theme == Theme.DARK) {
-                builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
-            } else {
-                builder = new AlertDialog.Builder(this);
-            }
-            builder.setTitle(R.string.reallyleaveroom);
-            builder.setPositiveButton(R.string.yes, (dialogInterface, which) -> {
-                fileOperations.writeToFile("", String.format(FileOperations.passwordFilePattern, roomKey));
-                startActivity(new Intent(ChatActivity.this, MainActivity.class));
-                if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
-                    markAsFav();
-                }
-                Intent intent = new Intent("leaveroom");
-                intent.putExtra("roomkey", roomKey);
-                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-                Toast.makeText(getApplicationContext(), R.string.roomleft, Toast.LENGTH_SHORT).show();
-            });
-            builder.setNegativeButton(R.string.no, null);
-            AlertDialog alert = builder.create();
-            alert.show();
+            leaveRoom();
             return true;
         } else if (item.getItemId() == android.R.id.home) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(userReceiver);
@@ -1758,14 +1729,11 @@ public class ChatActivity extends AppCompatActivity {
         decorView.setOnSystemUiVisibilityChangeListener(i -> {
             if (fullscreendialog.isShowing()) {
                 final Handler handler = new Handler();
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        int uiOptions1 = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                | View.SYSTEM_UI_FLAG_IMMERSIVE;
-                        decorView.setSystemUiVisibility(uiOptions1);
-                    }
+                handler.postDelayed(() -> {
+                    int uiOptions1 = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE;
+                    decorView.setSystemUiVisibility(uiOptions1);
                 }, 2000);
             }
         });
@@ -1888,6 +1856,43 @@ public class ChatActivity extends AppCompatActivity {
                 break;
             }
         }
+    }
+
+    private void muteRoom() {
+        if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+            fileOperations.writeToFile("1", String.format(FileOperations.muteFilePattern, roomKey));
+            FirebaseMessaging.getInstance().unsubscribeFromTopic(roomKey);
+            Toast.makeText(this, R.string.roommuted, Toast.LENGTH_SHORT).show();
+        } else {
+            fileOperations.writeToFile("0", String.format(FileOperations.muteFilePattern, roomKey));
+            FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
+            Toast.makeText(this, R.string.roomunmuted, Toast.LENGTH_SHORT).show();
+        }
+        invalidateOptionsMenu();
+    }
+
+    private void leaveRoom() {
+        AlertDialog.Builder builder;
+        if (theme == Theme.DARK) {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
+        } else {
+            builder = new AlertDialog.Builder(this);
+        }
+        builder.setTitle(R.string.reallyleaveroom);
+        builder.setPositiveButton(R.string.yes, (dialogInterface, which) -> {
+            fileOperations.writeToFile("", String.format(FileOperations.passwordFilePattern, roomKey));
+            startActivity(new Intent(ChatActivity.this, MainActivity.class));
+            if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+                markAsFav();
+            }
+            Intent intent = new Intent("leaveroom");
+            intent.putExtra("roomkey", roomKey);
+            LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+            Toast.makeText(getApplicationContext(), R.string.roomleft, Toast.LENGTH_SHORT).show();
+        });
+        builder.setNegativeButton(R.string.no, null);
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private byte[] getBytes(InputStream inputStream) throws IOException {

@@ -1158,13 +1158,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     };
 
     private void createUserProfile(final String userID) {
-        final Handler handler2 = new Handler();
-        handler2.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                readUserData(userID);
-            }
-        }, 100);
+        final Handler handler = new Handler();
+        handler.postDelayed(() -> readUserData(userID), 100);
     }
 
     @Override
