@@ -970,8 +970,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     @Override
                     public void onClick(View view) {
-                        fileOperations.writeToFile(theme.toString(),Theme.fileName);
-                        fileOperations.writeToFile(background.toString(), Background.fileName);
+                        Theme.setTheme(getApplicationContext(), theme);
+                        Background.setBackground(getApplicationContext(), background);
                         if (currentTheme != theme) {
                             FragmentManager mFragmentManager = getSupportFragmentManager();
                             mFragmentManager.beginTransaction().remove(rFragMore).commit();

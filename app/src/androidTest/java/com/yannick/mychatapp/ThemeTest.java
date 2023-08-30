@@ -13,8 +13,7 @@ public class ThemeTest {
     @Test
     public void testGetCurrentTheme() {
         assertEquals(Theme.LIGHT, Theme.getCurrentTheme(ApplicationProvider.getApplicationContext()));
-        FileOperations fileOperations = new FileOperations(ApplicationProvider.getApplicationContext());
-        fileOperations.writeToFile("DARK", "mychatapp_theme.txt");
+        Theme.setTheme(ApplicationProvider.getApplicationContext(), Theme.DARK);
         assertEquals(Theme.DARK, Theme.getCurrentTheme(ApplicationProvider.getApplicationContext()));
     }
 }

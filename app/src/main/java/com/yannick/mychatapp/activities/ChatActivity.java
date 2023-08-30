@@ -1202,7 +1202,7 @@ public class ChatActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.v("DL","Permission is granted");
+            Log.v("DL", "Permission is granted");
             if (action == 1) {
                 downloadImage(imgurl, PICK_IMAGE_REQUEST);
             } else if (action == 2) {

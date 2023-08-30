@@ -1,8 +1,9 @@
 package com.yannick.mychatapp.data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
-import com.yannick.mychatapp.FileOperations;
+import androidx.preference.PreferenceManager;
 
 public enum Background {
     STANDARD,
@@ -17,7 +18,7 @@ public enum Background {
     SUPER_SMASH_BROS_ULTIMATE,
     DETECTIVE_PIKACHU;
 
-    public static final String fileName = "mychatapp_background.txt";
+    private static final String settingsBackgroundKey = "settingsBackground";
 
     public static Background getByPosition(int position) {
         switch (position) {
@@ -47,12 +48,16 @@ public enum Background {
     }
 
     public static Background getCurrentBackground(Context context) {
-        FileOperations fileOperations = new FileOperations(context);
-        String fileValue = fileOperations.readFromFile(fileName);
-        if (!fileValue.isEmpty()) {
-            return Background.valueOf(fileValue);
-        }
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+        return Background.valueOf(sharedPref.getString(settingsBackgroundKey, Background.STANDARD.toString()));
+    }
 
-        return Background.STANDARD;
+    public static void setBackground(Context context, Background background) {
+        if (background != null) {
+            SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putString(settingsBackgroundKey, background.toString());
+            editor.apply();
+        }
     }
 }
