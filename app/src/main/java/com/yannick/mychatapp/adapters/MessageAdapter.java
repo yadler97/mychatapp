@@ -273,12 +273,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             if (type != Message.Type.HEADER) {
                 SheetMenu sheetMenu = new SheetMenu();
                 sheetMenu.setTitle(context.getResources().getString(R.string.selectanoption));
-                sheetMenu.setClick(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        runSelectedMenuOption(type, item, clickedDataItem);
-                        return false;
-                    }
+                sheetMenu.setClick(item -> {
+                    runSelectedMenuOption(type, item, clickedDataItem);
+                    return false;
                 });
 
                 if (Message.isImage(type)) {
@@ -524,11 +521,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             shape_quote.setShape(GradientDrawable.RECTANGLE);
             shape_quote.setCornerRadii(corners);
             shape_quote.setColor(ContextCompat.getColor(context, R.color.textbox_time));
-            /*if (!m.isSender()) {
-                shape_quote.setColor(ContextCompat.getColor(context, R.color.textbox_received_quote));
-            } else {
-                shape_quote.setColor(ContextCompat.getColor(context, R.color.textbox_sent_quote));
-            }*/
             holder.quotebox_content.setBackground(shape_quote);
             holder.quotebox.setBackground(shape);
         }

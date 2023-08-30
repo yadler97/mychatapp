@@ -66,13 +66,10 @@ public class MemberListAdapter extends ArrayAdapter<User> {
             viewHolder.adminText.setText(R.string.admin);
         }
 
-        rowView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent("userprofile");
-                intent.putExtra("userid", memberList.get(position).getUserID());
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            }
+        rowView.setOnClickListener(view1 -> {
+            Intent intent = new Intent("userprofile");
+            intent.putExtra("userid", memberList.get(position).getUserID());
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         });
 
         return rowView;

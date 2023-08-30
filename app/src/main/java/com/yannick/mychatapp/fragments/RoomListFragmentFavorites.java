@@ -74,13 +74,10 @@ public class RoomListFragmentFavorites extends Fragment {
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                int position = listView.getPositionForView(view);
-                Room room = roomList.get(position);
-                requestPassword(room);
-            }
+        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+            int position = listView.getPositionForView(view1);
+            Room room = roomList.get(position);
+            requestPassword(room);
         });
 
         adapter.registerDataSetObserver(new DataSetObserver() {

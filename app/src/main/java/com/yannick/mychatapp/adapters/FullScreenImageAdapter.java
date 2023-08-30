@@ -75,12 +75,9 @@ public class FullScreenImageAdapter extends PagerAdapter {
 
         container.addView(itemView);
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent("closefullscreen");
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            }
+        imageView.setOnClickListener(view -> {
+            Intent intent = new Intent("closefullscreen");
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         });
 
         return itemView;

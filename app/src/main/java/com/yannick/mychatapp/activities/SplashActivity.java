@@ -44,22 +44,19 @@ public class SplashActivity extends AppCompatActivity{
 
         mAuth = FirebaseAuth.getInstance();
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                FirebaseUser user = mAuth.getCurrentUser();
-                if (user != null && user.isEmailVerified()) {
-                    Intent homeIntent = new Intent(SplashActivity.this, MainActivity.class);
-                    startActivity(homeIntent);
-                } else {
-                    if (user != null) {
-                        mAuth.signOut();
-                    }
-                    Intent homeIntent = new Intent(SplashActivity.this, LoginActivity.class);
-                    startActivity(homeIntent);
+        new Handler().postDelayed(() -> {
+            FirebaseUser user = mAuth.getCurrentUser();
+            if (user != null && user.isEmailVerified()) {
+                Intent homeIntent = new Intent(SplashActivity.this, MainActivity.class);
+                startActivity(homeIntent);
+            } else {
+                if (user != null) {
+                    mAuth.signOut();
                 }
-                finish();
+                Intent homeIntent = new Intent(SplashActivity.this, LoginActivity.class);
+                startActivity(homeIntent);
             }
+            finish();
         }, SPLASH_OUT_TIME);
     }
 

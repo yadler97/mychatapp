@@ -218,9 +218,6 @@ public class ChatActivity extends AppCompatActivity {
 
         settings = PreferenceManager.getDefaultSharedPreferences(this);
 
-        //Toolbar toolbar = findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-
         recyclerView = findViewById(R.id.recycler_view);
         layout = findViewById(R.id.coordinatorlayout);
         backgroundview = findViewById(R.id.backgroundview);
@@ -240,12 +237,7 @@ public class ChatActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
 
         btn_scrolldown = findViewById(R.id.scrolldown);
-        btn_scrolldown.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recyclerView.scrollToPosition(messageList.size() - 1);
-            }
-        });
+        btn_scrolldown.setOnClickListener(view -> recyclerView.scrollToPosition(messageList.size() - 1));
 
         app_name = getResources().getString(R.string.app_name);
 
@@ -306,130 +298,105 @@ public class ChatActivity extends AppCompatActivity {
 
         gestureDetector = new GestureDetector(this, new SingleTapConfirm());
 
-        input_msg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                recyclerView.scrollToPosition(messageList.size() - 1);
-            }
-        });
+        input_msg.setOnClickListener(view -> recyclerView.scrollToPosition(messageList.size() - 1));
 
-        recyclerView.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
-            @Override
-            public void onLayoutChange(View view, int i, int i1, int i2, int i3, int i4, int i5, int i6, int i7) {
-                if (i3 < i7 && !cancelFullscreenImage) {
-                    recyclerView.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            recyclerView.smoothScrollToPosition(
-                                    recyclerView.getAdapter().getItemCount() - 1);
-                        }
-                    }, 0);
-                } else {
-                    cancelFullscreenImage = false;
-                }
+        recyclerView.addOnLayoutChangeListener((view, i, i1, i2, i3, i4, i5, i6, i7) -> {
+            if (i3 < i7 && !cancelFullscreenImage) {
+                recyclerView.postDelayed(() -> recyclerView.smoothScrollToPosition(
+                        recyclerView.getAdapter().getItemCount() - 1), 0);
+            } else {
+                cancelFullscreenImage = false;
             }
         });
 
         root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey);
 
-        sendMessageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!input_msg.getText().toString().trim().isEmpty()) {
-                    if (!searchView.isIconified()) {
-                        searchView.setIconified(true);
-                        searchView.setIconified(true);
-                    }
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    String newMessageKey = root.push().getKey();
-                    root.updateChildren(map);
-
-                    String currentDateAndTime = sdf.format(new Date());
-
-                    DatabaseReference message_root = root.child(newMessageKey);
-                    Map<String, Object> map2 = new HashMap<String, Object>();
-                    map2.put("name", userID);
-                    map2.put("msg", input_msg.getText().toString().trim());
-                    map2.put("img", "");
-                    map2.put("pin", "0");
-                    map2.put("quote", quoteStatus);
-                    map2.put("time", currentDateAndTime);
-
-                    message_root.updateChildren(map2);
-                    input_msg.getText().clear();
-                    quoteStatus = "";
-                    quote_text.setText("");
-                    quote_image.setImageDrawable(null);
-                    quote_image.setVisibility(View.GONE);
-                    quote_layout.setVisibility(View.GONE);
-                    fileOperations.writeToFile("", String.format(FileOperations.currentInputFilePattern, roomKey));
-                    fileOperations.writeToFile(newMessageKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
+        sendMessageButton.setOnClickListener(view -> {
+            if (!input_msg.getText().toString().trim().isEmpty()) {
+                if (!searchView.isIconified()) {
+                    searchView.setIconified(true);
+                    searchView.setIconified(true);
                 }
+                Map<String, Object> map = new HashMap<String, Object>();
+                String newMessageKey = root.push().getKey();
+                root.updateChildren(map);
+
+                String currentDateAndTime = sdf.format(new Date());
+
+                DatabaseReference message_root = root.child(newMessageKey);
+                Map<String, Object> map2 = new HashMap<String, Object>();
+                map2.put("name", userID);
+                map2.put("msg", input_msg.getText().toString().trim());
+                map2.put("img", "");
+                map2.put("pin", "0");
+                map2.put("quote", quoteStatus);
+                map2.put("time", currentDateAndTime);
+
+                message_root.updateChildren(map2);
+                input_msg.getText().clear();
+                quoteStatus = "";
+                quote_text.setText("");
+                quote_image.setImageDrawable(null);
+                quote_image.setVisibility(View.GONE);
+                quote_layout.setVisibility(View.GONE);
+                fileOperations.writeToFile("", String.format(FileOperations.currentInputFilePattern, roomKey));
+                fileOperations.writeToFile(newMessageKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
             }
         });
 
-        btn_image.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (gestureDetector.onTouchEvent(event)) {
-                    chooseImage();
+        btn_image.setOnTouchListener((view, event) -> {
+            if (gestureDetector.onTouchEvent(event)) {
+                chooseImage();
+                btn_image.setBackgroundResource(R.drawable.ic_image);
+                return true;
+            } else {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    btn_image.setBackgroundResource(R.drawable.ic_image_light);
+                    return true;
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     btn_image.setBackgroundResource(R.drawable.ic_image);
                     return true;
-                } else {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        btn_image.setBackgroundResource(R.drawable.ic_image_light);
-                        return true;
-                    } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                        btn_image.setBackgroundResource(R.drawable.ic_image);
-                        return true;
-                    }
                 }
-                return false;
             }
+            return false;
         });
 
-        btn_camera.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (gestureDetector.onTouchEvent(event)) {
-                    takePicture();
+        btn_camera.setOnTouchListener((view, event) -> {
+            if (gestureDetector.onTouchEvent(event)) {
+                takePicture();
+                btn_camera.setBackgroundResource(R.drawable.ic_camera);
+                return true;
+            } else {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    btn_camera.setBackgroundResource(R.drawable.ic_camera_light);
+                    return true;
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     btn_camera.setBackgroundResource(R.drawable.ic_camera);
                     return true;
-                } else {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        btn_camera.setBackgroundResource(R.drawable.ic_camera_light);
-                        return true;
-                    } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                        btn_camera.setBackgroundResource(R.drawable.ic_camera);
-                        return true;
-                    }
                 }
-                return false;
             }
+            return false;
         });
 
-        quote_remove.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (gestureDetector.onTouchEvent(event)) {
-                    quoteStatus = "";
-                    quote_text.setText("");
-                    quote_image.setImageDrawable(null);
-                    quote_image.setVisibility(View.GONE);
-                    quote_layout.setVisibility(View.GONE);
+        quote_remove.setOnTouchListener((view, event) -> {
+            if (gestureDetector.onTouchEvent(event)) {
+                quoteStatus = "";
+                quote_text.setText("");
+                quote_image.setImageDrawable(null);
+                quote_image.setVisibility(View.GONE);
+                quote_layout.setVisibility(View.GONE);
+                quote_remove.setBackgroundResource(R.drawable.ic_clear);
+                return true;
+            } else {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    quote_remove.setBackgroundResource(R.drawable.ic_clear_light);
+                    return true;
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     quote_remove.setBackgroundResource(R.drawable.ic_clear);
                     return true;
-                } else {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        quote_remove.setBackgroundResource(R.drawable.ic_clear_light);
-                        return true;
-                    } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                        quote_remove.setBackgroundResource(R.drawable.ic_clear);
-                        return true;
-                    }
                 }
-                return false;
             }
+            return false;
         });
 
         userRoot.addChildEventListener(new ChildEventListener() {
@@ -646,15 +613,6 @@ public class ChatActivity extends AppCompatActivity {
                 messageList.addAll(templist);
                 mAdapter.notifyDataSetChanged();
             }
-
-            /*addUser(key, chat_user_id, chat_msg, img, pin, quote, time, new MyCallback() {
-                @Override
-                public void onCallback(String key, User user, String time, String chat_msg, String img, String pin, String quote) {
-                    //Log.d("HEYHY", chat_msg + " - " + user.getName());
-
-
-                }
-            });*/
         }
 
         recyclerView.scrollToPosition(messageList.size() - 1);
@@ -923,67 +881,59 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         UploadTask uploadTask = ref.putBytes(byteArray);
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                progressDialog.dismiss();
-                Toast.makeText(ChatActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            progressDialog.dismiss();
+            Toast.makeText(ChatActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
 
-                if (type != PICK_ROOM_IMAGE_REQUEST) {
-                    Map<String, Object> map = new HashMap<String, Object>();
-                    String newMessageKey = root.push().getKey();
-                    root.updateChildren(map);
+            if (type != PICK_ROOM_IMAGE_REQUEST) {
+                Map<String, Object> map = new HashMap<String, Object>();
+                String newMessageKey = root.push().getKey();
+                root.updateChildren(map);
 
-                    String currentDateAndTime = sdf.format(new Date());
+                String currentDateAndTime = sdf.format(new Date());
 
-                    DatabaseReference message_root = root.child(newMessageKey);
-                    Map<String, Object> map2 = new HashMap<String, Object>();
-                    map2.put("name", userID);
-                    map2.put("msg", "");
-                    map2.put("img", imgName);
-                    map2.put("pin", "0");
-                    map2.put("quote", "");
-                    map2.put("time", currentDateAndTime);
+                DatabaseReference message_root = root.child(newMessageKey);
+                Map<String, Object> map2 = new HashMap<String, Object>();
+                map2.put("name", userID);
+                map2.put("msg", "");
+                map2.put("img", imgName);
+                map2.put("pin", "0");
+                map2.put("quote", "");
+                map2.put("time", currentDateAndTime);
 
-                    message_root.updateChildren(map2);
+                message_root.updateChildren(map2);
 
-                    quoteStatus = "";
+                quoteStatus = "";
 
-                    if (type == CAPTURE_IMAGE_REQUEST && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
-                        downloadImage(imgName, type);
-                    }
-                } else {
-                    DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey).child(roomDataKey);
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("img", imgName);
-                    message_root.updateChildren(map);
-
-                    room.setImg(imgName);
-
-                    ImageButton roomImageButton = findViewById(R.id.room_image);
-
-                    storageReferenceRoomImages = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                    final StorageReference pathReference = storageReferenceRoomImages.child("room_images/" + imgName);
-                    GlideApp.with(getApplicationContext())
-                            .load(pathReference)
-                            .centerCrop()
-                            .thumbnail(0.05f)
-                            .into(roomImageButton);
+                if (type == CAPTURE_IMAGE_REQUEST && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
+                    downloadImage(imgName, type);
                 }
+            } else {
+                DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey).child(roomDataKey);
+                Map<String, Object> map = new HashMap<>();
+                map.put("img", imgName);
+                message_root.updateChildren(map);
+
+                room.setImg(imgName);
+
+                ImageButton roomImageButton = findViewById(R.id.room_image);
+
+                storageReferenceRoomImages = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+                final StorageReference pathReference = storageReferenceRoomImages.child("room_images/" + imgName);
+                GlideApp.with(getApplicationContext())
+                        .load(pathReference)
+                        .centerCrop()
+                        .thumbnail(0.05f)
+                        .into(roomImageButton);
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                progressDialog.dismiss();
-                Toast.makeText(ChatActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
-            }
-        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                        .getTotalByteCount());
-                progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
-            }
+        }).addOnFailureListener(e -> {
+            Log.e("Upload failed", e.toString());
+            progressDialog.dismiss();
+            Toast.makeText(ChatActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+        }).addOnProgressListener(taskSnapshot -> {
+            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
+                    .getTotalByteCount());
+            progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
         });
     }
 
@@ -1225,30 +1175,21 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
-        pathReference.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-            @Override
-            public void onSuccess(StorageMetadata storageMetadata) {
-                String mimeType = storageMetadata.getContentType();
-                String currentDateAndTime = sdf.format(new Date());
-                final String filename = app_name + "_" + currentDateAndTime.substring(0,15) + "." + mimeType.substring(6);
-                final File localFile = new File(rootPath,filename);
+        pathReference.getMetadata().addOnSuccessListener(storageMetadata -> {
+            String mimeType = storageMetadata.getContentType();
+            String currentDateAndTime = sdf.format(new Date());
+            final String filename = app_name + "_" + currentDateAndTime.substring(0,15) + "." + mimeType.substring(6);
+            final File localFile = new File(rootPath,filename);
 
-                pathReference.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        notifyGallery(localFile.getAbsolutePath());
-                        if (type == PICK_IMAGE_REQUEST) {
-                            createSnackbar(localFile, mimeType, getResources().getString(R.string.imagesaved));
-                        }
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        Toast.makeText(context, R.string.savingimagefailed, Toast.LENGTH_SHORT).show();
-                        Log.e("firebase", "Saving image failed: " + exception.toString());
-                    }
-                });
-            }
+            pathReference.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                notifyGallery(localFile.getAbsolutePath());
+                if (type == PICK_IMAGE_REQUEST) {
+                    createSnackbar(localFile, mimeType, getResources().getString(R.string.imagesaved));
+                }
+            }).addOnFailureListener(exception -> {
+                Toast.makeText(context, R.string.savingimagefailed, Toast.LENGTH_SHORT).show();
+                Log.e("firebase", "Saving image failed: " + exception);
+            });
         });
     }
 
@@ -1365,19 +1306,16 @@ public class ChatActivity extends AppCompatActivity {
                 builder = new AlertDialog.Builder(this);
             }
             builder.setTitle(R.string.reallyleaveroom);
-            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    fileOperations.writeToFile("", String.format(FileOperations.passwordFilePattern, roomKey));
-                    startActivity(new Intent(ChatActivity.this, MainActivity.class));
-                    if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
-                        markAsFav();
-                    }
-                    Intent intent = new Intent("leaveroom");
-                    intent.putExtra("roomkey", roomKey);
-                    LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-                    Toast.makeText(getApplicationContext(), R.string.roomleft, Toast.LENGTH_SHORT).show();
+            builder.setPositiveButton(R.string.yes, (dialogInterface, which) -> {
+                fileOperations.writeToFile("", String.format(FileOperations.passwordFilePattern, roomKey));
+                startActivity(new Intent(ChatActivity.this, MainActivity.class));
+                if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+                    markAsFav();
                 }
+                Intent intent = new Intent("leaveroom");
+                intent.putExtra("roomkey", roomKey);
+                LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+                Toast.makeText(getApplicationContext(), R.string.roomleft, Toast.LENGTH_SHORT).show();
             });
             builder.setNegativeButton(R.string.no, null);
             AlertDialog alert = builder.create();
@@ -1439,12 +1377,7 @@ public class ChatActivity extends AppCompatActivity {
         builder.setView(view);
         builder.setPositiveButton(R.string.close, null);
         if (room.getAdmin().equals(userID)) {
-            builder.setNegativeButton(R.string.editroom, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    editRoom();
-                }
-            });
+            builder.setNegativeButton(R.string.editroom, (dialogInterface, i) -> editRoom());
         }
         AlertDialog alert = builder.create();
         alert.show();
@@ -1589,17 +1522,14 @@ public class ChatActivity extends AppCompatActivity {
 
     private void createSnackbar(final File file, final String mime, final String text) {
         Snackbar snack = Snackbar.make(layout, text, Snackbar.LENGTH_LONG).setActionTextColor(getResources().getColor(R.color.white))
-                .setAction(R.string.open, new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        Intent intent = new Intent(Intent.ACTION_VIEW);
-                        Uri fileURI = FileProvider.getUriForFile(ChatActivity.this,
-                                BuildConfig.APPLICATION_ID + ".fileprovider",
-                                file);
-                        intent.setDataAndType(fileURI, mime);
-                        intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION|FLAG_GRANT_WRITE_URI_PERMISSION|FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                    }
+                .setAction(R.string.open, view -> {
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    Uri fileURI = FileProvider.getUriForFile(ChatActivity.this,
+                            BuildConfig.APPLICATION_ID + ".fileprovider",
+                            file);
+                    intent.setDataAndType(fileURI, mime);
+                    intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION|FLAG_GRANT_WRITE_URI_PERMISSION|FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
                 });
         View sbView = snack.getView();
         if (theme == Theme.DARK) {
@@ -1729,19 +1659,8 @@ public class ChatActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(profileIcon);
 
-        profileIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showFullscreenImage(user_ID, 0);
-            }
-        });
-
-        banner.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showFullscreenImage(user_ID, 1);
-            }
-        });
+        profileIcon.setOnClickListener(v -> showFullscreenImage(user_ID, 0));
+        banner.setOnClickListener(v -> showFullscreenImage(user_ID, 1));
 
         profileName.setText(user.getName());
         profileDescription.setText(user.getProfileDescription());
@@ -1773,44 +1692,41 @@ public class ChatActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.cancel, null);
         final AlertDialog alert = builder.create();
         alert.show();
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                int position = listView.getPositionForView(view);
-                String roomKey = roomKeysList.get(position);
-                Message fMessage = new Message();
-                for (Message m : messageList) {
-                    if (m.getKey().equals(messageID)) {
-                        fMessage = m;
-                        break;
-                    }
+        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+            int position = listView.getPositionForView(view1);
+            String roomKey = roomKeysList.get(position);
+            Message fMessage = new Message();
+            for (Message m : messageList) {
+                if (m.getKey().equals(messageID)) {
+                    fMessage = m;
+                    break;
                 }
-                String newMessageKey = roomRoot.child(roomKey).push().getKey();
+            }
+            String newMessageKey = roomRoot.child(roomKey).push().getKey();
 
-                String currentDateAndTime = sdf.format(new Date());
+            String currentDateAndTime = sdf.format(new Date());
 
-                DatabaseReference message_root = roomRoot.child(roomKey).child(newMessageKey);
-                Map<String, Object> map = new HashMap<>();
-                map.put("name", userID);
-                if (Message.isImage(fMessage.getType())) {
-                    map.put("msg", "");
-                    map.put("img", fMessage.getMsg());
-                } else {
-                    map.put("msg", "(Forwarded) " + fMessage.getMsg());
-                    map.put("img", "");
-                }
-                map.put("pin", "0");
-                map.put("quote", quoteStatus);
-                map.put("time", currentDateAndTime);
+            DatabaseReference message_root = roomRoot.child(roomKey).child(newMessageKey);
+            Map<String, Object> map = new HashMap<>();
+            map.put("name", userID);
+            if (Message.isImage(fMessage.getType())) {
+                map.put("msg", "");
+                map.put("img", fMessage.getMsg());
+            } else {
+                map.put("msg", "(Forwarded) " + fMessage.getMsg());
+                map.put("img", "");
+            }
+            map.put("pin", "0");
+            map.put("quote", quoteStatus);
+            map.put("time", currentDateAndTime);
 
-                message_root.updateChildren(map);
-                fileOperations.writeToFile(newMessageKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
-                alert.cancel();
-                if (Message.isImage(fMessage.getType())) {
-                    Toast.makeText(ChatActivity.this, R.string.imageforwarded, Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(ChatActivity.this, R.string.messageforwarded, Toast.LENGTH_SHORT).show();
-                }
+            message_root.updateChildren(map);
+            fileOperations.writeToFile(newMessageKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
+            alert.cancel();
+            if (Message.isImage(fMessage.getType())) {
+                Toast.makeText(ChatActivity.this, R.string.imageforwarded, Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(ChatActivity.this, R.string.messageforwarded, Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -1839,21 +1755,18 @@ public class ChatActivity extends AppCompatActivity {
                 | View.SYSTEM_UI_FLAG_IMMERSIVE;
         decorView.setSystemUiVisibility(uiOptions);
 
-        decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
-            @Override
-            public void onSystemUiVisibilityChange(int i) {
-                if (fullscreendialog.isShowing()) {
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                    | View.SYSTEM_UI_FLAG_IMMERSIVE;
-                            decorView.setSystemUiVisibility(uiOptions);
-                        }
-                    }, 2000);
-                }
+        decorView.setOnSystemUiVisibilityChangeListener(i -> {
+            if (fullscreendialog.isShowing()) {
+                final Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        int uiOptions1 = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                                | View.SYSTEM_UI_FLAG_IMMERSIVE;
+                        decorView.setSystemUiVisibility(uiOptions1);
+                    }
+                }, 2000);
             }
         });
 
@@ -1896,12 +1809,7 @@ public class ChatActivity extends AppCompatActivity {
             }
             builder.setCustomTitle(setupHeader(getResources().getString(R.string.images)));
             builder.setView(view);
-            builder.setPositiveButton(R.string.close, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    imageListOpened = false;
-                }
-            });
+            builder.setPositiveButton(R.string.close, (dialogInterface, i) -> imageListOpened = false);
             imageListAlert = builder.create();
             imageListAlert.show();
             imageListOpened = true;
@@ -2126,14 +2034,11 @@ public class ChatActivity extends AppCompatActivity {
                     .into(roomImageButton);
         }
 
-        roomImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_ROOM_IMAGE_REQUEST);
-            }
+        roomImageButton.setOnClickListener(view13 -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_ROOM_IMAGE_REQUEST);
         });
 
         AlertDialog.Builder builder;
@@ -2145,86 +2050,69 @@ public class ChatActivity extends AppCompatActivity {
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.editroom)));
         builder.setCancelable(false);
         builder.setView(view);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (view1 != null) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
             }
-        });
-
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                View view = ((AlertDialog) dialogInterface).getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-                dialogInterface.cancel();
-                openInfo();
-            }
+            dialogInterface.cancel();
+            openInfo();
         });
         final AlertDialog alert = builder.create();
-        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+        alert.setOnShowListener(dialogInterface -> {
 
-            @Override
-            public void onShow(DialogInterface dialog) {
-
-                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        final String roomName = edit_room_name.getText().toString().trim();
-                        final String roomPassword = edit_room_password.getText().toString().trim();
-                        final String roomPasswordRepeat = edit_room_password_repeat.getText().toString().trim();
-                        final String roomDescription = edit_room_desc.getText().toString().trim();
-                        if (!roomName.isEmpty()) {
-                            if (!roomDescription.isEmpty()) {
-                                if (katindex!=0) {
-                                    if (!roomPassword.isEmpty()) {
-                                        if (!roomPasswordRepeat.isEmpty()) {
-                                            if (roomPassword.equals(roomPasswordRepeat)) {
-                                                if (view != null) {
-                                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                                                }
-                                                DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey).child(roomDataKey);
-                                                Map<String, Object> map = new HashMap<>();
-                                                map.put("name", roomName);
-                                                map.put("passwd", roomPassword);
-                                                map.put("desc", roomDescription);
-                                                map.put("category", String.valueOf(katindex));
-                                                message_root.updateChildren(map);
-                                                fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
-                                                setTitle(roomName);
-                                                Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();
-                                                room.setDesc(roomDescription);
-                                                room.setCategory(String.valueOf(katindex));
-                                                room.setPasswd(roomPassword);
-                                                alert.cancel();
-                                                openInfo();
-                                            } else {
-                                                Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
-                                            }
-                                        } else {
-                                            room_password_repeat_layout.setError(getResources().getString(R.string.repeatpassword));
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view12 -> {
+                final String roomName = edit_room_name.getText().toString().trim();
+                final String roomPassword = edit_room_password.getText().toString().trim();
+                final String roomPasswordRepeat = edit_room_password_repeat.getText().toString().trim();
+                final String roomDescription = edit_room_desc.getText().toString().trim();
+                if (!roomName.isEmpty()) {
+                    if (!roomDescription.isEmpty()) {
+                        if (katindex!=0) {
+                            if (!roomPassword.isEmpty()) {
+                                if (!roomPasswordRepeat.isEmpty()) {
+                                    if (roomPassword.equals(roomPasswordRepeat)) {
+                                        if (view12 != null) {
+                                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                            imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                                         }
+                                        DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey).child(roomDataKey);
+                                        Map<String, Object> map = new HashMap<>();
+                                        map.put("name", roomName);
+                                        map.put("passwd", roomPassword);
+                                        map.put("desc", roomDescription);
+                                        map.put("category", String.valueOf(katindex));
+                                        message_root.updateChildren(map);
+                                        fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
+                                        setTitle(roomName);
+                                        Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();
+                                        room.setDesc(roomDescription);
+                                        room.setCategory(String.valueOf(katindex));
+                                        room.setPasswd(roomPassword);
+                                        alert.cancel();
+                                        openInfo();
                                     } else {
-                                        room_password_layout.setError(getResources().getString(R.string.enterpassword));
+                                        Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
-                                    Toast.makeText(getApplicationContext(), R.string.selectcategory, Toast.LENGTH_SHORT).show();
+                                    room_password_repeat_layout.setError(getResources().getString(R.string.repeatpassword));
                                 }
                             } else {
-                                room_desc_layout.setError(getResources().getString(R.string.enterroomdesc));
+                                room_password_layout.setError(getResources().getString(R.string.enterpassword));
                             }
                         } else {
-                            room_name_layout.setError(getResources().getString(R.string.enterroomname));
+                            Toast.makeText(getApplicationContext(), R.string.selectcategory, Toast.LENGTH_SHORT).show();
                         }
+                    } else {
+                        room_desc_layout.setError(getResources().getString(R.string.enterroomdesc));
                     }
-                });
-            }
+                } else {
+                    room_name_layout.setError(getResources().getString(R.string.enterroomname));
+                }
+            });
         });
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         alert.show();

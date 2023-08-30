@@ -148,50 +148,39 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String email = inputEmail.getText().toString().trim();
-                String password = inputPassword.getText().toString().trim();
-                if (!email.isEmpty()) {
-                    if (!password.isEmpty()) {
-                        login(email, password);
-                    } else {
-                        inputPasswordLayout.setError(getResources().getString(R.string.enterpassword));
-                    }
+        loginButton.setOnClickListener(view -> {
+            String email = inputEmail.getText().toString().trim();
+            String password = inputPassword.getText().toString().trim();
+            if (!email.isEmpty()) {
+                if (!password.isEmpty()) {
+                    login(email, password);
                 } else {
-                    inputEmailLayout.setError(getResources().getString(R.string.enteremail));
+                    inputPasswordLayout.setError(getResources().getString(R.string.enterpassword));
                 }
+            } else {
+                inputEmailLayout.setError(getResources().getString(R.string.enteremail));
             }
         });
 
-        createButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                createAccount();
-            }
-        });
+        createButton.setOnClickListener(view -> createAccount());
     }
 
     private void login(String email, String password) {
         mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            Log.d("Auth", "successful");
-                            mAuth.getCurrentUser().reload();
-                            if (mAuth.getCurrentUser().isEmailVerified()) {
-                                Intent homeIntent = new Intent(LoginActivity.this, MainActivity.class);
-                                startActivity(homeIntent);
-                                finish();
-                            } else {
-                                openResendEmailDialog();
-                            }
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("Auth", "successful");
+                        mAuth.getCurrentUser().reload();
+                        if (mAuth.getCurrentUser().isEmailVerified()) {
+                            Intent homeIntent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(homeIntent);
+                            finish();
                         } else {
-                            Log.d("Auth", "failed");
-                            Toast.makeText(getApplicationContext(), R.string.loginfailed, Toast.LENGTH_SHORT).show();
+                            openResendEmailDialog();
                         }
+                    } else {
+                        Log.d("Auth", "failed");
+                        Toast.makeText(getApplicationContext(), R.string.loginfailed, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -219,21 +208,13 @@ public class LoginActivity extends AppCompatActivity {
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.pleaseverifyemail)));
         builder.setCancelable(false);
         builder.setView(view);
-        builder.setPositiveButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                mAuth.signOut();
-            }
-        });
+        builder.setPositiveButton(R.string.cancel, (dialogInterface, i) -> mAuth.signOut());
 
         final AlertDialog alert = builder.create();
 
-        resendEmailButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resendEmail();
-                alert.cancel();
-            }
+        resendEmailButton.setOnClickListener(view1 -> {
+            resendEmail();
+            alert.cancel();
         });
 
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -321,59 +302,44 @@ public class LoginActivity extends AppCompatActivity {
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.createprofile)));
         builder.setCancelable(false);
         builder.setView(view);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (view1 != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
             }
-        });
-
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                View view = ((AlertDialog) dialogInterface).getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-                dialogInterface.cancel();
-            }
+            dialogInterface.cancel();
         });
 
         final AlertDialog alert = builder.create();
-        alert.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
+        alert.setOnShowListener(dialogInterface -> {
 
-                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (!email.getText().toString().isEmpty()) {
-                            if (!password.getText().toString().trim().isEmpty()) {
-                                if (password.getText().toString().trim().length()>=6)
-                                    if (!passwordRepeat.getText().toString().trim().isEmpty()) {
-                                        if (password.getText().toString().trim().equals(passwordRepeat.getText().toString().trim())) {
-                                            createAccountData(email.getText().toString().trim(), password.getText().toString().trim());
-                                            alert.cancel();
-                                        } else {
-                                            Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
-                                        }
-                                    } else {
-                                        passwordRepeatLayout.setError(getResources().getString(R.string.repeatpassword));
-                                    }
-                                else {
-                                    passwordLayout.setError(getResources().getString(R.string.passwordmustcontainatleastsixcharacters));
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view12 -> {
+                if (!email.getText().toString().isEmpty()) {
+                    if (!password.getText().toString().trim().isEmpty()) {
+                        if (password.getText().toString().trim().length()>=6)
+                            if (!passwordRepeat.getText().toString().trim().isEmpty()) {
+                                if (password.getText().toString().trim().equals(passwordRepeat.getText().toString().trim())) {
+                                    createAccountData(email.getText().toString().trim(), password.getText().toString().trim());
+                                    alert.cancel();
+                                } else {
+                                    Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                passwordLayout.setError(getResources().getString(R.string.enterpassword));
+                                passwordRepeatLayout.setError(getResources().getString(R.string.repeatpassword));
                             }
-                        } else {
-                            emailLayout.setError(getResources().getString(R.string.enteremail));
+                        else {
+                            passwordLayout.setError(getResources().getString(R.string.passwordmustcontainatleastsixcharacters));
                         }
+                    } else {
+                        passwordLayout.setError(getResources().getString(R.string.enterpassword));
                     }
-                });
-            }
+                } else {
+                    emailLayout.setError(getResources().getString(R.string.enteremail));
+                }
+            });
         });
 
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -382,64 +348,61 @@ public class LoginActivity extends AppCompatActivity {
 
     private void createAccountAuth(final String email, final String password, final String name, final String description, final String location, final String birthday) {
         mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            FirebaseUser user = mAuth.getCurrentUser();
-                            userID = user.getUid();
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        userID = user.getUid();
 
-                            if (ownpi.equals("0")) {
-                                img = UUID.randomUUID().toString();
-                            }
-
-                            DatabaseReference user_root = userRoot.child(userID);
-                            Map<String, Object> map = new HashMap<>();
-                            map.put("name", name);
-                            map.put("profileDescription", description);
-                            map.put("location", location);
-                            map.put("birthday", birthday.substring(6, 10) + birthday.substring(3, 5) + birthday.substring(0, 2));
-                            map.put("favColour", String.valueOf(colour));
-                            map.put("img", img);
-                            map.put("banner", banner);
-                            if (ownpi.equals("0")) {
-                                map.put("ownpi", "0");
-                            } else {
-                                map.put("ownpi", "1");
-                            }
-                            user_root.updateChildren(map);
-                            Toast.makeText(getApplicationContext(), R.string.profilecreated, Toast.LENGTH_SHORT).show();
-
-                            if (!ownpi.equals("1")) {
-                                storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                                TextDrawable drawable = TextDrawable.builder()
-                                        .beginConfig()
-                                        .bold()
-                                        .endConfig()
-                                        .buildRect(name.substring(0, 1), getResources().getIntArray(R.array.favcolors)[colour]);
-                                Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-                                Canvas canvas = new Canvas(bitmap);
-                                drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                                drawable.draw(canvas);
-
-                                byte[] byteArray;
-                                final StorageReference pathReference_image = storageRef.child("profile_images/" + img);
-                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                                byteArray = stream.toByteArray();
-                                try {
-                                    stream.close();
-                                } catch (IOException ioe) {
-                                    ioe.printStackTrace();
-                                }
-                                pathReference_image.putBytes(byteArray);
-                            }
-
-                            user.sendEmailVerification();
-                            login(email, password);
-                        } else {
-                            Toast.makeText(LoginActivity.this, R.string.profilecreationfailed, Toast.LENGTH_SHORT).show();
+                        if (ownpi.equals("0")) {
+                            img = UUID.randomUUID().toString();
                         }
+
+                        DatabaseReference user_root = userRoot.child(userID);
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("name", name);
+                        map.put("profileDescription", description);
+                        map.put("location", location);
+                        map.put("birthday", birthday.substring(6, 10) + birthday.substring(3, 5) + birthday.substring(0, 2));
+                        map.put("favColour", String.valueOf(colour));
+                        map.put("img", img);
+                        map.put("banner", banner);
+                        if (ownpi.equals("0")) {
+                            map.put("ownpi", "0");
+                        } else {
+                            map.put("ownpi", "1");
+                        }
+                        user_root.updateChildren(map);
+                        Toast.makeText(getApplicationContext(), R.string.profilecreated, Toast.LENGTH_SHORT).show();
+
+                        if (!ownpi.equals("1")) {
+                            storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+                            TextDrawable drawable = TextDrawable.builder()
+                                    .beginConfig()
+                                    .bold()
+                                    .endConfig()
+                                    .buildRect(name.substring(0, 1), getResources().getIntArray(R.array.favcolors)[colour]);
+                            Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+                            Canvas canvas = new Canvas(bitmap);
+                            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                            drawable.draw(canvas);
+
+                            byte[] byteArray;
+                            final StorageReference pathReference_image = storageRef.child("profile_images/" + img);
+                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                            byteArray = stream.toByteArray();
+                            try {
+                                stream.close();
+                            } catch (IOException ioe) {
+                                ioe.printStackTrace();
+                            }
+                            pathReference_image.putBytes(byteArray);
+                        }
+
+                        user.sendEmailVerification();
+                        login(email, password);
+                    } else {
+                        Toast.makeText(LoginActivity.this, R.string.profilecreationfailed, Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -556,24 +519,18 @@ public class LoginActivity extends AppCompatActivity {
                     .into(profileBannerButton);
         }
 
-        profileImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Image"), 0);
-            }
+        profileImageButton.setOnClickListener(view15 -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), 0);
         });
 
-        profileBannerButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Select Image"), 1);
-            }
+        profileBannerButton.setOnClickListener(view16 -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), 1);
         });
 
         GradientDrawable shape = new GradientDrawable();
@@ -581,55 +538,49 @@ public class LoginActivity extends AppCompatActivity {
         shape.setColor(getResources().getIntArray(R.array.favcolors)[colour]);
         favColour.setBackground(shape);
 
-        birthdayEdit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DatePickerDialog datePicker = new DatePickerDialog(view.getContext(), new DatePickerDialog.OnDateSetListener() {
+        birthdayEdit.setOnClickListener(view14 -> {
+            DatePickerDialog datePicker = new DatePickerDialog(view14.getContext(), new DatePickerDialog.OnDateSetListener() {
 
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
-                        birthdayEdit.setText(date);
-                    }
-                }, StringOperations.getYear(birthday), StringOperations.getMonth(birthday), StringOperations.getDay(birthday));
-                if (theme == Theme.DARK) {
-                    datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
+                @Override
+                public void onDateSet(DatePicker view14, int year, int monthOfYear, int dayOfMonth) {
+                    String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
+                    birthdayEdit.setText(date);
                 }
-                Calendar c = Calendar.getInstance();
-                c.set(2004, 11, 31);
-                datePicker.getDatePicker().setMaxDate(c.getTimeInMillis());
-                datePicker.show();
+            }, StringOperations.getYear(birthday), StringOperations.getMonth(birthday), StringOperations.getDay(birthday));
+            if (theme == Theme.DARK) {
+                datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
             }
+            Calendar c = Calendar.getInstance();
+            c.set(2004, 11, 31);
+            datePicker.getDatePicker().setMaxDate(c.getTimeInMillis());
+            datePicker.show();
         });
 
-        favColour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SpectrumDialog.Builder builder;
-                if (theme == Theme.DARK) {
-                    builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
-                } else {
-                    builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
-                }
-                builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[colour]).setFixedColumnCount(5).setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
-                    @Override
-                    public void onColorSelected(boolean positiveResult, @ColorInt int scolor) {
-                        if (positiveResult) {
-                            int i = 0;
-                            for (int c : getResources().getIntArray(R.array.favcolors)) {
-                                if (c == scolor) {
-                                    colour = i;
-                                    GradientDrawable shape = new GradientDrawable();
-                                    shape.setShape(GradientDrawable.OVAL);
-                                    shape.setColor(getResources().getIntArray(R.array.favcolors)[i]);
-                                    favColour.setBackground(shape);
-                                }
-                                i++;
+        favColour.setOnClickListener(view13 -> {
+            SpectrumDialog.Builder builder;
+            if (theme == Theme.DARK) {
+                builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
+            } else {
+                builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
+            }
+            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[colour]).setFixedColumnCount(5).setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
+                @Override
+                public void onColorSelected(boolean positiveResult, @ColorInt int scolor) {
+                    if (positiveResult) {
+                        int i = 0;
+                        for (int c : getResources().getIntArray(R.array.favcolors)) {
+                            if (c == scolor) {
+                                colour = i;
+                                GradientDrawable shape1 = new GradientDrawable();
+                                shape1.setShape(GradientDrawable.OVAL);
+                                shape1.setColor(getResources().getIntArray(R.array.favcolors)[i]);
+                                favColour.setBackground(shape1);
                             }
+                            i++;
                         }
                     }
-                }).build().show(getSupportFragmentManager(), "ColorPicker");
-            }
+                }
+            }).build().show(getSupportFragmentManager(), "ColorPicker");
         });
 
         AlertDialog.Builder builder;
@@ -642,67 +593,53 @@ public class LoginActivity extends AppCompatActivity {
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.createprofile)));
         builder.setCancelable(false);
         builder.setView(view);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
 
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (view1 != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
             }
-        });
-
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                View view = ((AlertDialog) dialogInterface).getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-                dialogInterface.cancel();
-                userID = "";
-            }
+            dialogInterface.cancel();
+            userID = "";
         });
 
         final AlertDialog alert = builder.create();
-        alert.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
+        alert.setOnShowListener(dialogInterface -> {
 
-                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (!usernameEdit.getText().toString().isEmpty()) {
-                            if (!profileDescriptionEdit.getText().toString().isEmpty()) {
-                                if (!locationEdit.getText().toString().isEmpty()) {
-                                    if (!birthdayEdit.getText().toString().isEmpty()) {
-                                        String username = usernameEdit.getText().toString();
-                                        String profileDescription = profileDescriptionEdit.getText().toString();
-                                        String location = locationEdit.getText().toString();
-                                        String birthday = birthdayEdit.getText().toString();
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view12 -> {
+                if (!usernameEdit.getText().toString().isEmpty()) {
+                    if (!profileDescriptionEdit.getText().toString().isEmpty()) {
+                        if (!locationEdit.getText().toString().isEmpty()) {
+                            if (!birthdayEdit.getText().toString().isEmpty()) {
+                                String username = usernameEdit.getText().toString();
+                                String profileDescription = profileDescriptionEdit.getText().toString();
+                                String location = locationEdit.getText().toString();
+                                String birthday = birthdayEdit.getText().toString();
 
-                                        createAccountAuth(email, password, username, profileDescription, location, birthday);
+                                createAccountAuth(email, password, username, profileDescription, location, birthday);
 
-                                        if (view != null) {
-                                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                                        }
-
-                                        alert.cancel();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
-                                    }
-                                } else {
-                                    locationLayout.setError(getResources().getString(R.string.enterlocation));
+                                if (view12 != null) {
+                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                    imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                                 }
+
+                                alert.cancel();
                             } else {
-                                profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
+                                Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            usernameLayout.setError(getResources().getString(R.string.entername));
+                            locationLayout.setError(getResources().getString(R.string.enterlocation));
                         }
+                    } else {
+                        profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
                     }
-                });
-            }
+                } else {
+                    usernameLayout.setError(getResources().getString(R.string.entername));
+                }
+            });
         });
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         alert.show();
@@ -821,33 +758,25 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         UploadTask uploadTask = ref.putBytes(byteArray);
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                progressDialog.dismiss();
-                if (type == 0) {
-                    ownpi = "1";
-                    DatabaseReference user_root = userRoot.child(userID);
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("ownpi", "1");
-                    user_root.updateChildren(map);
-                }
-                updateEditProfileImages();
-                Toast.makeText(LoginActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            progressDialog.dismiss();
+            if (type == 0) {
+                ownpi = "1";
+                DatabaseReference user_root = userRoot.child(userID);
+                Map<String, Object> map = new HashMap<>();
+                map.put("ownpi", "1");
+                user_root.updateChildren(map);
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                progressDialog.dismiss();
-                Toast.makeText(LoginActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
-            }
-        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                        .getTotalByteCount());
-                progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
-            }
+            updateEditProfileImages();
+            Toast.makeText(LoginActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
+        }).addOnFailureListener(e -> {
+            Log.e("Upload failed", e.toString());
+            progressDialog.dismiss();
+            Toast.makeText(LoginActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+        }).addOnProgressListener(taskSnapshot -> {
+            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
+                    .getTotalByteCount());
+            progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
         });
     }
 
@@ -858,29 +787,19 @@ public class LoginActivity extends AppCompatActivity {
         final ImageButton profileImageButton = findViewById(R.id.user_profile_image);
         final ImageButton profileBannerButton = findViewById(R.id.user_profile_banner);
 
-        pathReference_image.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-            @Override
-            public void onSuccess(StorageMetadata storageMetadata) {
-                GlideApp.with(getApplicationContext())
-                        //.using(new FirebaseImageLoader())
-                        .load(pathReference_image)
-                        .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
-                        .centerCrop()
-                        .into(profileImageButton);
-            }
-        });
+        pathReference_image.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
+                //.using(new FirebaseImageLoader())
+                .load(pathReference_image)
+                .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
+                .centerCrop()
+                .into(profileImageButton));
         StorageReference pathReference_banner = storageRef.child("profile_banners/" + banner);
-        pathReference_banner.getMetadata().addOnSuccessListener(new OnSuccessListener<StorageMetadata>() {
-            @Override
-            public void onSuccess(StorageMetadata storageMetadata) {
-                GlideApp.with(getApplicationContext())
-                        //.using(new FirebaseImageLoader())
-                        .load(pathReference_banner)
-                        .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
-                        .centerCrop()
-                        .thumbnail(0.05f)
-                        .into(profileBannerButton);
-            }
-        });
+        pathReference_banner.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
+                //.using(new FirebaseImageLoader())
+                .load(pathReference_banner)
+                .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
+                .centerCrop()
+                .thumbnail(0.05f)
+                .into(profileBannerButton));
     }
 }

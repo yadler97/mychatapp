@@ -70,23 +70,20 @@ public class ThemeAdapter extends BaseAdapter {
             imageView.setBorderWidth((float)8);
         }
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                for (SquareImageView v : viewList) {
-                    v.setBorderColor(context.getResources().getColor(R.color.grey));
-                    v.setBorderWidth((float)2);
-                }
-                if (theme == Theme.DARK) {
-                    imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
-                } else {
-                    imageView.setBorderColor(context.getResources().getColor(R.color.red));
-                }
-                imageView.setBorderWidth((float)8);
-                Intent intent = new Intent("themeOption");
-                intent.putExtra("position", position);
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+        imageView.setOnClickListener(view -> {
+            for (SquareImageView v : viewList) {
+                v.setBorderColor(context.getResources().getColor(R.color.grey));
+                v.setBorderWidth((float)2);
             }
+            if (theme == Theme.DARK) {
+                imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
+            } else {
+                imageView.setBorderColor(context.getResources().getColor(R.color.red));
+            }
+            imageView.setBorderWidth((float)8);
+            Intent intent = new Intent("themeOption");
+            intent.putExtra("position", position);
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         });
 
         int image = imageList.getResourceId(position, -1);

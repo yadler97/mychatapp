@@ -78,13 +78,10 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
             viewHolder.messageText.setText(pinnedList.get(position).getMsg());
         }
 
-        rowView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent("jumppinned");
-                intent.putExtra("pinnedKey", pinnedList.get(position).getKey());
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            }
+        rowView.setOnClickListener(view1 -> {
+            Intent intent = new Intent("jumppinned");
+            intent.putExtra("pinnedKey", pinnedList.get(position).getKey());
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         });
 
         return rowView;

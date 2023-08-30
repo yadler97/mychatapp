@@ -85,13 +85,10 @@ public class RoomListFragmentMore extends Fragment {
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                int position = listView.getPositionForView(view);
-                Room room = roomList.get(position);
-                requestPassword(room, position);
-            }
+        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+            int position = listView.getPositionForView(view1);
+            Room room = roomList.get(position);
+            requestPassword(room, position);
         });
 
         adapter.registerDataSetObserver(new DataSetObserver() {
@@ -186,68 +183,52 @@ public class RoomListFragmentMore extends Fragment {
         builder.setTitle(R.string.pleaseenterpassword);
         builder.setView(view);
         builder.setCancelable(false);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (view1 != null) {
+                InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
             }
-        });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                View view = ((AlertDialog) dialogInterface).getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-                dialogInterface.cancel();
-            }
+            dialogInterface.cancel();
         });
 
         final AlertDialog alert = builder.create();
-        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+        alert.setOnShowListener(dialogInterface -> {
 
-            @Override
-            public void onShow(DialogInterface dialog) {
-
-                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        if (!input_field.getText().toString().isEmpty()) {
-                            if (input_field.getText().toString().trim().equals(room.getPasswd())) {
-                                String roomKey = room.getKey();
-                                Intent tabIntent = new Intent("tab");
-                                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(tabIntent);
-                                Intent intent = new Intent(getActivity(), ChatActivity.class);
-                                intent.putExtra("room_name", room.getName());
-                                intent.putExtra("room_key", roomKey);
-                                intent.putExtra("last_read_message", fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomKey)));
-                                if (room.getnM() != null) {
-                                    intent.putExtra("nmid", room.getnM().getKey());
-                                } else {
-                                    intent.putExtra("nmid", roomKey);
-                                }
-                                if (room.getnM() != null) {
-                                    fileOperations.writeToFile(room.getnM().getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
-                                } else {
-                                    fileOperations.writeToFile(roomKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
-                                }
-                                updateRoomList(position);
-                                fileOperations.writeToFile(room.getPasswd(), String.format(FileOperations.passwordFilePattern, roomKey));
-                                FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
-                                alert.cancel();
-                                startActivity(intent);
-                            } else {
-                                input_field_layout.setError(getResources().getString(R.string.wrongpassword));
-                            }
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view12 -> {
+                if (!input_field.getText().toString().isEmpty()) {
+                    if (input_field.getText().toString().trim().equals(room.getPasswd())) {
+                        String roomKey = room.getKey();
+                        Intent tabIntent = new Intent("tab");
+                        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(tabIntent);
+                        Intent intent = new Intent(getActivity(), ChatActivity.class);
+                        intent.putExtra("room_name", room.getName());
+                        intent.putExtra("room_key", roomKey);
+                        intent.putExtra("last_read_message", fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomKey)));
+                        if (room.getnM() != null) {
+                            intent.putExtra("nmid", room.getnM().getKey());
                         } else {
-                            input_field_layout.setError(getResources().getString(R.string.enterpassword));
+                            intent.putExtra("nmid", roomKey);
                         }
+                        if (room.getnM() != null) {
+                            fileOperations.writeToFile(room.getnM().getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
+                        } else {
+                            fileOperations.writeToFile(roomKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
+                        }
+                        updateRoomList(position);
+                        fileOperations.writeToFile(room.getPasswd(), String.format(FileOperations.passwordFilePattern, roomKey));
+                        FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
+                        alert.cancel();
+                        startActivity(intent);
+                    } else {
+                        input_field_layout.setError(getResources().getString(R.string.wrongpassword));
                     }
-                });
-            }
+                } else {
+                    input_field_layout.setError(getResources().getString(R.string.enterpassword));
+                }
+            });
         });
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         alert.show();
