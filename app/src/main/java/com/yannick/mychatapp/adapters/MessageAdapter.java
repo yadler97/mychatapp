@@ -70,8 +70,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private final FirebaseAuth mAuth;
 
-    private final FileOperations fileOperations = new FileOperations(context);
-
     public class MyViewHolder extends RecyclerView.ViewHolder{
         private final TextView name, msg, time, quote_name, quote_message;
         private final LinearLayout quotebox, quotebox_content, messagebox;

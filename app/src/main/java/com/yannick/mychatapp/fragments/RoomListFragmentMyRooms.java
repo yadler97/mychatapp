@@ -104,9 +104,9 @@ public class RoomListFragmentMyRooms extends Fragment {
     private void addRoomToList(DataSnapshot dataSnapshot) {
         roomList.clear();
 
-        for (final DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
+        for (final DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
             final String roomKey = uniqueKeySnapshot.getKey();
-            for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
+            for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
                 final Room room = roomSnapshot.getValue(Room.class);
                 room.setKey(roomKey);
                 if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {

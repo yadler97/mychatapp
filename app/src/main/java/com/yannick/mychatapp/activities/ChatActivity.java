@@ -253,7 +253,7 @@ public class ChatActivity extends AppCompatActivity {
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx,int dy){
+            public void onScrolled(RecyclerView recyclerView, int dx,int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
                 if (!recyclerView.canScrollVertically(1)) {
@@ -1273,7 +1273,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
-        if (menu instanceof MenuBuilder){
+        if (menu instanceof MenuBuilder) {
             MenuBuilder m = (MenuBuilder) menu;
             m.setOptionalIconsVisible(true);
         }
@@ -1376,7 +1376,7 @@ public class ChatActivity extends AppCompatActivity {
                     Intent intent = new Intent("leaveroom");
                     intent.putExtra("roomkey", roomKey);
                     LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
-                    Toast.makeText(getApplicationContext(), R.string.roomleaved, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), R.string.roomleft, Toast.LENGTH_SHORT).show();
                 }
             });
             builder.setNegativeButton(R.string.no, null);

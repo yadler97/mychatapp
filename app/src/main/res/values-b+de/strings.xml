@@ -131,7 +131,7 @@
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
     <string name="reallyleaveroom">Raum wirklich verlassen?</string>
-    <string name="roomleaved">Raum verlassen</string>
+    <string name="roomleft">Raum verlassen</string>
     <string name="previewimages">Bildervorschau laden</string>
     <string name="savecamerapictures">Kamerabilder auf Gerät speichern</string>
     <string name="reply">Antworten</string>

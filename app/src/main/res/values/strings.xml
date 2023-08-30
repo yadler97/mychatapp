@@ -131,7 +131,7 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="reallyleaveroom">Really leave room?</string>
-    <string name="roomleaved">Room leaved</string>
+    <string name="roomleft">Room left</string>
     <string name="previewimages">Preview images</string>
     <string name="savecamerapictures">Save camera pictures on device</string>
     <string name="reply">Reply</string>
@@ -278,7 +278,7 @@
         "- The character limit is now being displayed beneath input fields\n"
 		"- If the user enters something in a input field the hint is now being showed above\n"
 		"- The password can now be displayed in readable characters by pressing a button\n"
-		"- Breaks are now pssobile when entering a message. Up to six lines are displayed in the input field\n"
+		"- Breaks are now possible when entering a message. Up to six lines are displayed in the input field\n"
         "- The action bar will no longer disappear when the user opens the keyboard\n"
         "- The keyboard no longer overlaps the input field\n"
         "- The user is no being notified when he quotes a message\n"
@@ -309,7 +309,7 @@
         "- Photos taken with the camera are now automatically saved to the \"MyChatApp\" Images Directory\n"
         "- A member list is now available in the room info\n"
         "- The admin can now edit the room\n"
-        "- Rooms can now be leaved\n"
+        "- Rooms can now be left\n"
         "- The special characters \., \$, \[, \], \# and \/ can now be used in room names\n"
         "- The input field is no longer overlapping the messages when it contains more than two lines\n"
         "- Messages with more than 2000 characters are no longer shown completely. Clicking on \"Show more\" shows the entire message\n"

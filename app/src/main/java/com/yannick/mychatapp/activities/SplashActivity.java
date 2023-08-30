@@ -24,7 +24,7 @@ public class SplashActivity extends AppCompatActivity{
     private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.activity_splash);

@@ -77,6 +77,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
+import com.yannick.mychatapp.StringOperations;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.adapters.BackgroundAdapter;
 import com.yannick.mychatapp.BuildConfig;
@@ -754,22 +755,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        String date;
-                        if (dayOfMonth < 10) {
-                            date = "0" + dayOfMonth;
-                        } else {
-                            date = "" + dayOfMonth;
-                        }
-                        monthOfYear = monthOfYear + 1;
-                        if (monthOfYear < 10) {
-                            date = date + ".0" + monthOfYear + "." + year;
-                        } else {
-                            date = date + "." + monthOfYear + "." + year;
-                        }
-
+                        String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
                         birthday.setText(date);
                     }
-                }, Integer.parseInt(currentUser.getBirthday().substring(6, 10)), Integer.parseInt(currentUser.getBirthday().substring(3, 5)) - 1, Integer.parseInt(currentUser.getBirthday().substring(0, 2)));
+                }, StringOperations.getYear(currentUser.getBirthday()), StringOperations.getMonth(currentUser.getBirthday()), StringOperations.getDay(currentUser.getBirthday()));
                 if (theme == Theme.DARK) {
                     datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
                 }
@@ -1100,7 +1089,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_roomsearch, menu);
 
-        if (menu instanceof MenuBuilder){
+        if (menu instanceof MenuBuilder) {
             MenuBuilder m = (MenuBuilder) menu;
             m.setOptionalIconsVisible(true);
         }

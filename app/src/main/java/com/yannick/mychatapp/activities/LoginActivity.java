@@ -57,6 +57,7 @@ import com.thebluealliance.spectrum.SpectrumDialog;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.ImageOperations;
 import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.StringOperations;
 import com.yannick.mychatapp.data.Theme;
 
 import java.io.ByteArrayOutputStream;
@@ -587,22 +588,10 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        String date;
-                        if (dayOfMonth < 10) {
-                            date = "0" + dayOfMonth;
-                        } else {
-                            date = "" + dayOfMonth;
-                        }
-                        monthOfYear = monthOfYear + 1;
-                        if (monthOfYear < 10) {
-                            date = date + ".0" + monthOfYear + "." + year;
-                        } else {
-                            date = date + "." + monthOfYear + "." + year;
-                        }
-
+                        String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
                         birthdayEdit.setText(date);
                     }
-                }, Integer.parseInt(birthday.substring(6, 10)), Integer.parseInt(birthday.substring(3, 5)) - 1, Integer.parseInt(birthday.substring(0, 2)));
+                }, StringOperations.getYear(birthday), StringOperations.getMonth(birthday), StringOperations.getDay(birthday));
                 if (theme == Theme.DARK) {
                     datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
                 }
