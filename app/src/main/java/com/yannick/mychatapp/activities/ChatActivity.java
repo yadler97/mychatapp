@@ -57,6 +57,7 @@ import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -705,42 +706,42 @@ public class ChatActivity extends AppCompatActivity {
             switch (background) {
                 case BREATH_OF_THE_WILD:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_botw));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_botw, null));
                     break;
                 case SPLATOON_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_splatoon2));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_splatoon2, null));
                     break;
                 case PERSONA_5:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_persona));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_persona, null));
                     break;
                 case KIMI_NO_NA_WA:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_kiminonawa));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_kiminonawa, null));
                     break;
                 case SUPER_MARIO_BROS:
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smb));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_smb, null));
                     break;
                 case SUPER_MARIO_MAKER:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smm));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_smm, null));
                     break;
                 case XENOBLADE_CHRONICLES_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_xc2));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_xc2, null));
                     break;
                 case FIRE_EMBLEM_FATES:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_fef));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_fef, null));
                     break;
                 case SUPER_SMASH_BROS_ULTIMATE:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_ssbu));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_ssbu, null));
                     break;
                 case DETECTIVE_PIKACHU:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_dp));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_dp, null));
                     break;
                 default:
                     break;
@@ -749,41 +750,41 @@ public class ChatActivity extends AppCompatActivity {
             switch (background) {
                 case BREATH_OF_THE_WILD:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_botw_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_botw_horizontal, null));
                     break;
                 case SPLATOON_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_splatoon2_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_splatoon2_horizontal, null));
                     break;
                 case PERSONA_5:
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_persona_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_persona_horizontal, null));
                     break;
                 case KIMI_NO_NA_WA:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_kiminonawa_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_kiminonawa_horizontal, null));
                     break;
                 case SUPER_MARIO_BROS:
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smb_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_smb_horizontal, null));
                     break;
                 case SUPER_MARIO_MAKER:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_smm_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_smm_horizontal, null));
                     break;
                 case XENOBLADE_CHRONICLES_2:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.BOTTOM);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_xc2_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_xc2_horizontal, null));
                     break;
                 case FIRE_EMBLEM_FATES:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_fef_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_fef_horizontal, null));
                     break;
                 case SUPER_SMASH_BROS_ULTIMATE:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.CENTER);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_ssbu_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_ssbu_horizontal, null));
                     break;
                 case DETECTIVE_PIKACHU:
                     backgroundview.setImageGravity(GravityImageView.CENTER_HORIZONTAL|GravityImageView.TOP);
-                    backgroundview.setImageDrawable(getResources().getDrawable(R.drawable.background_dp_horizontal));
+                    backgroundview.setImageDrawable(ResourcesCompat.getDrawable(getResources(), R.drawable.background_dp_horizontal, null));
                     break;
                 default:
                     break;
@@ -1610,10 +1611,10 @@ public class ChatActivity extends AppCompatActivity {
 
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
-            banner.setBackground(getResources().getDrawable(R.drawable.side_nav_bar_dark));
+            banner.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar_dark, null));
         } else {
             builder = new AlertDialog.Builder(this);
-            banner.setBackground(getResources().getDrawable(R.drawable.side_nav_bar));
+            banner.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar, null));
         }
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());

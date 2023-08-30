@@ -10,6 +10,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.core.content.res.ResourcesCompat;
+
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -61,20 +63,25 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         MORE
     }
 
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        View rowView;
+    public View getView(final int position, View view, ViewGroup parent) {
+        ViewHolder viewHolder;
 
-        final ViewHolder viewHolder = new ViewHolder();
+        if (view == null) {
+            viewHolder = new ViewHolder();
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.room_list, parent, false);
 
-        rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.room_list, parent, false);
+            viewHolder.roomNameText = view.findViewById(R.id.room_name);
+            viewHolder.newestMessageText = view.findViewById(R.id.room_date);
+            viewHolder.categoryText = view.findViewById(R.id.room_category);
+            viewHolder.lockText = view.findViewById(R.id.room_lock);
+            viewHolder.background = view.findViewById(R.id.room_background);
+            viewHolder.muteIcon = view.findViewById(R.id.room_mute);
+            viewHolder.roomImage = view.findViewById(R.id.room_image);
 
-        viewHolder.roomNameText = rowView.findViewById(R.id.raumname);
-        viewHolder.newestMessageText = rowView.findViewById(R.id.raumdatum);
-        viewHolder.categoryText = rowView.findViewById(R.id.raumkat);
-        viewHolder.lockText = rowView.findViewById(R.id.raumlock);
-        viewHolder.background = rowView.findViewById(R.id.raumbackground);
-        viewHolder.muteIcon = rowView.findViewById(R.id.raummute);
-        viewHolder.roomImage = rowView.findViewById(R.id.roomimage);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) view.getTag();
+        }
 
         viewHolder.roomNameText.setText(roomList.get(position).getName());
         if (type == RoomListType.MORE) {
@@ -130,7 +137,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
 
         if (type != RoomListType.MORE) {
             if (fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomList.get(position).getKey())).equals("1")) {
-                viewHolder.muteIcon.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_muted));
+                viewHolder.muteIcon.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_muted, null));
                 if (Theme.getCurrentTheme(context) == Theme.DARK) {
                     viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
                 } else {
@@ -147,7 +154,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
                 .thumbnail(0.05f)
                 .into(viewHolder.roomImage);
 
-        return rowView;
+        return view;
     }
 
     private String parseTime(String time) {

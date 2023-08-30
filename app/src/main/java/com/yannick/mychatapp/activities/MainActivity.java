@@ -44,6 +44,7 @@ import android.widget.Toast;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.view.GravityCompat;
@@ -205,9 +206,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         icon_profile.setOnClickListener(view -> showProfile());
 
         if (theme == Theme.DARK) {
-            banner_profile.setBackground(getResources().getDrawable(R.drawable.side_nav_bar_dark));
+            banner_profile.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar_dark, null));
         } else {
-            banner_profile.setBackground(getResources().getDrawable(R.drawable.side_nav_bar));
+            banner_profile.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar, null));
         }
 
         storage = FirebaseStorage.getInstance();
@@ -525,10 +526,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
-            banner.setBackground(getResources().getDrawable(R.drawable.side_nav_bar_dark));
+            banner.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar_dark, null));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
-            banner.setBackground(getResources().getDrawable(R.drawable.side_nav_bar));
+            banner.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar, null));
         }
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
