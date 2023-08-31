@@ -37,7 +37,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.activities.MainActivity;
 import com.yannick.mychatapp.data.Message;

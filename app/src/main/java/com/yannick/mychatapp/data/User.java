@@ -85,4 +85,12 @@ public class User {
     public void setOwnpi(String ownpi) {
         this.ownpi = ownpi;
     }
+
+    public void setImg(String img) {
+        this.img = img;
+    }
+
+    public void setBanner(String banner) {
+        this.banner = banner;
+    }
 }

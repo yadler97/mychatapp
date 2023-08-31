@@ -5,12 +5,10 @@ import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -32,7 +30,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
@@ -42,7 +39,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
@@ -60,8 +56,6 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
@@ -74,7 +68,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
@@ -97,9 +90,7 @@ import com.yannick.mychatapp.adapters.ThemeAdapter;
 import com.yannick.mychatapp.data.User;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -138,6 +129,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CircleImageView profileImage;
     private ImageView banner;
     private ImageView banner_profile;
+    private ImageButton profileImageButton;
+    private ImageButton profileBannerButton;
+    private ImageButton roomImageButton;
     private CircleImageView icon_profile;
     private TextView text_profile;
 
@@ -259,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final TextInputLayout room_password_repeat_layout = view.findViewById(R.id.room_password_repeat_layout);
 
         final Spinner spinner = view.findViewById(R.id.spinner);
-        final ImageButton roomImageButton = view.findViewById(R.id.room_image);
+        roomImageButton = view.findViewById(R.id.room_image);
 
         Random rand = new Random();
         img_room = "standard" + (rand.nextInt(4)+1);
@@ -376,7 +370,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), 2);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_ROOM_IMAGE_REQUEST);
         });
 
         AlertDialog.Builder builder;
@@ -634,8 +628,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         final ImageButton favColour = view.findViewById(R.id.user_favcolor);
-        final ImageButton profileImageButton = view.findViewById(R.id.user_profile_image);
-        final ImageButton profileBannerButton = view.findViewById(R.id.user_profile_banner);
+        profileImageButton = view.findViewById(R.id.user_profile_image);
+        profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         final StorageReference pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
@@ -679,14 +673,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), 0);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_IMAGE_REQUEST);
         });
 
         profileBannerButton.setOnClickListener(v -> {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), 1);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_BANNER_REQUEST);
         });
 
         username.setText(currentUser.getName());
@@ -1075,9 +1069,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateEditProfileImages() {
-        final ImageButton profileImageButton = findViewById(R.id.user_profile_image);
-        final ImageButton profileBannerButton = findViewById(R.id.user_profile_banner);
-
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
         GlideApp.with(getApplicationContext())
@@ -1166,7 +1157,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && data != null && data.getData() != null ) {
+        if (resultCode == RESULT_OK && data != null) {
             Uri filePath = data.getData();
             if (filePath != null) {
                 uploadImage(filePath, requestCode);
@@ -1186,10 +1177,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference ref;
-        if (type == 0) {
+        if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
             img_user = UUID.randomUUID().toString();
             ref = storageRef.child("profile_images/" + img_user);
-        } else if (type == 1) {
+        } else if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
             img_banner = UUID.randomUUID().toString();
             ref = storageRef.child("profile_banners/" + img_banner);
         } else {
@@ -1197,86 +1188,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ref = storageRef.child("room_images/" + img_room);
         }
 
-        byte[] byteArray;
-        InputStream imageStream = null;
-        try {
-            imageStream = getContentResolver().openInputStream(filePath);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        Bitmap bmp = BitmapFactory.decodeStream(imageStream);
-
-        if (bmp.getWidth() < bmp.getHeight() && (type == 0 || type == 2)) {
-            bmp = Bitmap.createBitmap(bmp, 0, bmp.getHeight()/2-bmp.getWidth()/2, bmp.getWidth(), bmp.getWidth());
-        } else if (bmp.getWidth() > bmp.getHeight() && (type == 0 || type == 2)) {
-            bmp = Bitmap.createBitmap(bmp, bmp.getWidth()/2-bmp.getHeight()/2, 0, bmp.getHeight(), bmp.getHeight());
-        } else if (bmp.getWidth()/16*9 < bmp.getHeight() && type == 1) {
-            bmp = Bitmap.createBitmap(bmp, 0, bmp.getHeight()/2-bmp.getWidth()/16*9/2, bmp.getWidth(), bmp.getWidth()/16*9);
-        } else if (bmp.getWidth()/16*9 > bmp.getHeight() && type == 1) {
-            bmp = Bitmap.createBitmap(bmp, bmp.getWidth()/2-bmp.getHeight()/9*16/2, 0, bmp.getHeight()/9*16, bmp.getHeight());
-        }
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        int compression = 100;
-        int compressFactor = 2;
-        int height = bmp.getHeight();
-        int width = bmp.getWidth();
         ImageOperations imageOperations = new ImageOperations(getContentResolver());
-        if (imageOperations.getImgSize(filePath) > height * width) {
-            compressFactor = 4;
-        }
-        if (type == 0 || type == 2) {
-            while (height * width > 500 * 500) {
-                height /= 1.1;
-                width /= 1.1;
-                compression -= compressFactor;
-            }
-        } else {
-            while (height * width > 1920 * 1080) {
-                height /= 1.1;
-                width /= 1.1;
-                compression -= compressFactor;
-            }
-        }
-        bmp = Bitmap.createScaledBitmap(bmp, width, height, false);
-        try {
-            bmp = imageOperations.rotateImageIfRequired(this, bmp, filePath);
-        } catch (IOException e) { }
-        bmp.compress(Bitmap.CompressFormat.JPEG, compression, stream);
-        byteArray = stream.toByteArray();
-        try {
-            stream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        byte[] byteArray = imageOperations.getImageAsBytes(this, filePath, type);
 
         UploadTask uploadTask = ref.putBytes(byteArray);
         uploadTask.addOnSuccessListener(taskSnapshot -> {
             progressDialog.dismiss();
-            if (type == 0) {
+            if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
                 currentUser.setOwnpi("1");
+                currentUser.setImg(img_user);
                 DatabaseReference user_root = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
                 map.put("ownpi", "1");
                 map.put("img", img_user);
                 user_root.updateChildren(map);
             }
-            if (type == 1) {
+            if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
+                currentUser.setBanner(img_banner);
                 DatabaseReference user_root = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
                 map.put("banner", img_banner);
                 user_root.updateChildren(map);
             }
-            if (type != 2) {
+            if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
                 updateNavigationDrawerIcon();
                 updateProfileImages();
                 updateEditProfileImages();
             }
             Toast.makeText(MainActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
-            if (type == 2) {
-                final ImageButton roomImageButton = findViewById(R.id.room_image);
-
+            if (type == ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
                 pathReference_roomimage = storageRef.child("room_images/" + img_room);
                 GlideApp.with(getApplicationContext())
                         .load(pathReference_roomimage)

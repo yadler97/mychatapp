@@ -6,16 +6,12 @@ import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -70,8 +66,6 @@ import androidx.appcompat.widget.SearchView;
 
 import com.bumptech.glide.signature.ObjectKey;
 import com.chrisrenke.giv.GravityImageView;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
@@ -83,10 +77,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
-import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.yannick.mychatapp.data.Background;
@@ -108,12 +99,9 @@ import com.yannick.mychatapp.data.Theme;
 import com.yannick.mychatapp.data.User;
 import com.yannick.mychatapp.ZoomOutPageTransformer;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -185,16 +173,13 @@ public class ChatActivity extends AppCompatActivity {
     private boolean lastReadMessageReached = false;
     private FloatingActionButton btn_scrolldown;
 
-    private static final int PICK_IMAGE_REQUEST = 0;
-    private static final int CAPTURE_IMAGE_REQUEST = 1;
-    private static final int PICK_ROOM_IMAGE_REQUEST = 2;
-
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private SimpleDateFormat sdf_local = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
 
     private int katindex = 0;
 
     private GravityImageView backgroundview;
+    private ImageButton roomImageButton;
 
     private TextView quote_text;
     private LinearLayout quote_layout;
@@ -817,76 +802,21 @@ public class ChatActivity extends AppCompatActivity {
 
         String imgName = UUID.randomUUID().toString();
         StorageReference ref;
-        if (type == PICK_ROOM_IMAGE_REQUEST) {
+        if (type == ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
             ref = storageReference.child("room_images/" + imgName);
         } else {
             ref = storageReference.child("images/" + imgName);
         }
 
-        byte[] byteArray = new byte[0];
-        ContentResolver cR = getApplicationContext().getContentResolver();
-        if (cR.getType(filePath).equals("image/gif") && type != PICK_ROOM_IMAGE_REQUEST) {
-            try {
-                InputStream iStream = getContentResolver().openInputStream(filePath);
-                byteArray = getBytes(iStream);
-            } catch (IOException ioe) { }
-        } else {
-            InputStream imageStream = null;
-            try {
-                imageStream = getContentResolver().openInputStream(filePath);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            Bitmap bmp = BitmapFactory.decodeStream(imageStream);
-
-            if (bmp.getWidth() < bmp.getHeight() && type == PICK_ROOM_IMAGE_REQUEST) {
-                bmp = Bitmap.createBitmap(bmp, 0, bmp.getHeight()/2-bmp.getWidth()/2, bmp.getWidth(), bmp.getWidth());
-            } else if (bmp.getWidth() > bmp.getHeight() && type == PICK_ROOM_IMAGE_REQUEST) {
-                bmp = Bitmap.createBitmap(bmp, bmp.getWidth()/2-bmp.getHeight()/2, 0, bmp.getHeight(), bmp.getHeight());
-            }
-
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            int compression = 100;
-            int compressFactor = 2;
-            int height = bmp.getHeight();
-            int width = bmp.getWidth();
-            ImageOperations imageOperations = new ImageOperations(getContentResolver());
-            if (imageOperations.getImgSize(filePath) > height * width) {
-                compressFactor = 4;
-            }
-            if (type == PICK_ROOM_IMAGE_REQUEST) {
-                while (height * width > 500 * 500) {
-                    height /= 1.1;
-                    width /= 1.1;
-                    compression -= compressFactor;
-                }
-            } else {
-                while (height * width > 1920 * 1080) {
-                    height /= 1.1;
-                    width /= 1.1;
-                    compression -= compressFactor;
-                }
-            }
-            bmp = Bitmap.createScaledBitmap(bmp, width, height, false);
-            try {
-                bmp = imageOperations.rotateImageIfRequired(this, bmp, filePath);
-            } catch (IOException e) { }
-            bmp.compress(Bitmap.CompressFormat.JPEG, compression, stream);
-            byteArray = stream.toByteArray();
-            try {
-                stream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        ImageOperations imageOperations = new ImageOperations(getContentResolver());
+        byte[] byteArray = imageOperations.getImageAsBytes(this, filePath, type);
 
         UploadTask uploadTask = ref.putBytes(byteArray);
         uploadTask.addOnSuccessListener(taskSnapshot -> {
             progressDialog.dismiss();
             Toast.makeText(ChatActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
 
-            if (type != PICK_ROOM_IMAGE_REQUEST) {
+            if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
                 Map<String, Object> map = new HashMap<String, Object>();
                 String newMessageKey = root.push().getKey();
                 root.updateChildren(map);
@@ -906,7 +836,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 quoteStatus = "";
 
-                if (type == CAPTURE_IMAGE_REQUEST && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
+                if (type == ImageOperations.CAPTURE_IMAGE_REQUEST && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
                     downloadImage(imgName, type);
                 }
             } else {
@@ -916,8 +846,6 @@ public class ChatActivity extends AppCompatActivity {
                 message_root.updateChildren(map);
 
                 room.setImg(imgName);
-
-                ImageButton roomImageButton = findViewById(R.id.room_image);
 
                 storageReferenceRoomImages = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
                 final StorageReference pathReference = storageReferenceRoomImages.child("room_images/" + imgName);
@@ -942,7 +870,7 @@ public class ChatActivity extends AppCompatActivity {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_REQUEST);
+        startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_IMAGE_REQUEST);
     }
 
     private void takePicture() {
@@ -951,15 +879,15 @@ public class ChatActivity extends AppCompatActivity {
             File photoFile = null;
             try {
                 photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
+            } catch (IOException e) {
+                Log.e("error creating file", e.toString());
             }
             if (photoFile != null) {
                 photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID+".fileprovider", photoFile);
                 action = 2;
                 if (isStoragePermissionGranted()) {
                     takePictureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoURI);
-                    startActivityForResult(takePictureIntent, CAPTURE_IMAGE_REQUEST);
+                    startActivityForResult(takePictureIntent, ImageOperations.CAPTURE_IMAGE_REQUEST);
                 }
             }
         }
@@ -975,20 +903,15 @@ public class ChatActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null ) {
+        if (requestCode == ImageOperations.CAPTURE_IMAGE_REQUEST && resultCode == RESULT_OK) {
+            if (photoURI != null) {
+                uploadImage(photoURI, requestCode);
+            }
+        } else if (resultCode == RESULT_OK && data != null) {
             Uri filePath = data.getData();
             if (filePath != null) {
-                uploadImage(filePath, PICK_IMAGE_REQUEST);
+                uploadImage(filePath, requestCode);
             }
-        }
-        if (requestCode == CAPTURE_IMAGE_REQUEST && resultCode == RESULT_OK) {
-            if (photoURI != null) {
-                uploadImage(photoURI, CAPTURE_IMAGE_REQUEST);
-            }
-        }
-        if (requestCode == PICK_ROOM_IMAGE_REQUEST) {
-            Uri filePath = data.getData();
-            uploadImage(filePath, PICK_ROOM_IMAGE_REQUEST);
         }
     }
 
@@ -1061,7 +984,7 @@ public class ChatActivity extends AppCompatActivity {
             imgurl = intent.getStringExtra("imgurl");
             action = 1;
             if (isStoragePermissionGranted()) {
-                downloadImage(imgurl, PICK_IMAGE_REQUEST);
+                downloadImage(imgurl, ImageOperations.PICK_IMAGE_REQUEST);
             }
         }
     };
@@ -1155,7 +1078,7 @@ public class ChatActivity extends AppCompatActivity {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.v("DL", "Permission is granted");
             if (action == 1) {
-                downloadImage(imgurl, PICK_IMAGE_REQUEST);
+                downloadImage(imgurl, ImageOperations.PICK_IMAGE_REQUEST);
             } else if (action == 2) {
                 takePicture();
             } else if (action == 3) {
@@ -1184,7 +1107,7 @@ public class ChatActivity extends AppCompatActivity {
 
             pathReference.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
                 notifyGallery(localFile.getAbsolutePath());
-                if (type == PICK_IMAGE_REQUEST) {
+                if (type == ImageOperations.PICK_IMAGE_REQUEST) {
                     createSnackbar(localFile, mimeType, getResources().getString(R.string.imagesaved));
                 }
             }).addOnFailureListener(exception -> {
@@ -1896,18 +1819,6 @@ public class ChatActivity extends AppCompatActivity {
         alert.show();
     }
 
-    private byte[] getBytes(InputStream inputStream) throws IOException {
-        ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
-        int bufferSize = 1024;
-        byte[] buffer = new byte[bufferSize];
-
-        int len = 0;
-        while ((len = inputStream.read(buffer)) != -1) {
-            byteBuffer.write(buffer, 0, len);
-        }
-        return byteBuffer.toByteArray();
-    }
-
     private void editRoom() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.add_room, null);
@@ -1928,7 +1839,7 @@ public class ChatActivity extends AppCompatActivity {
         edit_room_password_repeat.setText(room.getPasswd());
 
         final Spinner spinner = view.findViewById(R.id.spinner);
-        ImageButton roomImageButton = view.findViewById(R.id.room_image);
+        roomImageButton = view.findViewById(R.id.room_image);
 
         spinner.setSelection(Integer.parseInt(room.getCategory()));
 
@@ -2044,7 +1955,7 @@ public class ChatActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_ROOM_IMAGE_REQUEST);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_ROOM_IMAGE_REQUEST);
         });
 
         AlertDialog.Builder builder;
