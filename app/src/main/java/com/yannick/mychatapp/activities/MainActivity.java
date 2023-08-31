@@ -393,7 +393,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
-
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view12 -> {
                 final String roomName = room_name.getText().toString().trim();
@@ -754,8 +753,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             showProfile();
         });
         final AlertDialog alert = builder.create();
-        alert.setOnShowListener(dialog -> {
-
+        alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view1 -> {
                 if (!username.getText().toString().isEmpty()) {
@@ -778,7 +776,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 map.put("location", currentUser.getLocation());
                                 map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
                                 map.put("favColour", String.valueOf(color));
-                                if (!currentUser.getOwnpi().equals("1") && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
+                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
                                     img_user = UUID.randomUUID().toString();
                                     map.put("img", img_user);
                                 }
@@ -789,7 +787,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                                     imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
                                 }
-                                if (!currentUser.getOwnpi().equals("1") && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
+                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
                                     storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
                                     TextDrawable drawable = TextDrawable.builder()
                                             .beginConfig()
@@ -1195,11 +1193,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         uploadTask.addOnSuccessListener(taskSnapshot -> {
             progressDialog.dismiss();
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
-                currentUser.setOwnpi("1");
+                currentUser.setOwnProfileImage(true);
                 currentUser.setImg(img_user);
                 DatabaseReference user_root = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
-                map.put("ownpi", "1");
+                map.put("ownProfileImage", true);
                 map.put("img", img_user);
                 user_root.updateChildren(map);
             }

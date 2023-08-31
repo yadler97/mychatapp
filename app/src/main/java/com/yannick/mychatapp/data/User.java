@@ -7,7 +7,7 @@ public class User {
     private String profileDescription;
     private String location;
     private String favColour;
-    private String ownpi;
+    private boolean ownProfileImage;
     private String img;
     private String banner;
 
@@ -54,8 +54,8 @@ public class User {
         return favColour;
     }
 
-    public String getOwnpi() {
-        return ownpi;
+    public boolean getOwnProfileImage() {
+        return ownProfileImage;
     }
 
     public String getImg() {
@@ -82,8 +82,8 @@ public class User {
         this.location = location;
     }
 
-    public void setOwnpi(String ownpi) {
-        this.ownpi = ownpi;
+    public void setOwnProfileImage(boolean ownProfileImage) {
+        this.ownProfileImage = ownProfileImage;
     }
 
     public void setImg(String img) {

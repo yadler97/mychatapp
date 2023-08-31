@@ -65,7 +65,7 @@ public class LoginActivity extends AppCompatActivity {
     private StorageReference storageRef;
     private static String userID = "";
     private static final String birthday = "01.01.2000";
-    private static String ownpi = "0";
+    private static boolean ownProfileImage = false;
     private static int colour = 0;
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
 
@@ -281,7 +281,7 @@ public class LoginActivity extends AppCompatActivity {
 
         img = "";
         banner = "";
-        ownpi = "0";
+        ownProfileImage = false;
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -305,7 +305,6 @@ public class LoginActivity extends AppCompatActivity {
 
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
-
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view12 -> {
                 if (!email.getText().toString().isEmpty()) {
@@ -344,7 +343,7 @@ public class LoginActivity extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
                         userID = user.getUid();
 
-                        if (ownpi.equals("0")) {
+                        if (!ownProfileImage) {
                             img = UUID.randomUUID().toString();
                         }
 
@@ -357,15 +356,11 @@ public class LoginActivity extends AppCompatActivity {
                         map.put("favColour", String.valueOf(colour));
                         map.put("img", img);
                         map.put("banner", banner);
-                        if (ownpi.equals("0")) {
-                            map.put("ownpi", "0");
-                        } else {
-                            map.put("ownpi", "1");
-                        }
+                        map.put("ownProfileImage", ownProfileImage);
                         user_root.updateChildren(map);
                         Toast.makeText(getApplicationContext(), R.string.profilecreated, Toast.LENGTH_SHORT).show();
 
-                        if (!ownpi.equals("1")) {
+                        if (!ownProfileImage) {
                             storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
                             TextDrawable drawable = TextDrawable.builder()
                                     .beginConfig()
@@ -701,10 +696,10 @@ public class LoginActivity extends AppCompatActivity {
         uploadTask.addOnSuccessListener(taskSnapshot -> {
             progressDialog.dismiss();
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
-                ownpi = "1";
+                ownProfileImage = true;
                 DatabaseReference user_root = userRoot.child(userID);
                 Map<String, Object> map = new HashMap<>();
-                map.put("ownpi", "1");
+                map.put("ownProfileImage", ownProfileImage);
                 user_root.updateChildren(map);
             }
             updateEditProfileImages();
