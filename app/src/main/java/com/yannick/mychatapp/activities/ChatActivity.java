@@ -570,7 +570,7 @@ public class ChatActivity extends AppCompatActivity {
                         break;
                     }
                 }
-                if (quoteType != Message.Type.IMAGE_RECEIVED && quoteType != Message.Type.IMAGE_RECEIVED_CON && quoteType != Message.Type.IMAGE_SENT && quoteType != Message.Type.IMAGE_SENT_CON) {
+                if (!Message.isImage(quoteType)) {
                     if (!quoteMessage.equals(getResources().getString(R.string.quotedmessagenolongeravailable))) {
                         m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteMessageType(sender, con), quoteName, quoteMessage, quoteKey, pin);
                     } else {
@@ -925,7 +925,7 @@ public class ChatActivity extends AppCompatActivity {
                     } else {
                         user = m.getUser().getName();
                     }
-                    if (m.getType() != Message.Type.IMAGE_RECEIVED && m.getType() != Message.Type.IMAGE_RECEIVED_CON && m.getType() != Message.Type.IMAGE_SENT && m.getType() != Message.Type.IMAGE_SENT_CON) {
+                    if (!Message.isImage(m.getType())) {
                         String text = user + " " + m.getMsg();
                         SpannableStringBuilder str = new SpannableStringBuilder(text);
                         str.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, user.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
