@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,8 +73,8 @@ public class RoomListFragmentMyRooms extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
                 try {
                     Toast.makeText(getActivity(), R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
-                } catch(Exception e) {
-
+                } catch (NullPointerException e) {
+                    Log.e("NullPointerException", e.toString());
                 }
             }
         });

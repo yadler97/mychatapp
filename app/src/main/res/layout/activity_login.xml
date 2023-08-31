@@ -42,6 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
+            app:boxBackgroundMode="none"
             app:hintEnabled="false"
             app:errorEnabled="true" >
             <org.droidparts.widget.ClearableEditText
@@ -61,6 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="10dp"
+            app:boxBackgroundMode="none"
             app:hintEnabled="false"
             app:errorEnabled="true"
             app:passwordToggleEnabled="true" >
@@ -86,6 +88,7 @@
             app:cornerRadius="100dp"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             app:rippleColor="@color/roomhighlight_dark"
+            app:backgroundTint="?attr/colorButtonNormal"
             android:text="@string/login" />
 
         <com.google.android.material.button.MaterialButton
@@ -98,6 +101,7 @@
             app:cornerRadius="100dp"
             style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
             app:rippleColor="@color/roomhighlight_dark"
+            app:backgroundTint="?attr/colorButtonNormal"
             android:text="@string/createnewaccount" />
 
     </LinearLayout>
