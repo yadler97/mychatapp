@@ -151,7 +151,6 @@ public class ChatActivity extends AppCompatActivity {
     private GestureDetector gestureDetector;
     private String quoteStatus = "";
     private int messageCount = 0;
-    private int action = 0;
     private User user = new User();
 
     private final ArrayList<Message> messageList = new ArrayList<>();
@@ -884,8 +883,7 @@ public class ChatActivity extends AppCompatActivity {
             }
             if (photoFile != null) {
                 photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID+".fileprovider", photoFile);
-                action = 2;
-                if (isStoragePermissionGranted()) {
+                if (isStoragePermissionGranted(1)) {
                     takePictureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoURI);
                     startActivityForResult(takePictureIntent, ImageOperations.CAPTURE_IMAGE_REQUEST);
                 }
@@ -982,8 +980,7 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             imgurl = intent.getStringExtra("imgurl");
-            action = 1;
-            if (isStoragePermissionGranted()) {
+            if (isStoragePermissionGranted(0)) {
                 downloadImage(imgurl, ImageOperations.PICK_IMAGE_REQUEST);
             }
         }
@@ -1061,13 +1058,12 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    public boolean isStoragePermissionGranted() {
+    public boolean isStoragePermissionGranted(int requestCode) {
         if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-            Log.v("DL", "Permission is granted");
+            Log.v("StoragePermission", "Permission is granted");
             return true;
         } else {
-            Log.v("DL", "Permission is revoked");
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, requestCode);
             return false;
         }
     }
@@ -1076,14 +1072,16 @@ public class ChatActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            Log.v("DL", "Permission is granted");
-            if (action == 1) {
+            Log.v("StoragePermission", "Permission is granted");
+            if (requestCode == 0) {
                 downloadImage(imgurl, ImageOperations.PICK_IMAGE_REQUEST);
-            } else if (action == 2) {
+            } else if (requestCode == 1) {
                 takePicture();
-            } else if (action == 3) {
+            } else if (requestCode == 2) {
                 writeBackup(createBackup());
             }
+        } else {
+            Log.v("StoragePermission", "Permission is rejected");
         }
     }
 
@@ -1387,8 +1385,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void writeBackup(String text) {
-        action = 3;
-        if (isStoragePermissionGranted()) {
+        if (isStoragePermissionGranted(2)) {
             final File path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS + "/" + getResources().getString(R.string.app_name) + "/");
 
             if (!path.exists()) {
