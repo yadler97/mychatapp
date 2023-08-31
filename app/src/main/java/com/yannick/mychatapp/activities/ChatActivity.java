@@ -488,7 +488,7 @@ public class ChatActivity extends AppCompatActivity {
             try {
                 creationTime = sdf_local.format(sdf_local.parse(creationTime));
             } catch (ParseException e) {
-
+                Log.e("ParseException", e.toString());
             }
             String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
             String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
@@ -512,7 +512,7 @@ public class ChatActivity extends AppCompatActivity {
             try {
                 time = sdf_local.format(sdf_local.parse(time));
             } catch (ParseException e) {
-
+                Log.e("ParseException", e.toString());
             }
             if (lastReadMessage.equals(key_last) && !lastReadMessageReached) {
                 Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, false, "-", Message.Type.HEADER, "", "", "", "0");
@@ -1464,7 +1464,9 @@ public class ChatActivity extends AppCompatActivity {
         String creationTime = "";
         try {
             creationTime = sdf.format(sdf.parse(room.getTime()));
-        } catch (ParseException e) {}
+        } catch (ParseException e) {
+            Log.e("ParseException", e.toString());
+        }
         intent.putExtra("newestMessage", creationTime);
         intent.putExtra("passwd", room.getPasswd());
         Message newest = messageList.get(messageList.size() - 1);
@@ -1473,7 +1475,9 @@ public class ChatActivity extends AppCompatActivity {
             String parsedTime = "";
             try {
                 parsedTime = sdf.format(sdf.parse(newest.getTime()));
-            } catch (ParseException e) {}
+            } catch (ParseException e) {
+                Log.e("ParseException", e.toString());
+            }
             intent.putExtra("nmTime", parsedTime);
             intent.putExtra("nmKey", newest.getKey());
             intent.putExtra("nmType", newest.getType().toString());

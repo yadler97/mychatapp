@@ -2,6 +2,7 @@ package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
 import android.graphics.PorterDuff;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -161,7 +162,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         try {
             time = sdf_local.format(sdf_local.parse(time));
         } catch (ParseException e) {
-
+            Log.e("ParseException", e.toString());
         }
         if (time.substring(0, 8).equals(sdf_local.format(new Date()).substring(0, 8))) {
             return time.substring(9, 11) + ":" + time.substring(11, 13);
