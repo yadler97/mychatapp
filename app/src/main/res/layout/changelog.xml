@@ -192,6 +192,23 @@
 
         <View
             android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginLeft="@dimen/activity_horizontal_margin"
+            android:layout_marginRight="@dimen/activity_horizontal_margin"
+            android:background="?attr/colorDivider" />
+
+        <hakobastvatsatryan.DropdownTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingLeft="4dp"
+            app:title_text="@string/v111_title"
+            app:title_text_color="?attr/colorTextChangelog"
+            app:content_text="@string/v111_text"
+            app:content_text_color="?attr/colorTextChangelog"
+            app:arrow_drawable="@drawable/icon_arrow_right" />
+
+        <View
+            android:layout_width="match_parent"
             android:layout_height="150dp" />
 
     </LinearLayout>

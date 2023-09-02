@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.data;
 
 public class Room {
     private String key;
@@ -8,7 +8,7 @@ public class Room {
     private String time;
     private String passwd;
     private String desc;
-    private Message nM;
+    private Message newestMessage;
     private String username;
     private String img;
 
@@ -70,8 +70,8 @@ public class Room {
         return admin;
     }
 
-    public Message getnM() {
-        return nM;
+    public Message getNewestMessage() {
+        return newestMessage;
     }
 
     public String getUsername() {
@@ -82,11 +82,15 @@ public class Room {
         this.username = username;
     }
 
-    public void setnM(Message nM) {
-        this.nM = nM;
+    public void setNewestMessage(Message newestMessage) {
+        this.newestMessage = newestMessage;
     }
 
     public String getImg() {
         return img;
+    }
+
+    public void setImg(String img) {
+        this.img = img;
     }
 }

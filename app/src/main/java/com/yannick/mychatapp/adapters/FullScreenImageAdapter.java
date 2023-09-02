@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +13,8 @@ import android.widget.LinearLayout;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.R;
 
 import java.util.ArrayList;
 
@@ -73,12 +75,9 @@ public class FullScreenImageAdapter extends PagerAdapter {
 
         container.addView(itemView);
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent("closefullscreen");
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            }
+        imageView.setOnClickListener(view -> {
+            Intent intent = new Intent("closefullscreen");
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         });
 
         return itemView;

@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -12,6 +12,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.User;
 
 import java.util.ArrayList;
 
@@ -40,15 +43,20 @@ public class MemberListAdapter extends ArrayAdapter<User> {
 
     @Override
     public View getView(final int position, View view, ViewGroup parent) {
-        View rowView;
+        ViewHolder viewHolder;
 
-        final ViewHolder viewHolder = new ViewHolder();
+        if (view == null) {
+            viewHolder = new ViewHolder();
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.member_list, parent, false);
 
-        rowView = LayoutInflater.from(parent.getContext()).inflate(R.layout.member_list, parent, false);
+            viewHolder.userText = view.findViewById(R.id.user);
+            viewHolder.profileImage = view.findViewById(R.id.icon_profile);
+            viewHolder.adminText = view.findViewById(R.id.admin);
 
-        viewHolder.userText = rowView.findViewById(R.id.user);
-        viewHolder.profileImage = rowView.findViewById(R.id.icon_profile);
-        viewHolder.adminText = rowView.findViewById(R.id.admin);
+            view.setTag(viewHolder);
+        } else {
+            viewHolder = (ViewHolder) view.getTag();
+        }
 
         viewHolder.userText.setText(memberList.get(position).getName());
 
@@ -63,15 +71,12 @@ public class MemberListAdapter extends ArrayAdapter<User> {
             viewHolder.adminText.setText(R.string.admin);
         }
 
-        rowView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent("userprofile");
-                intent.putExtra("userid", memberList.get(position).getUserID());
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            }
+        view.setOnClickListener(view1 -> {
+            Intent intent = new Intent("userprofile");
+            intent.putExtra("userid", memberList.get(position).getUserID());
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         });
 
-        return rowView;
+        return view;
     }
 }

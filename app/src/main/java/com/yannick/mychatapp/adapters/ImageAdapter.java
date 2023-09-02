@@ -1,13 +1,20 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 
+import androidx.preference.PreferenceManager;
+
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.SquareImageView;
+import com.yannick.mychatapp.activities.MainActivity;
 
 import java.util.ArrayList;
 
@@ -41,8 +48,8 @@ public class ImageAdapter extends BaseAdapter {
         StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference pathReference = storageRef.child("images/" + imgurl);
 
-        FileOperations fileOperations = new FileOperations(this.context);
-        if (fileOperations.readFromFile("mychatapp_settings_preview.txt").equals("off")) {
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
+        if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {
             GlideApp.with(context)
                     .load(pathReference)
                     .onlyRetrieveFromCache(true)

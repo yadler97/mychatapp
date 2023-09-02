@@ -1,10 +1,11 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.annotation.SuppressLint;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -28,12 +29,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.activities.MainActivity;
+import com.yannick.mychatapp.data.Message;
+import com.yannick.mychatapp.PatternEditableBuilder;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Theme;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -60,8 +69,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     private FirebaseStorage storage;
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private final FirebaseAuth mAuth;
-
-    private final FileOperations fileOperations = new FileOperations(context);
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
         private final TextView name, msg, time, quote_name, quote_message;
@@ -98,124 +105,112 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
             theme = Theme.getCurrentTheme(context);
 
-            view.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent event) {
-                    pos = getAdapterPosition();
-                    if(pos != RecyclerView.NO_POSITION) {
-                        return gestureDetector.onTouchEvent(event);
-                    }
-                    return false;
+            view.setOnTouchListener((view14, event) -> {
+                pos = getAdapterPosition();
+                if (pos != RecyclerView.NO_POSITION) {
+                    return gestureDetector.onTouchEvent(event);
                 }
+                return false;
             });
 
             try {
-                msg.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent event) {
-                        pos = getAdapterPosition();
-                        if (pos != RecyclerView.NO_POSITION) {
-                            int action = event.getActionMasked();
-                            if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                                GradientDrawable shape = new GradientDrawable();
-                                shape.setShape(GradientDrawable.RECTANGLE);
-                                float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
-                                shape.setCornerRadii(corners);
-                                if (action == MotionEvent.ACTION_DOWN) {
-                                    if (messageList.get(pos).isSender()) {
-                                        shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent_clicked));
-                                    } else {
-                                        shape.setColor(ContextCompat.getColor(context, R.color.textbox_received_clicked));
-                                    }
-                                } else {
-                                    if (messageList.get(pos).isSender()) {
-                                        shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent));
-                                    } else {
-                                        shape.setColor(ContextCompat.getColor(context, R.color.textbox_received));
-                                    }
-                                }
-
-                                Message.Type type = messageList.get(pos).getType();
-                                if (Message.isQuote(type)
-                                        || Message.isDeletedQuote(type)
-                                        || Message.isQuoteImage(type)) {
-                                    quotebox.setBackground(shape);
-                                } else if (Message.isForwardedMessage(type)
-                                        || Message.isLinkPreview(type)
-                                        || Message.isExpandable(type)
-                                        || Message.isForwardedExpandable(type)) {
-                                    messagebox.setBackground(shape);
-                                } else if (Message.isBasicMessage(type)) {
-                                    msg.setBackground(shape);
-                                }
-                            }
-
-                            return gestureDetector.onTouchEvent(event);
-                        }
-                        return true;
-                    }
-                });
-            } catch (NullPointerException e) {
-
-            }
-
-            try {
-                msg_exp.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent event) {
-                        pos = getAdapterPosition();
-                        if (pos != RecyclerView.NO_POSITION) {
-                            int action = event.getActionMasked();
+                msg.setOnTouchListener((view13, event) -> {
+                    pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        int action = event.getActionMasked();
+                        if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                            GradientDrawable shape = new GradientDrawable();
+                            shape.setShape(GradientDrawable.RECTANGLE);
+                            float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
+                            shape.setCornerRadii(corners);
                             if (action == MotionEvent.ACTION_DOWN) {
-                                GradientDrawable shape = new GradientDrawable();
-                                shape.setShape(GradientDrawable.RECTANGLE);
-                                float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
-                                shape.setCornerRadii(corners);
                                 if (messageList.get(pos).isSender()) {
                                     shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent_clicked));
                                 } else {
                                     shape.setColor(ContextCompat.getColor(context, R.color.textbox_received_clicked));
                                 }
-                                messagebox.setBackground(shape);
-                            }
-                            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                                GradientDrawable shape = new GradientDrawable();
-                                shape.setShape(GradientDrawable.RECTANGLE);
-                                float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
-                                shape.setCornerRadii(corners);
+                            } else {
                                 if (messageList.get(pos).isSender()) {
                                     shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent));
                                 } else {
                                     shape.setColor(ContextCompat.getColor(context, R.color.textbox_received));
                                 }
-                                messagebox.setBackground(shape);
                             }
-                            return gestureDetector.onTouchEvent(event);
+
+                            Message.Type type = messageList.get(pos).getType();
+                            if (Message.isQuote(type)
+                                    || Message.isDeletedQuote(type)
+                                    || Message.isQuoteImage(type)) {
+                                quotebox.setBackground(shape);
+                            } else if (Message.isForwardedMessage(type)
+                                    || Message.isLinkPreview(type)
+                                    || Message.isExpandable(type)
+                                    || Message.isForwardedExpandable(type)) {
+                                messagebox.setBackground(shape);
+                            } else if (Message.isBasicMessage(type)) {
+                                msg.setBackground(shape);
+                            }
                         }
-                        return true;
+
+                        return gestureDetector.onTouchEvent(event);
                     }
+                    return true;
                 });
             } catch (NullPointerException e) {
 
             }
 
             try {
-                img.setOnTouchListener(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View view, MotionEvent event) {
-                        pos = getAdapterPosition();
-                        if (pos != RecyclerView.NO_POSITION) {
-                            int action = event.getActionMasked();
-                            if (action == MotionEvent.ACTION_DOWN) {
-                                img.setForeground(context.getResources().getDrawable(R.drawable.image_overlay));
+                msg_exp.setOnTouchListener((view12, event) -> {
+                    pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        int action = event.getActionMasked();
+                        if (action == MotionEvent.ACTION_DOWN) {
+                            GradientDrawable shape = new GradientDrawable();
+                            shape.setShape(GradientDrawable.RECTANGLE);
+                            float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
+                            shape.setCornerRadii(corners);
+                            if (messageList.get(pos).isSender()) {
+                                shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent_clicked));
+                            } else {
+                                shape.setColor(ContextCompat.getColor(context, R.color.textbox_received_clicked));
                             }
-                            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                                img.setForeground(null);
-                            }
-                            return gestureDetector.onTouchEvent(event);
+                            messagebox.setBackground(shape);
                         }
-                        return true;
+                        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                            GradientDrawable shape = new GradientDrawable();
+                            shape.setShape(GradientDrawable.RECTANGLE);
+                            float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
+                            shape.setCornerRadii(corners);
+                            if (messageList.get(pos).isSender()) {
+                                shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent));
+                            } else {
+                                shape.setColor(ContextCompat.getColor(context, R.color.textbox_received));
+                            }
+                            messagebox.setBackground(shape);
+                        }
+                        return gestureDetector.onTouchEvent(event);
                     }
+                    return true;
+                });
+            } catch (NullPointerException e) {
+
+            }
+
+            try {
+                img.setOnTouchListener((view1, event) -> {
+                    pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        int action = event.getActionMasked();
+                        if (action == MotionEvent.ACTION_DOWN) {
+                            img.setForeground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.image_overlay, null));
+                        }
+                        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                            img.setForeground(null);
+                        }
+                        return gestureDetector.onTouchEvent(event);
+                    }
+                    return true;
                 });
             } catch (NullPointerException e) {
 
@@ -237,7 +232,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 intent.putExtra("forwardID", message.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.pin) {
-                Intent intent = new Intent("pinnen");
+                Intent intent = new Intent("pinMessage");
                 intent.putExtra("pinID", message.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.jump) {
@@ -261,34 +256,30 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
 
         public void openSheetMenu() {
             Message clickedDataItem = messageList.get(pos);
-            String message = clickedDataItem.getMsg();
             Message.Type type = clickedDataItem.getType();
 
             if (type != Message.Type.HEADER) {
                 SheetMenu sheetMenu = new SheetMenu();
                 sheetMenu.setTitle(context.getResources().getString(R.string.selectanoption));
-                sheetMenu.setClick(new MenuItem.OnMenuItemClickListener() {
-                    @Override
-                    public boolean onMenuItemClick(MenuItem item) {
-                        runSelectedMenuOption(type, item, clickedDataItem);
-                        return false;
-                    }
+                sheetMenu.setClick(item -> {
+                    runSelectedMenuOption(type, item, clickedDataItem);
+                    return false;
                 });
 
                 if (Message.isImage(type)) {
-                    if (clickedDataItem.getPin().equals("0")) {
+                    if (!clickedDataItem.isPinned()) {
                         sheetMenu.setMenu(R.menu.menu_image);
                     } else {
                         sheetMenu.setMenu(R.menu.menu_image_unpin);
                     }
                 } else if (Message.isQuoteImage(type)) {
-                    if (clickedDataItem.getPin().equals("0")) {
+                    if (!clickedDataItem.isPinned()) {
                         sheetMenu.setMenu(R.menu.menu_quote_image);
                     } else {
                         sheetMenu.setMenu(R.menu.menu_quote_image_unpin);
                     }
                 } else {
-                    if (clickedDataItem.getPin().equals("0")) {
+                    if (!clickedDataItem.isPinned()) {
                         sheetMenu.setMenu(R.menu.menu_message);
                     } else {
                         sheetMenu.setMenu(R.menu.menu_message_unpin);
@@ -383,12 +374,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 } else {
                     holder.msg_exp.setText(sbuilder);
                     holder.msg_exp.setInterpolator(new LinearInterpolator());
-                    holder.messagebutton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(final View v) {
-                            holder.messagebutton.setText(holder.msg_exp.isExpanded() ? R.string.showmore : R.string.showless);
-                            holder.msg_exp.toggle();
-                        }
+                    holder.messagebutton.setOnClickListener(view -> {
+                        holder.messagebutton.setText(holder.msg_exp.isExpanded() ? R.string.showmore : R.string.showless);
+                        holder.msg_exp.toggle();
                     });
                 }
             } else {
@@ -403,31 +391,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     if (!m.isSender()) {
                         new PatternEditableBuilder().
                                 addPattern(Pattern.compile("\\@(\\w+)"), Color.BLUE,
-                                        new PatternEditableBuilder.SpannableClickedListener() {
-                                            @Override
-                                            public void onSpanClicked(String text) {
-
-                                            }
-                                        }).into(holder.msg);
+                                        text -> {}).into(holder.msg);
                     } else {
                         new PatternEditableBuilder().
                                 addPattern(Pattern.compile("\\@(\\w+)"), Color.RED,
-                                        new PatternEditableBuilder.SpannableClickedListener() {
-                                            @Override
-                                            public void onSpanClicked(String text) {
-
-                                            }
-                                        }).into(holder.msg);
+                                        text -> {}).into(holder.msg);
                     }
                 } else if (Message.isExpandable(type) || Message.isForwardedExpandable(type)) {
                     holder.msg_exp.setText(m.getMsg());
                     holder.msg_exp.setInterpolator(new LinearInterpolator());
-                    holder.messagebutton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(final View v) {
-                            holder.messagebutton.setText(holder.msg_exp.isExpanded() ? R.string.showmore : R.string.showless);
-                            holder.msg_exp.toggle();
-                        }
+                    holder.messagebutton.setOnClickListener(view -> {
+                        holder.messagebutton.setText(holder.msg_exp.isExpanded() ? R.string.showmore : R.string.showless);
+                        holder.msg_exp.toggle();
                     });
                 } else {
                     holder.msg.setText(m.getMsg());
@@ -438,7 +413,8 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
             StorageReference pathReference = storageRef.child("images/" + imgurl);
 
-            if (fileOperations.readFromFile("mychatapp_settings_preview.txt").equals("off")) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
+            if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {
                 GlideApp.with(context)
                         .load(pathReference)
                         .onlyRetrieveFromCache(true)
@@ -517,11 +493,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             shape_quote.setShape(GradientDrawable.RECTANGLE);
             shape_quote.setCornerRadii(corners);
             shape_quote.setColor(ContextCompat.getColor(context, R.color.textbox_time));
-            /*if (!m.isSender()) {
-                shape_quote.setColor(ContextCompat.getColor(context, R.color.textbox_received_quote));
-            } else {
-                shape_quote.setColor(ContextCompat.getColor(context, R.color.textbox_sent_quote));
-            }*/
             holder.quotebox_content.setBackground(shape_quote);
             holder.quotebox.setBackground(shape);
         }
@@ -582,7 +553,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     private static SpannableStringBuilder highlightSearchedText(String text, String textToBold) {
         SpannableStringBuilder builder = new SpannableStringBuilder();
 
-        if(textToBold.length() > 0 && !textToBold.trim().equals("")) {
+        if (textToBold.length() > 0 && !textToBold.trim().equals("")) {
             int startingIndex = text.toLowerCase().indexOf(textToBold.toLowerCase());
             int endingIndex = startingIndex + textToBold.length();
             builder.append(text);

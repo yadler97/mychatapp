@@ -1,8 +1,7 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.fragments;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.DataSetObserver;
@@ -14,13 +13,13 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -34,6 +33,13 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.activities.ChatActivity;
+import com.yannick.mychatapp.adapters.RoomAdapter;
+import com.yannick.mychatapp.data.Message;
+import com.yannick.mychatapp.data.Room;
+import com.yannick.mychatapp.data.Theme;
 
 import java.util.ArrayList;
 
@@ -74,17 +80,18 @@ public class RoomListFragmentMore extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(getActivity(), R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
+                try {
+                    Toast.makeText(getActivity(), R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
+                } catch (NullPointerException e) {
+                    Log.e("NullPointerException", e.toString());
+                }
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                int position = listView.getPositionForView(view);
-                Room room = roomList.get(position);
-                requestPassword(room, position);
-            }
+        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+            int position = listView.getPositionForView(view1);
+            Room room = roomList.get(position);
+            requestPassword(room, position);
         });
 
         adapter.registerDataSetObserver(new DataSetObserver() {
@@ -104,14 +111,14 @@ public class RoomListFragmentMore extends Fragment {
     private void addRoomToList(DataSnapshot dataSnapshot) {
         roomList.clear();
 
-        for(DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
-            String name = uniqueKeySnapshot.getKey();
-            for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
+        for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
+            String roomKey = uniqueKeySnapshot.getKey();
+            for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
                 final Room room = roomSnapshot.getValue(Room.class);
-                room.setKey(name);
-                if (!room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + name + ".txt"))) {
+                room.setKey(roomKey);
+                if (!room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
                     if (uniqueKeySnapshot.getChildrenCount() > 1) {
-                        DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(name);
+                        DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(roomKey);
                         Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
                         lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
@@ -119,13 +126,13 @@ public class RoomListFragmentMore extends Fragment {
                                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                                     String key = child.getKey();
                                     String message = child.child("msg").getValue().toString();
-                                    String pin = child.child("pin").getValue().toString();
+                                    boolean pinned = (boolean) child.child("pinned").getValue();
                                     String quote = child.child("quote").getValue().toString();
                                     String time = child.child("time").getValue().toString();
 
-                                    Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pin);
+                                    Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
 
-                                    room.setnM(newestMessage);
+                                    room.setNewestMessage(newestMessage);
                                     roomList.add(room);
                                     adapter.notifyDataSetChanged();
                                 }
@@ -179,68 +186,52 @@ public class RoomListFragmentMore extends Fragment {
         builder.setTitle(R.string.pleaseenterpassword);
         builder.setView(view);
         builder.setCancelable(false);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (view1 != null) {
+                InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
             }
-        });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                View view = ((AlertDialog) dialogInterface).getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-                dialogInterface.cancel();
-            }
+            dialogInterface.cancel();
         });
 
         final AlertDialog alert = builder.create();
-        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+        alert.setOnShowListener(dialogInterface -> {
 
-            @Override
-            public void onShow(DialogInterface dialog) {
-
-                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        if (!input_field.getText().toString().isEmpty()) {
-                            if (input_field.getText().toString().trim().equals(room.getPasswd())) {
-                                String roomKey = room.getKey();
-                                Intent tabIntent = new Intent("tab");
-                                LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(tabIntent);
-                                Intent intent = new Intent(getActivity(), ChatActivity.class);
-                                intent.putExtra("room_name", room.getName());
-                                intent.putExtra("room_key", roomKey);
-                                intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_room_" + roomKey + "_nm.txt"));
-                                if (room.getnM() != null) {
-                                    intent.putExtra("nmid", room.getnM().getKey());
-                                } else {
-                                    intent.putExtra("nmid", roomKey);
-                                }
-                                if (room.getnM() != null) {
-                                    fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
-                                } else {
-                                    fileOperations.writeToFile(roomKey, "mychatapp_room_" + roomKey + "_nm.txt");
-                                }
-                                updateRoomList(position);
-                                fileOperations.writeToFile(room.getPasswd(), "mychatapp_room_" + roomKey + ".txt");
-                                FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
-                                alert.cancel();
-                                startActivity(intent);
-                            } else {
-                                input_field_layout.setError(getResources().getString(R.string.wrongpassword));
-                            }
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view12 -> {
+                if (!input_field.getText().toString().isEmpty()) {
+                    if (input_field.getText().toString().trim().equals(room.getPasswd())) {
+                        String roomKey = room.getKey();
+                        Intent tabIntent = new Intent("tab");
+                        LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(tabIntent);
+                        Intent intent = new Intent(getActivity(), ChatActivity.class);
+                        intent.putExtra("room_name", room.getName());
+                        intent.putExtra("room_key", roomKey);
+                        intent.putExtra("last_read_message", fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomKey)));
+                        if (room.getNewestMessage() != null) {
+                            intent.putExtra("nmid", room.getNewestMessage().getKey());
                         } else {
-                            input_field_layout.setError(getResources().getString(R.string.enterpassword));
+                            intent.putExtra("nmid", roomKey);
                         }
+                        if (room.getNewestMessage() != null) {
+                            fileOperations.writeToFile(room.getNewestMessage().getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
+                        } else {
+                            fileOperations.writeToFile(roomKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
+                        }
+                        updateRoomList(position);
+                        fileOperations.writeToFile(room.getPasswd(), String.format(FileOperations.passwordFilePattern, roomKey));
+                        FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
+                        alert.cancel();
+                        startActivity(intent);
+                    } else {
+                        input_field_layout.setError(getResources().getString(R.string.wrongpassword));
                     }
-                });
-            }
+                } else {
+                    input_field_layout.setError(getResources().getString(R.string.enterpassword));
+                }
+            });
         });
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         alert.show();

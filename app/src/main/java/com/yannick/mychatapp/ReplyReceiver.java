@@ -31,29 +31,26 @@ public class ReplyReceiver extends BroadcastReceiver {
         CharSequence message = getReplyMessage(intent);
 
         DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(intent.getStringExtra("room_key"));
-
-        Map<String, Object> map = new HashMap<String, Object>();
         String temp_key = root.push().getKey();
-        root.updateChildren(map);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
         String currentDateAndTime = sdf.format(new Date());
 
         DatabaseReference message_root = root.child(temp_key);
-        Map<String, Object> map2 = new HashMap<String, Object>();
-        map2.put("name", intent.getStringExtra("user_id"));
-        map2.put("msg", message.toString());
-        map2.put("img", "");
-        map2.put("pin", "0");
-        map2.put("quote", "");
-        map2.put("time", currentDateAndTime);
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("name", intent.getStringExtra("user_id"));
+        map.put("msg", message.toString());
+        map.put("img", "");
+        map.put("pinned", false);
+        map.put("quote", "");
+        map.put("time", currentDateAndTime);
 
-        message_root.updateChildren(map2);
+        message_root.updateChildren(map);
 
         updateNotification(context, intent.getIntExtra("push_id", 1));
 
         FileOperations fileOperations = new FileOperations(context);
-        fileOperations.writeToFile(temp_key, "mychatapp_room_" + intent.getStringExtra("room_key") + "_nm.txt");
+        fileOperations.writeToFile(temp_key, String.format(FileOperations.newestMessageFilePattern, intent.getStringExtra("room_key")));
     }
 
     private void updateNotification(Context context, int notifyId) {

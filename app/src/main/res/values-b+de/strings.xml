@@ -131,7 +131,7 @@
     <string name="yes">Ja</string>
     <string name="no">Nein</string>
     <string name="reallyleaveroom">Raum wirklich verlassen?</string>
-    <string name="roomleaved">Raum verlassen</string>
+    <string name="roomleft">Raum verlassen</string>
     <string name="previewimages">Bildervorschau laden</string>
     <string name="savecamerapictures">Kamerabilder auf Gerät speichern</string>
     <string name="reply">Antworten</string>
@@ -358,6 +358,11 @@
     <string name="v110_title">"Version 1.1.0 (20.08.2023)"</string>
     <string name="v110_text">"- Zahlreiche Dependencies wurden geupdatet\n"
         "- Android-Versionen unter Android 8.0 Oreo werden jetzt nicht mehr unterstützt\n"
+        "- Zahlreiche Verbesserungen am Code\n"
+        "\n "</string>
+
+    <string name="v111_title">"Version 1.1.1 (02.09.2023)"</string>
+    <string name="v111_text">"- Der Anmeldebirdschirm verwendet jetzt das korrekte Theme für die Buttons\n"
         "- Zahlreiche Verbesserungen am Code\n"
         "\n "</string>
 

@@ -1,15 +1,14 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.activities;
 
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -20,6 +19,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -30,22 +30,21 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
+import androidx.appcompat.widget.SwitchCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.view.GravityCompat;
+import androidx.preference.PreferenceManager;
 import androidx.viewpager.widget.ViewPager;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -57,8 +56,6 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
@@ -71,15 +68,29 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
+import com.yannick.mychatapp.StringOperations;
+import com.yannick.mychatapp.data.Background;
+import com.yannick.mychatapp.adapters.BackgroundAdapter;
+import com.yannick.mychatapp.BuildConfig;
+import com.yannick.mychatapp.CatchViewPager;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.adapters.FullScreenImageAdapter;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.ImageOperations;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.fragments.RoomListFragmentFavorites;
+import com.yannick.mychatapp.fragments.RoomListFragmentMore;
+import com.yannick.mychatapp.fragments.RoomListFragmentMyRooms;
+import com.yannick.mychatapp.adapters.SectionsPageAdapter;
+import com.yannick.mychatapp.data.Theme;
+import com.yannick.mychatapp.adapters.ThemeAdapter;
+import com.yannick.mychatapp.data.User;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -94,7 +105,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
-    private String s_push, s_save, s_preview, s_camera, img_room, img_user, img_banner;
+    private String img_room, img_user, img_banner;
 
     private Theme theme;
 
@@ -103,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
-    private String[] kat;
     private int categoryIndex = 0;
     private static int color = 0;
     private int tmpcolor = -1;
@@ -119,11 +129,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CircleImageView profileImage;
     private ImageView banner;
     private ImageView banner_profile;
+    private ImageButton profileImageButton;
+    private ImageButton profileBannerButton;
+    private ImageButton roomImageButton;
     private CircleImageView icon_profile;
     private TextView text_profile;
-    private ImageButton profileimage;
-    private ImageButton profilebanner;
-    private ImageButton roomimage;
 
     private StorageReference pathReference_image;
     private StorageReference pathReference_banner;
@@ -140,6 +150,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private final FileOperations fileOperations = new FileOperations(this);
 
+    public static final String settingsPushNotificationsKey = "settingsPushNotifications";
+    public static final String settingsSaveEnteredTextKey = "settingsSaveEnteredText";
+    public static final String settingsPreviewImagesKey = "settingsPreviewImages";
+    public static final String settingsStoreCameraPicturesKey = "settingsStoreCameraPictures";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,18 +163,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        //if (savedInstanceState == null) {
-            pageadapter = new SectionsPageAdapter(getSupportFragmentManager());
-            rFragMore = new RoomListFragmentMore();
-            rFragMyRooms = new RoomListFragmentMyRooms();
-            rFragFavs = new RoomListFragmentFavorites();
-        /*} else {
-            rFragMyRooms = (RoomlistFragmentMyRooms)pageadapter.getItem(0);
-            rFragFavs = (RoomlistFragmentFavorites)pageadapter.getItem(1);
-            rFragMore = (RoomlistFragmentMore)pageadapter.getItem(2);
-            pageadapter.clearAdapter();
-            pageadapter = new SectionsPageAdapter(getSupportFragmentManager());
-        }*/
+        pageadapter = new SectionsPageAdapter(getSupportFragmentManager());
+        rFragMore = new RoomListFragmentMore();
+        rFragMyRooms = new RoomListFragmentMyRooms();
+        rFragFavs = new RoomListFragmentFavorites();
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -179,41 +186,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LocalBroadcastManager.getInstance(this).registerReceiver(backgroundReceiver, new IntentFilter("backgroundOption"));
         LocalBroadcastManager.getInstance(this).registerReceiver(closeFullscreenReceiver, new IntentFilter("closefullscreen"));
 
-        fileOperations.writeToFile("0", "mychatapp_current.txt");
+        fileOperations.writeToFile("0", FileOperations.currentRoomFile);
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View v = navigationView.getHeaderView(0);
 
-        kat = getResources().getStringArray(R.array.categories);
-
         icon_profile = v.findViewById(R.id.icon_profile);
         text_profile = v.findViewById(R.id.name_profile);
         banner_profile = v.findViewById(R.id.banner_profile);
 
-        icon_profile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showProfile();
-            }
-        });
+        icon_profile.setOnClickListener(view -> showProfile());
 
         if (theme == Theme.DARK) {
-            banner_profile.setBackground(getResources().getDrawable(R.drawable.side_nav_bar_dark));
+            banner_profile.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar_dark, null));
         } else {
-            banner_profile.setBackground(getResources().getDrawable(R.drawable.side_nav_bar));
+            banner_profile.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar, null));
         }
 
         storage = FirebaseStorage.getInstance();
 
         FloatingActionButton btn_add_room = findViewById(R.id.addroom);
-        btn_add_room.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                addRoom();
-            }
-        });
+        btn_add_room.setOnClickListener(view -> addRoom());
 
         userRoot.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -234,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if(!userListCreated) {
+                if (!userListCreated) {
                     handler.postDelayed(this, 1000);
                 } else {
                     createUserProfile(mAuth.getCurrentUser().getUid());
@@ -258,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final TextInputLayout room_password_repeat_layout = view.findViewById(R.id.room_password_repeat_layout);
 
         final Spinner spinner = view.findViewById(R.id.spinner);
-        roomimage = view.findViewById(R.id.room_image);
+        roomImageButton = view.findViewById(R.id.room_image);
 
         Random rand = new Random();
         img_room = "standard" + (rand.nextInt(4)+1);
@@ -267,8 +262,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onItemSelected(AdapterView<?> adapter, View v,int position, long id) {
                 String category = adapter.getItemAtPosition(position).toString();
-                for (int i = 0; i < kat.length; i++) {
-                    if (kat[i].equals(category)) {
+                String[] categories = getResources().getStringArray(R.array.categories);
+                for (int i = 0; i < categories.length; i++) {
+                    if (categories[i].equals(category)) {
                         categoryIndex = i;
                     }
                 }
@@ -360,24 +356,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(roomimage);
+                    .into(roomImageButton);
         } else {
             GlideApp.with(getApplicationContext())
                     .load(pathReference_roomimage)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(roomimage);
+                    .into(roomImageButton);
         }
 
-        roomimage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), 2);
-            }
+        roomImageButton.setOnClickListener(view13 -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_ROOM_IMAGE_REQUEST);
         });
 
         AlertDialog.Builder builder;
@@ -389,105 +382,87 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.createroom)));
         builder.setCancelable(false);
         builder.setView(view);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (view1 != null) {
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
             }
-        });
-
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                View view = ((AlertDialog) dialogInterface).getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-                dialogInterface.cancel();
-            }
+            dialogInterface.cancel();
         });
         final AlertDialog alert = builder.create();
-        alert.setOnShowListener(new DialogInterface.OnShowListener() {
-
-            @Override
-            public void onShow(DialogInterface dialog) {
-
-                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        final String roomName = room_name.getText().toString().trim();
-                        final String roomPassword = room_password.getText().toString().trim();
-                        final String roomPasswordRepeat = room_password_repeat.getText().toString().trim();
-                        final String roomDescription = room_desc.getText().toString().trim();
-                        if (!roomName.isEmpty()) {
-                            if (!roomDescription.isEmpty()) {
-                                if (categoryIndex !=0) {
-                                    if (!roomPassword.isEmpty()) {
-                                        if (!roomPasswordRepeat.isEmpty()) {
-                                            if (roomPassword.equals(roomPasswordRepeat)) {
-                                                if (view != null) {
-                                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                                                }
-                                                if (!searchView.isIconified()) {
-                                                    searchView.setIconified(true);
-                                                    searchView.setIconified(true);
-                                                }
-                                                final String roomKey = roomRoot.push().getKey();
-                                                roomRoot = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey);
-                                                roomRoot.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                    @Override
-                                                    public void onDataChange(DataSnapshot snapshot) {
-                                                        if (!snapshot.exists()) {
-                                                            DatabaseReference message_root = roomRoot.child("-0roomdata");
-                                                            Map<String, Object> map = new HashMap<>();
-                                                            String currentDateAndTime = sdf.format(new Date());
-                                                            map.put("admin", currentUser.getUserID());
-                                                            map.put("name", roomName);
-                                                            map.put("time", currentDateAndTime);
-                                                            map.put("passwd", roomPassword);
-                                                            map.put("desc", roomDescription);
-                                                            map.put("category", String.valueOf(categoryIndex));
-                                                            map.put("img", img_room);
-                                                            message_root.updateChildren(map);
-                                                            fileOperations.writeToFile(roomPassword, "mychatapp_room_" + roomKey + ".txt");
-                                                            fileOperations.writeToFile("-0roomdata", "mychatapp_room_" + roomKey + "_nm.txt");
-                                                            FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
-                                                            Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
-                                                            alert.cancel();
-                                                        } else {
-                                                            Toast.makeText(getApplicationContext(), R.string.roomalreadyexists, Toast.LENGTH_SHORT).show();
-                                                        }
-                                                    }
-
-                                                    public void onCancelled(DatabaseError error) {
-
-                                                    }
-                                                });
-                                            } else {
-                                                Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
-                                            }
-                                        } else {
-                                            room_password_repeat_layout.setError(getResources().getString(R.string.repeatpassword));
+        alert.setOnShowListener(dialogInterface -> {
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view12 -> {
+                final String roomName = room_name.getText().toString().trim();
+                final String roomPassword = room_password.getText().toString().trim();
+                final String roomPasswordRepeat = room_password_repeat.getText().toString().trim();
+                final String roomDescription = room_desc.getText().toString().trim();
+                if (!roomName.isEmpty()) {
+                    if (!roomDescription.isEmpty()) {
+                        if (categoryIndex !=0) {
+                            if (!roomPassword.isEmpty()) {
+                                if (!roomPasswordRepeat.isEmpty()) {
+                                    if (roomPassword.equals(roomPasswordRepeat)) {
+                                        if (view12 != null) {
+                                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                            imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                                         }
+                                        if (!searchView.isIconified()) {
+                                            searchView.setIconified(true);
+                                            searchView.setIconified(true);
+                                        }
+                                        final String roomKey = roomRoot.push().getKey();
+                                        roomRoot = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey);
+                                        roomRoot.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot snapshot) {
+                                                if (!snapshot.exists()) {
+                                                    DatabaseReference message_root = roomRoot.child("-0roomdata");
+                                                    Map<String, Object> map = new HashMap<>();
+                                                    String currentDateAndTime = sdf.format(new Date());
+                                                    map.put("admin", currentUser.getUserID());
+                                                    map.put("name", roomName);
+                                                    map.put("time", currentDateAndTime);
+                                                    map.put("passwd", roomPassword);
+                                                    map.put("desc", roomDescription);
+                                                    map.put("category", String.valueOf(categoryIndex));
+                                                    map.put("img", img_room);
+                                                    message_root.updateChildren(map);
+                                                    fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
+                                                    fileOperations.writeToFile("-0roomdata", String.format(FileOperations.newestMessageFilePattern, roomKey));
+                                                    FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
+                                                    Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
+                                                    alert.cancel();
+                                                } else {
+                                                    Toast.makeText(getApplicationContext(), R.string.roomalreadyexists, Toast.LENGTH_SHORT).show();
+                                                }
+                                            }
+
+                                            public void onCancelled(DatabaseError error) {
+
+                                            }
+                                        });
                                     } else {
-                                        room_password_layout.setError(getResources().getString(R.string.enterpassword));
+                                        Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
-                                    Toast.makeText(getApplicationContext(), R.string.selectcategory, Toast.LENGTH_SHORT).show();
+                                    room_password_repeat_layout.setError(getResources().getString(R.string.repeatpassword));
                                 }
                             } else {
-                                room_desc_layout.setError(getResources().getString(R.string.enterroomdesc));
+                                room_password_layout.setError(getResources().getString(R.string.enterpassword));
                             }
                         } else {
-                            room_name_layout.setError(getResources().getString(R.string.enterroomname));
+                            Toast.makeText(getApplicationContext(), R.string.selectcategory, Toast.LENGTH_SHORT).show();
                         }
+                    } else {
+                        room_desc_layout.setError(getResources().getString(R.string.enterroomdesc));
                     }
-                });
-            }
+                } else {
+                    room_name_layout.setError(getResources().getString(R.string.enterroomname));
+                }
+            });
         });
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         alert.show();
@@ -544,10 +519,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
-            banner.setBackground(getResources().getDrawable(R.drawable.side_nav_bar_dark));
+            banner.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar_dark, null));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
-            banner.setBackground(getResources().getDrawable(R.drawable.side_nav_bar));
+            banner.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar, null));
         }
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
@@ -565,19 +540,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .centerCrop()
                 .into(profileImage);
 
-        profileImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showFullscreenImage(0);
-            }
-        });
+        profileImage.setOnClickListener(v -> showFullscreenImage(0));
 
-        banner.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showFullscreenImage(1);
-            }
-        });
+        banner.setOnClickListener(v -> showFullscreenImage(1));
 
         profileName.setText(currentUser.getName());
         profileDescription.setText(currentUser.getProfileDescription());
@@ -587,12 +552,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.myprofile)));
         builder.setView(view);
         builder.setPositiveButton(R.string.close, null);
-        builder.setNegativeButton(R.string.editprofile, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                editProfile();
-            }
-        });
+        builder.setNegativeButton(R.string.editprofile, (dialogInterface, i) -> editProfile());
 
         AlertDialog alert = builder.create();
         alert.show();
@@ -667,8 +627,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         final ImageButton favColour = view.findViewById(R.id.user_favcolor);
-        profileimage = view.findViewById(R.id.user_profile_image);
-        profilebanner = view.findViewById(R.id.user_profile_banner);
+        profileImageButton = view.findViewById(R.id.user_profile_image);
+        profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         final StorageReference pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
@@ -681,7 +641,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileimage);
+                    .into(profileImageButton);
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -689,7 +649,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profilebanner);
+                    .into(profileBannerButton);
         } else {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -697,7 +657,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profileimage);
+                    .into(profileImageButton);
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
@@ -705,27 +665,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
-                    .into(profilebanner);
+                    .into(profileBannerButton);
         }
 
-        profileimage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), 0);
-            }
+        profileImageButton.setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_IMAGE_REQUEST);
         });
 
-        profilebanner.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent();
-                intent.setType("image/*");
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(Intent.createChooser(intent, "Bild auswählen"), 1);
-            }
+        profileBannerButton.setOnClickListener(v -> {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_BANNER_REQUEST);
         });
 
         username.setText(currentUser.getName());
@@ -737,67 +691,45 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         shape.setColor(getResources().getIntArray(R.array.favcolors)[color]);
         favColour.setBackground(shape);
 
-        birthday.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                DatePickerDialog datePicker = new DatePickerDialog(view.getContext(), new DatePickerDialog.OnDateSetListener() {
-
-                    @Override
-                    public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
-                        String date;
-                        if (dayOfMonth < 10) {
-                            date = "0" + dayOfMonth;
-                        } else {
-                            date = "" + dayOfMonth;
-                        }
-                        monthOfYear = monthOfYear + 1;
-                        if (monthOfYear < 10) {
-                            date = date + ".0" + monthOfYear + "." + year;
-                        } else {
-                            date = date + "." + monthOfYear + "." + year;
-                        }
-
-                        birthday.setText(date);
-                    }
-                }, Integer.parseInt(currentUser.getBirthday().substring(6, 10)), Integer.parseInt(currentUser.getBirthday().substring(3, 5)) - 1, Integer.parseInt(currentUser.getBirthday().substring(0, 2)));
-                if (theme == Theme.DARK) {
-                    datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
-                }
-                Calendar c = Calendar.getInstance();
-                c.set(2004, 11, 31);
-                datePicker.getDatePicker().setMaxDate(c.getTimeInMillis());
-                datePicker.show();
+        birthday.setOnClickListener(view15 -> {
+            DatePickerDialog datePicker = new DatePickerDialog(view15.getContext(), (view14, year, monthOfYear, dayOfMonth) -> {
+                String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
+                birthday.setText(date);
+            }, StringOperations.getYear(currentUser.getBirthday()), StringOperations.getMonth(currentUser.getBirthday()), StringOperations.getDay(currentUser.getBirthday()));
+            if (theme == Theme.DARK) {
+                datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
             }
+            Calendar c = Calendar.getInstance();
+            c.set(2004, 11, 31);
+            datePicker.getDatePicker().setMaxDate(c.getTimeInMillis());
+            datePicker.show();
         });
 
-        favColour.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SpectrumDialog.Builder builder;
-                if (theme == Theme.DARK) {
-                    builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
-                } else {
-                    builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
-                }
-                builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[color]).setFixedColumnCount(5).setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
-                    @Override
-                    public void onColorSelected(boolean positiveResult, @ColorInt int scolor) {
-                        if (positiveResult) {
-                            int i = 0;
-                            for (int c : getResources().getIntArray(R.array.favcolors)) {
-                                if (c == scolor) {
-                                    tmpcolor = i;
-                                    GradientDrawable shape = new GradientDrawable();
-                                    shape.setShape(GradientDrawable.OVAL);
-                                    shape.setColor(getResources().getIntArray(R.array.favcolors)[i]);
-                                    favColour.setBackground(shape);
-                                }
-                                i++;
+        favColour.setOnClickListener(view13 -> {
+            SpectrumDialog.Builder builder;
+            if (theme == Theme.DARK) {
+                builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
+            } else {
+                builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
+            }
+            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[color]).setFixedColumnCount(5).setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
+                @Override
+                public void onColorSelected(boolean positiveResult, @ColorInt int scolor) {
+                    if (positiveResult) {
+                        int i = 0;
+                        for (int c : getResources().getIntArray(R.array.favcolors)) {
+                            if (c == scolor) {
+                                tmpcolor = i;
+                                GradientDrawable shape1 = new GradientDrawable();
+                                shape1.setShape(GradientDrawable.OVAL);
+                                shape1.setColor(getResources().getIntArray(R.array.favcolors)[i]);
+                                favColour.setBackground(shape1);
                             }
+                            i++;
                         }
                     }
-                }).build().show(getSupportFragmentManager(), "ColorPicker");
-            }
+                }
+            }).build().show(getSupportFragmentManager(), "ColorPicker");
         });
 
         AlertDialog.Builder builder;
@@ -810,105 +742,90 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.editprofile)));
         builder.setCancelable(false);
         builder.setView(view);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View view12 = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (view12 != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
             }
-        });
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                View view = ((AlertDialog) dialogInterface).getCurrentFocus();
-                if (view != null) {
-                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                }
-                dialogInterface.cancel();
-                showProfile();
-            }
+            dialogInterface.cancel();
+            showProfile();
         });
         final AlertDialog alert = builder.create();
-        alert.setOnShowListener(new DialogInterface.OnShowListener() {
-            @Override
-            public void onShow(DialogInterface dialog) {
-
-                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if (!username.getText().toString().isEmpty()) {
-                            if (!profileDescription.getText().toString().isEmpty()) {
-                                if (!location.getText().toString().isEmpty()) {
-                                    if (!birthday.getText().toString().isEmpty()) {
-                                        String old_name = currentUser.getName();
-                                        int old_color = color;
-                                        currentUser.setName(username.getText().toString());
-                                        currentUser.setProfileDescription(profileDescription.getText().toString());
-                                        currentUser.setLocation(location.getText().toString());
-                                        currentUser.setBirthday(birthday.getText().toString());
-                                        if (tmpcolor >= 0) {
-                                            color = tmpcolor;
-                                        }
-                                        DatabaseReference user_root = userRoot.child(currentUser.getUserID());
-                                        Map<String, Object> map = new HashMap<>();
-                                        map.put("name", currentUser.getName());
-                                        map.put("profileDescription", currentUser.getProfileDescription());
-                                        map.put("location", currentUser.getLocation());
-                                        map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
-                                        map.put("favColour", String.valueOf(color));
-                                        if (!currentUser.getOwnpi().equals("1") && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
-                                            img_user = UUID.randomUUID().toString();
-                                            map.put("img", img_user);
-                                        }
-                                        user_root.updateChildren(map);
-                                        text_profile.setText(currentUser.getName());
-                                        Toast.makeText(getApplicationContext(), R.string.profileedited, Toast.LENGTH_SHORT).show();
-                                        if (view != null) {
-                                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                                        }
-                                        if (!currentUser.getOwnpi().equals("1") && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
-                                            storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                                            TextDrawable drawable = TextDrawable.builder()
-                                                    .beginConfig()
-                                                    .bold()
-                                                    .endConfig()
-                                                    .buildRect(currentUser.getName().substring(0, 1), getResources().getIntArray(R.array.favcolors)[color]);
-                                            Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-                                            Canvas canvas = new Canvas(bitmap);
-                                            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                                            drawable.draw(canvas);
-
-                                            byte[] byteArray;
-                                            final StorageReference pathReference_image = storageRef.child("profile_images/" + img_user);
-                                            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                                            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                                            byteArray = stream.toByteArray();
-                                            try {
-                                                stream.close();
-                                            } catch (IOException ioe) {
-                                                ioe.printStackTrace();
-                                            }
-                                            pathReference_image.putBytes(byteArray);
-                                        }
-                                        showProfile();
-                                        alert.cancel();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
-                                    }
-                                } else {
-                                    locationLayout.setError(getResources().getString(R.string.enterlocation));
+        alert.setOnShowListener(dialogInterface -> {
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view1 -> {
+                if (!username.getText().toString().isEmpty()) {
+                    if (!profileDescription.getText().toString().isEmpty()) {
+                        if (!location.getText().toString().isEmpty()) {
+                            if (!birthday.getText().toString().isEmpty()) {
+                                String old_name = currentUser.getName();
+                                int old_color = color;
+                                currentUser.setName(username.getText().toString());
+                                currentUser.setProfileDescription(profileDescription.getText().toString());
+                                currentUser.setLocation(location.getText().toString());
+                                currentUser.setBirthday(birthday.getText().toString());
+                                if (tmpcolor >= 0) {
+                                    color = tmpcolor;
                                 }
+                                DatabaseReference user_root = userRoot.child(currentUser.getUserID());
+                                Map<String, Object> map = new HashMap<>();
+                                map.put("name", currentUser.getName());
+                                map.put("profileDescription", currentUser.getProfileDescription());
+                                map.put("location", currentUser.getLocation());
+                                map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
+                                map.put("favColour", String.valueOf(color));
+                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
+                                    img_user = UUID.randomUUID().toString();
+                                    map.put("img", img_user);
+                                }
+                                user_root.updateChildren(map);
+                                text_profile.setText(currentUser.getName());
+                                Toast.makeText(getApplicationContext(), R.string.profileedited, Toast.LENGTH_SHORT).show();
+                                if (view1 != null) {
+                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                    imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                                }
+                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
+                                    storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+                                    TextDrawable drawable = TextDrawable.builder()
+                                            .beginConfig()
+                                            .bold()
+                                            .endConfig()
+                                            .buildRect(currentUser.getName().substring(0, 1), getResources().getIntArray(R.array.favcolors)[color]);
+                                    Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+                                    Canvas canvas = new Canvas(bitmap);
+                                    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                                    drawable.draw(canvas);
+
+                                    byte[] byteArray;
+                                    final StorageReference pathReference_image1 = storageRef.child("profile_images/" + img_user);
+                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                                    byteArray = stream.toByteArray();
+                                    try {
+                                        stream.close();
+                                    } catch (IOException ioe) {
+                                        ioe.printStackTrace();
+                                    }
+                                    pathReference_image1.putBytes(byteArray);
+                                }
+                                showProfile();
+                                alert.cancel();
                             } else {
-                                profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
+                                Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            usernameLayout.setError(getResources().getString(R.string.entername));
+                            locationLayout.setError(getResources().getString(R.string.enterlocation));
                         }
+                    } else {
+                        profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
                     }
-                });
-            }
+                } else {
+                    usernameLayout.setError(getResources().getString(R.string.entername));
+                }
+            });
         });
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         alert.show();
@@ -936,45 +853,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.changedesign)));
         builder.setCancelable(false);
         builder.setView(view);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-
-            }
-        });
-
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.cancel();
-            }
-        });
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.cancel());
         final AlertDialog alert = builder.create();
-        alert.setOnShowListener(new DialogInterface.OnShowListener() {
+        alert.setOnShowListener(dialogInterface -> {
 
-            @Override
-            public void onShow(DialogInterface dialog) {
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(new View.OnClickListener() {
 
-                Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-                b.setOnClickListener(new View.OnClickListener() {
-
-                    @Override
-                    public void onClick(View view) {
-                        String currentTheme = fileOperations.readFromFile("mychatapp_theme.txt");
-                        fileOperations.writeToFile(theme.toString(),"mychatapp_theme.txt");
-                        fileOperations.writeToFile(background.toString(), "mychatapp_background.txt");
-                        if (!currentTheme.equals(fileOperations.readFromFile("mychatapp_theme.txt"))) {
-                            FragmentManager mFragmentManager = getSupportFragmentManager();
-                            mFragmentManager.beginTransaction().remove(rFragMore).commit();
-                            mFragmentManager.beginTransaction().remove(rFragMyRooms).commit();
-                            mFragmentManager.beginTransaction().remove(rFragFavs).commit();
-                            recreate();
-                        }
-                        Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();
-                        alert.cancel();
+                @Override
+                public void onClick(View view1) {
+                    Theme.setTheme(getApplicationContext(), theme);
+                    Background.setBackground(getApplicationContext(), background);
+                    if (currentTheme != theme) {
+                        FragmentManager mFragmentManager = getSupportFragmentManager();
+                        mFragmentManager.beginTransaction().remove(rFragMore).commit();
+                        mFragmentManager.beginTransaction().remove(rFragMyRooms).commit();
+                        mFragmentManager.beginTransaction().remove(rFragFavs).commit();
+                        recreate();
                     }
-                });
-            }
+                    Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();
+                    alert.cancel();
+                }
+            });
         });
         alert.show();
     }
@@ -983,46 +884,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.settings, null);
 
-        Switch push = view.findViewById(R.id.push);
-        Switch save = view.findViewById(R.id.save);
-        Switch preview = view.findViewById(R.id.preview);
-        Switch camera = view.findViewById(R.id.camera);
-        s_push = fileOperations.readFromFile("mychatapp_settings_push.txt");
-        s_save = fileOperations.readFromFile("mychatapp_settings_save.txt");
-        s_preview = fileOperations.readFromFile("mychatapp_settings_preview.txt");
-        s_camera = fileOperations.readFromFile("mychatapp_settings_camera.txt");
-        if (!s_push.equals("off")) {
-            push.setChecked(true);
-        }
-        if (!s_save.equals("off")) {
-            save.setChecked(true);
-        }
-        if (!s_preview.equals("off")) {
-            preview.setChecked(true);
-        }
-        if (!s_camera.equals("off")) {
-            camera.setChecked(true);
-        }
-        push.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                s_push = isChecked ? "on" : "off";
-            }
-        });
-        save.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                s_save = isChecked ? "on" : "off";
-            }
-        });
-        preview.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                s_preview = isChecked ? "on" : "off";
-            }
-        });
-        camera.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                s_camera = isChecked ? "on" : "off";
-            }
-        });
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        SwitchCompat push = view.findViewById(R.id.push);
+        SwitchCompat save = view.findViewById(R.id.save);
+        SwitchCompat preview = view.findViewById(R.id.preview);
+        SwitchCompat camera = view.findViewById(R.id.camera);
+
+        boolean s_push = sharedPref.getBoolean(settingsPushNotificationsKey, true);
+        boolean s_save = sharedPref.getBoolean(settingsSaveEnteredTextKey, true);
+        boolean s_preview = sharedPref.getBoolean(settingsPreviewImagesKey, true);
+        boolean s_camera = sharedPref.getBoolean(settingsStoreCameraPicturesKey, true);
+
+        push.setChecked(s_push);
+        save.setChecked(s_save);
+        preview.setChecked(s_preview);
+        camera.setChecked(s_camera);
+
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
@@ -1035,15 +913,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.settings)));
         builder.setView(view);
-        builder.setPositiveButton(R.string.confirm, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                fileOperations.writeToFile(s_push, "mychatapp_settings_push.txt");
-                fileOperations.writeToFile(s_save, "mychatapp_settings_save.txt");
-                fileOperations.writeToFile(s_preview, "mychatapp_settings_preview.txt");
-                fileOperations.writeToFile(s_camera, "mychatapp_settings_camera.txt");
-                Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();
-            }
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putBoolean(settingsPushNotificationsKey, push.isChecked());
+            editor.putBoolean(settingsSaveEnteredTextKey, save.isChecked());
+            editor.putBoolean(settingsPreviewImagesKey, preview.isChecked());
+            editor.putBoolean(settingsStoreCameraPicturesKey, camera.isChecked());
+            editor.apply();
+
+            Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();
         });
         builder.setNegativeButton(R.string.cancel, null);
         AlertDialog alert = builder.create();
@@ -1063,7 +941,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -1106,7 +983,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_roomsearch, menu);
 
-        if(menu instanceof MenuBuilder){
+        if (menu instanceof MenuBuilder) {
             MenuBuilder m = (MenuBuilder) menu;
             m.setOptionalIconsVisible(true);
         }
@@ -1189,14 +1066,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         GlideApp.with(getApplicationContext())
                 .load(pathReference_image)
                 .centerCrop()
-                .into(profileimage);
+                .into(profileImageButton);
 
         pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
                 .load(pathReference_banner)
                 .centerCrop()
                 .thumbnail(0.05f)
-                .into(profilebanner);
+                .into(profileBannerButton);
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -1258,26 +1135,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 int uiOptions = View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
                 decorView.setSystemUiVisibility(uiOptions);
                 fullscreendialog.dismiss();
-            } catch (NullPointerException npe) {}
+            } catch (NullPointerException npe) {
+                Log.e("NullPointerException", npe.toString());
+            }
         }
     };
 
     private void createUserProfile(final String userID) {
-        final Handler handler2 = new Handler();
-        handler2.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                readUserData(userID);
-            }
-        }, 100);
+        final Handler handler = new Handler();
+        handler.postDelayed(() -> readUserData(userID), 100);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(resultCode == RESULT_OK && data != null && data.getData() != null ) {
+        if (resultCode == RESULT_OK && data != null) {
             Uri filePath = data.getData();
-            if(filePath != null) {
+            if (filePath != null) {
                 uploadImage(filePath, requestCode);
             }
         }
@@ -1295,10 +1169,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference ref;
-        if (type == 0) {
+        if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
             img_user = UUID.randomUUID().toString();
             ref = storageRef.child("profile_images/" + img_user);
-        } else if (type == 1) {
+        } else if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
             img_banner = UUID.randomUUID().toString();
             ref = storageRef.child("profile_banners/" + img_banner);
         } else {
@@ -1306,106 +1180,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             ref = storageRef.child("room_images/" + img_room);
         }
 
-        byte[] byteArray;
-        InputStream imageStream = null;
-        try {
-            imageStream = getContentResolver().openInputStream(filePath);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-
-        Bitmap bmp = BitmapFactory.decodeStream(imageStream);
-
-        if (bmp.getWidth() < bmp.getHeight() && (type == 0 || type == 2)) {
-            bmp = Bitmap.createBitmap(bmp, 0, bmp.getHeight()/2-bmp.getWidth()/2, bmp.getWidth(), bmp.getWidth());
-        } else if (bmp.getWidth() > bmp.getHeight() && (type == 0 || type == 2)) {
-            bmp = Bitmap.createBitmap(bmp, bmp.getWidth()/2-bmp.getHeight()/2, 0, bmp.getHeight(), bmp.getHeight());
-        } else if (bmp.getWidth()/16*9 < bmp.getHeight() && type == 1) {
-            bmp = Bitmap.createBitmap(bmp, 0, bmp.getHeight()/2-bmp.getWidth()/16*9/2, bmp.getWidth(), bmp.getWidth()/16*9);
-        } else if (bmp.getWidth()/16*9 > bmp.getHeight() && type == 1) {
-            bmp = Bitmap.createBitmap(bmp, bmp.getWidth()/2-bmp.getHeight()/9*16/2, 0, bmp.getHeight()/9*16, bmp.getHeight());
-        }
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        int compression = 100;
-        int compressFactor = 2;
-        int height = bmp.getHeight();
-        int width = bmp.getWidth();
         ImageOperations imageOperations = new ImageOperations(getContentResolver());
-        if (imageOperations.getImgSize(filePath) > height * width) {
-            compressFactor = 4;
-        }
-        if (type == 0 || type == 2) {
-            while (height * width > 500 * 500) {
-                height /= 1.1;
-                width /= 1.1;
-                compression -= compressFactor;
-            }
-        } else {
-            while (height * width > 1920 * 1080) {
-                height /= 1.1;
-                width /= 1.1;
-                compression -= compressFactor;
-            }
-        }
-        bmp = Bitmap.createScaledBitmap(bmp, width, height, false);
-        try {
-            bmp = imageOperations.rotateImageIfRequired(this, bmp, filePath);
-        } catch (IOException e) { }
-        bmp.compress(Bitmap.CompressFormat.JPEG, compression, stream);
-        byteArray = stream.toByteArray();
-        try {
-            stream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        byte[] byteArray = imageOperations.getImageAsBytes(this, filePath, type);
 
         UploadTask uploadTask = ref.putBytes(byteArray);
-        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                progressDialog.dismiss();
-                if (type == 0) {
-                    currentUser.setOwnpi("1");
-                    DatabaseReference user_root = userRoot.child(currentUser.getUserID());
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("ownpi", "1");
-                    map.put("img", img_user);
-                    user_root.updateChildren(map);
-                }
-                if (type == 1) {
-                    DatabaseReference user_root = userRoot.child(currentUser.getUserID());
-                    Map<String, Object> map = new HashMap<>();
-                    map.put("banner", img_banner);
-                    user_root.updateChildren(map);
-                }
-                if (type != 2) {
-                    updateNavigationDrawerIcon();
-                    updateProfileImages();
-                    updateEditProfileImages();
-                }
-                Toast.makeText(MainActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
-                if (type == 2) {
-                    pathReference_roomimage = storageRef.child("room_images/" + img_room);
-                    GlideApp.with(getApplicationContext())
-                            .load(pathReference_roomimage)
-                            .centerCrop()
-                            .into(roomimage);
-                }
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            progressDialog.dismiss();
+            if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
+                currentUser.setOwnProfileImage(true);
+                currentUser.setImg(img_user);
+                DatabaseReference user_root = userRoot.child(currentUser.getUserID());
+                Map<String, Object> map = new HashMap<>();
+                map.put("ownProfileImage", true);
+                map.put("img", img_user);
+                user_root.updateChildren(map);
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                progressDialog.dismiss();
-                Toast.makeText(MainActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+            if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
+                currentUser.setBanner(img_banner);
+                DatabaseReference user_root = userRoot.child(currentUser.getUserID());
+                Map<String, Object> map = new HashMap<>();
+                map.put("banner", img_banner);
+                user_root.updateChildren(map);
             }
-        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                        .getTotalByteCount());
-                progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
+            if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
+                updateNavigationDrawerIcon();
+                updateProfileImages();
+                updateEditProfileImages();
             }
+            Toast.makeText(MainActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
+            if (type == ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
+                pathReference_roomimage = storageRef.child("room_images/" + img_room);
+                GlideApp.with(getApplicationContext())
+                        .load(pathReference_roomimage)
+                        .centerCrop()
+                        .into(roomImageButton);
+            }
+        }).addOnFailureListener(e -> {
+            Log.e("Upload failed", e.toString());
+            progressDialog.dismiss();
+            Toast.makeText(MainActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+        }).addOnProgressListener(taskSnapshot -> {
+            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
+                    .getTotalByteCount());
+            progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
         });
     }
 
@@ -1424,21 +1241,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 | View.SYSTEM_UI_FLAG_IMMERSIVE;
         decorView.setSystemUiVisibility(uiOptions);
 
-        decorView.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener() {
-            @Override
-            public void onSystemUiVisibilityChange(int i) {
-                if (fullscreendialog.isShowing()) {
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-                                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                                    | View.SYSTEM_UI_FLAG_IMMERSIVE;
-                            decorView.setSystemUiVisibility(uiOptions);
-                        }
-                    }, 2000);
-                }
+        decorView.setOnSystemUiVisibilityChangeListener(i -> {
+            if (fullscreendialog.isShowing()) {
+                final Handler handler = new Handler();
+                handler.postDelayed(() -> {
+                    int uiOptions1 = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE;
+                    decorView.setSystemUiVisibility(uiOptions1);
+                }, 2000);
             }
         });
 

@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.activities;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -14,6 +14,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Theme;
 
 public class SplashActivity extends AppCompatActivity{
     private final static int SPLASH_OUT_TIME = 2000;
@@ -22,7 +24,7 @@ public class SplashActivity extends AppCompatActivity{
     private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.activity_splash);
@@ -42,22 +44,19 @@ public class SplashActivity extends AppCompatActivity{
 
         mAuth = FirebaseAuth.getInstance();
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                FirebaseUser user = mAuth.getCurrentUser();
-                if (user != null && user.isEmailVerified()) {
-                    Intent homeIntent = new Intent(SplashActivity.this, MainActivity.class);
-                    startActivity(homeIntent);
-                } else {
-                    if (user != null) {
-                        mAuth.signOut();
-                    }
-                    Intent homeIntent = new Intent(SplashActivity.this, LoginActivity.class);
-                    startActivity(homeIntent);
+        new Handler().postDelayed(() -> {
+            FirebaseUser user = mAuth.getCurrentUser();
+            if (user != null && user.isEmailVerified()) {
+                Intent homeIntent = new Intent(SplashActivity.this, MainActivity.class);
+                startActivity(homeIntent);
+            } else {
+                if (user != null) {
+                    mAuth.signOut();
                 }
-                finish();
+                Intent homeIntent = new Intent(SplashActivity.this, LoginActivity.class);
+                startActivity(homeIntent);
             }
+            finish();
         }, SPLASH_OUT_TIME);
     }
 

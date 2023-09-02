@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,6 +13,9 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.data.Message;
+import com.yannick.mychatapp.R;
 
 import java.util.ArrayList;
 
@@ -75,13 +78,10 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
             viewHolder.messageText.setText(pinnedList.get(position).getMsg());
         }
 
-        rowView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent("jumppinned");
-                intent.putExtra("pinnedKey", pinnedList.get(position).getKey());
-                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-            }
+        rowView.setOnClickListener(view1 -> {
+            Intent intent = new Intent("jumppinned");
+            intent.putExtra("pinnedKey", pinnedList.get(position).getKey());
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         });
 
         return rowView;

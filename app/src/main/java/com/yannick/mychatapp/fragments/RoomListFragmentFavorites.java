@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.fragments;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,10 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,10 +25,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.activities.ChatActivity;
+import com.yannick.mychatapp.adapters.RoomAdapter;
+import com.yannick.mychatapp.data.Message;
+import com.yannick.mychatapp.data.Room;
+import com.yannick.mychatapp.data.User;
 
 import java.util.ArrayList;
 
-public class RoomListFragmentMyRooms extends Fragment {
+public class RoomListFragmentFavorites extends Fragment {
 
     private ListView listView;
     private RoomAdapter adapter;
@@ -45,12 +53,12 @@ public class RoomListFragmentMyRooms extends Fragment {
         listView = view.findViewById(R.id.listView);
         noRoomFound = view.findViewById(R.id.keinraumgefunden);
 
-        adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MY_ROOMS);
+        adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.FAVORITES);
         listView.setAdapter(adapter);
 
         fileOperations = new FileOperations(getActivity());
 
-        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(roomLeaveReceiver, new IntentFilter("leaveroom"));
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(favReceiver, new IntentFilter("favroom"));
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(searchReceiver, new IntentFilter("searchroom"));
 
         root.addValueEventListener(new ValueEventListener() {
@@ -65,19 +73,16 @@ public class RoomListFragmentMyRooms extends Fragment {
             public void onCancelled(DatabaseError databaseError) {
                 try {
                     Toast.makeText(getActivity(), R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
-                } catch(Exception e) {
-
+                } catch (NullPointerException e) {
+                    Log.e("NullPointerException", e.toString());
                 }
             }
         });
 
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                int position = listView.getPositionForView(view);
-                Room room = roomList.get(position);
-                requestPassword(room);
-            }
+        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
+            int position = listView.getPositionForView(view1);
+            Room room = roomList.get(position);
+            requestPassword(room);
         });
 
         adapter.registerDataSetObserver(new DataSetObserver() {
@@ -97,14 +102,14 @@ public class RoomListFragmentMyRooms extends Fragment {
     private void addRoomToList(DataSnapshot dataSnapshot) {
         roomList.clear();
 
-        for(final DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()){
-            final String name = uniqueKeySnapshot.getKey();
-            for(DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()){
+        for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
+            final String roomKey = uniqueKeySnapshot.getKey();
+            for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
                 final Room room = roomSnapshot.getValue(Room.class);
-                room.setKey(name);
-                if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + name + ".txt"))) {
+                room.setKey(roomKey);
+                if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
                     if (uniqueKeySnapshot.getChildrenCount() > 1) {
-                        DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(name);
+                        DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(roomKey);
                         Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
                         lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
@@ -114,17 +119,17 @@ public class RoomListFragmentMyRooms extends Fragment {
                                     String message = child.child("msg").getValue().toString();
                                     String image = child.child("img").getValue().toString();
                                     String userid = child.child("name").getValue().toString();
-                                    String pin = child.child("pin").getValue().toString();
+                                    boolean pinned = (boolean) child.child("pinned").getValue();
                                     String quote = child.child("quote").getValue().toString();
                                     String time = child.child("time").getValue().toString();
 
                                     Message newestMessage;
                                     if (!image.isEmpty()) {
-                                        newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, "", "", quote, pin);
+                                        newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, "", "", quote, pinned);
                                     } else {
-                                        newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pin);
+                                        newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
                                     }
-                                    room.setnM(newestMessage);
+                                    room.setNewestMessage(newestMessage);
 
                                     sortByTime(room, userid);
                                 }
@@ -154,8 +159,8 @@ public class RoomListFragmentMyRooms extends Fragment {
                 String key = dataSnapshot.getKey();
                 User u = dataSnapshot.getValue(User.class);
                 u.setUserID(key);
-                if (room.getnM() != null) {
-                    room.getnM().setUser(u);
+                if (room.getNewestMessage() != null) {
+                    room.getNewestMessage().setUser(u);
                 } else {
                     room.setUsername(u.getName());
                 }
@@ -164,13 +169,13 @@ public class RoomListFragmentMyRooms extends Fragment {
                 if (!roomList.isEmpty()) {
                     for (Room r : roomList) {
                         long t, t2;
-                        if (r.getnM() != null) {
-                            t = Long.parseLong(r.getnM().getTime().substring(0, 8) + r.getnM().getTime().substring(9, 15));
+                        if (r.getNewestMessage() != null) {
+                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
                         } else {
                             t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
                         }
-                        if (room.getnM() != null) {
-                            t2 = Long.parseLong(room.getnM().getTime().substring(0, 8) + room.getnM().getTime().substring(9, 15));
+                        if (room.getNewestMessage() != null) {
+                            t2 = Long.parseLong(room.getNewestMessage().getTime().substring(0, 8) + room.getNewestMessage().getTime().substring(9, 15));
                         } else {
                             t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
                         }
@@ -206,40 +211,96 @@ public class RoomListFragmentMyRooms extends Fragment {
 
     private void requestPassword(final Room room) {
         String roomKey = room.getKey();
-
-        if (room.getPasswd().equals(fileOperations.readFromFile("mychatapp_room_" + roomKey + ".txt"))) {
+        if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
             Intent intent = new Intent(getContext(), ChatActivity.class);
             intent.putExtra("room_name", room.getName());
             intent.putExtra("room_key", roomKey);
-            intent.putExtra("last_read_message", fileOperations.readFromFile("mychatapp_room_" + roomKey + "_nm.txt"));
-            if (room.getnM() != null) {
-                intent.putExtra("nmid", room.getnM().getKey());
-                fileOperations.writeToFile(room.getnM().getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
+            intent.putExtra("last_read_message", fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomKey)));
+            if (room.getNewestMessage() != null) {
+                intent.putExtra("nmid", room.getNewestMessage().getKey());
+                fileOperations.writeToFile(room.getNewestMessage().getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
             } else {
                 intent.putExtra("nmid", roomKey);
-                fileOperations.writeToFile(room.getKey(), "mychatapp_room_" + roomKey + "_nm.txt");
+                fileOperations.writeToFile(room.getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
             }
             adapter.notifyDataSetChanged();
             startActivity(intent);
         }
     }
 
-    private void updateRoomList(String key) {
-        for (int i = 0; i < roomList.size(); i++) {
-            if (roomList.get(i).getKey().equals(key)) {
-                roomList.remove(i);
-                adapter.notifyDataSetChanged();
-                break;
+    public BroadcastReceiver favReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            updateRoomList(
+                    intent.getStringExtra("roomKey"),
+                    intent.getStringExtra("roomName"),
+                    intent.getStringExtra("admin"),
+                    intent.getStringExtra("category"),
+                    intent.getStringExtra("newestMessage"),
+                    intent.getStringExtra("passwd"),
+                    intent.getStringExtra("nmMessage"),
+                    intent.getStringExtra("nmTime"),
+                    intent.getStringExtra("nmKey"),
+                    Message.Type.valueOf(intent.getStringExtra("nmType"))
+            );
+        }
+    };
+
+    private void updateRoomList(String key, String name, String admin, String category, String time, String passwd, String nmMsg, String nmTime, String nmKey, Message.Type nmType) {
+        if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, key)).equals("1")) {
+            Room room = new Room(key, name, category, time, passwd, admin);
+            if (!nmMsg.isEmpty()) {
+                Message newestMessage = new Message(null, nmMsg, nmTime, false, nmKey, nmType, "", "", "", false);
+                room.setNewestMessage(newestMessage);
+            }
+
+            int index = 0;
+            if (!roomList.isEmpty()) {
+                for (Room r : roomList) {
+                    Long t, t2;
+                    if (nmMsg.isEmpty()) {
+                        if (r.getNewestMessage() != null) {
+                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
+                        } else {
+                            t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
+                        }
+                        t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
+                    } else {
+                        if (r.getNewestMessage() != null) {
+                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
+                        } else {
+                            t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
+                        }
+                        t2 = Long.parseLong(room.getNewestMessage().getTime().substring(0, 8) + room.getNewestMessage().getTime().substring(9, 15));
+                    }
+                    if (t < t2) {
+                        break;
+                    } else {
+                        index++;
+                    }
+                }
+                roomList.add(index, room);
+            } else {
+                roomList.add(room);
+            }
+
+            adapter.notifyDataSetChanged();
+        } else {
+            for (int i = 0; i < roomList.size(); i++) {
+                if (roomList.get(i).getKey().equals(key)) {
+                    roomList.remove(i);
+                    adapter.notifyDataSetChanged();
+                    break;
+                }
             }
         }
     }
 
-    public BroadcastReceiver roomLeaveReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            updateRoomList(intent.getStringExtra("roomkey"));
-        }
-    };
+    @Override
+    public void onDestroy() {
+        LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(favReceiver);
+        super.onDestroy();
+    }
 
     public BroadcastReceiver searchReceiver = new BroadcastReceiver() {
         @Override
@@ -249,7 +310,7 @@ public class RoomListFragmentMyRooms extends Fragment {
                 ArrayList<Room> searchResultList = searchRoom(s);
 
                 if (!searchResultList.isEmpty()) {
-                    adapter = new RoomAdapter(getContext(), searchResultList, RoomAdapter.RoomListType.MY_ROOMS);
+                    adapter = new RoomAdapter(getContext(), searchResultList, RoomAdapter.RoomListType.FAVORITES);
                     listView.setAdapter(adapter);
                     listView.setVisibility(View.VISIBLE);
                     noRoomFound.setText("");
@@ -259,7 +320,7 @@ public class RoomListFragmentMyRooms extends Fragment {
                     noRoomFound.setText(R.string.noroomfound);
                 }
             } else {
-                adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MY_ROOMS);
+                adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.FAVORITES);
                 listView.setVisibility(View.VISIBLE);
                 if (!roomList.isEmpty()) {
                     noRoomFound.setText("");

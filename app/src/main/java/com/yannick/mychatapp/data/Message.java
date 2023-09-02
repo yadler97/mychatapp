@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.data;
 
 public class Message {
     private User user;
@@ -11,13 +11,13 @@ public class Message {
     private String quote_message;
     private String quote_key;
     private String searchString;
-    private String pin;
+    private boolean pinned;
 
     public Message() {
 
     }
 
-    public Message(User user, String msg, String time, boolean sender, String id, Type type, String quote_name, String quote_message, String quote_key, String pin) {
+    public Message(User user, String msg, String time, boolean sender, String id, Type type, String quote_name, String quote_message, String quote_key, boolean pinned) {
         this.user = user;
         this.msg = msg;
         this.time = time;
@@ -28,10 +28,10 @@ public class Message {
         this.quote_name = quote_name;
         this.quote_key = quote_key;
         this.searchString = "";
-        this.pin = pin;
+        this.pinned = pinned;
     }
 
-    enum Type {
+    public enum Type {
         HEADER,
         MESSAGE_RECEIVED,
         MESSAGE_RECEIVED_CON,
@@ -393,11 +393,11 @@ public class Message {
         this.searchString = searchString;
     }
 
-    public String getPin() {
-        return pin;
+    public boolean isPinned() {
+        return pinned;
     }
 
-    public void setPin(String pin) {
-        this.pin = pin;
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
     }
 }

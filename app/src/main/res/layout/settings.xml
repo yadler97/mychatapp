@@ -8,28 +8,28 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:gravity="center_horizontal">
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/push"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
         android:text="@string/receivepushnotifications" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/save"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:text="@string/saveenteredmessage" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:text="@string/previewimages" />
 
-    <Switch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/camera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

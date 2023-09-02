@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.media.RingtoneManager;
@@ -14,10 +15,13 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.core.app.RemoteInput;
 import androidx.core.content.ContextCompat;
+import androidx.preference.PreferenceManager;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.yannick.mychatapp.activities.ChatActivity;
+import com.yannick.mychatapp.activities.MainActivity;
 
 import java.util.List;
 
@@ -36,17 +40,18 @@ public class PushService extends FirebaseMessagingService {
     public void onMessageReceived(RemoteMessage remoteMessage) {
         mAuth = FirebaseAuth.getInstance();
         FileOperations fileOperations = new FileOperations(this);
-        if (!appInForeground(this) || (appInForeground(this) && !fileOperations.readFromFile("mychatapp_current.txt").equals(remoteMessage.getData().get("roomid")))) {
-            if (!fileOperations.readFromFile("mychatapp_settings_push.txt").equals("off") && !remoteMessage.getData().get("userid").equals(mAuth.getCurrentUser().getUid())) {
+        if (!appInForeground(this) || (appInForeground(this) && !fileOperations.readFromFile(FileOperations.currentRoomFile).equals(remoteMessage.getData().get("roomid")))) {
+            SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
+            if (settings.getBoolean(MainActivity.settingsPushNotificationsKey, true) && !remoteMessage.getData().get("userid").equals(mAuth.getCurrentUser().getUid())) {
                 int pushID = 0;
                 for (int i = 0; i < remoteMessage.getData().get("roomid").length(); ++i) {
                     pushID += (int) remoteMessage.getData().get("roomid").charAt(i);
                 }
-                String pushtext;
+                String pushText;
                 if (!remoteMessage.getData().get("img").isEmpty()) {
-                    pushtext = remoteMessage.getData().get("name") + " " + getResources().getString(R.string.sharedapicture);
+                    pushText = remoteMessage.getData().get("name") + " " + getResources().getString(R.string.sharedapicture);
                 } else {
-                    pushtext = remoteMessage.getData().get("name") + ": " + remoteMessage.getData().get("msg");
+                    pushText = remoteMessage.getData().get("name") + ": " + remoteMessage.getData().get("msg");
                 }
 
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
@@ -76,7 +81,7 @@ public class PushService extends FirebaseMessagingService {
 
                 NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
                         .setContentTitle(remoteMessage.getData().get("roomname"))
-                        .setContentText(pushtext)
+                        .setContentText(pushText)
                         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                         .setStyle(new NotificationCompat.BigTextStyle())
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
