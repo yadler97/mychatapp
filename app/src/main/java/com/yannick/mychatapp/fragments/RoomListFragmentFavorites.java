@@ -119,15 +119,15 @@ public class RoomListFragmentFavorites extends Fragment {
                                     String message = child.child("msg").getValue().toString();
                                     String image = child.child("img").getValue().toString();
                                     String userid = child.child("name").getValue().toString();
-                                    String pin = child.child("pin").getValue().toString();
+                                    boolean pinned = (boolean) child.child("pinned").getValue();
                                     String quote = child.child("quote").getValue().toString();
                                     String time = child.child("time").getValue().toString();
 
                                     Message newestMessage;
                                     if (!image.isEmpty()) {
-                                        newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, "", "", quote, pin);
+                                        newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, "", "", quote, pinned);
                                     } else {
-                                        newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pin);
+                                        newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
                                     }
                                     room.setnM(newestMessage);
 
@@ -250,7 +250,7 @@ public class RoomListFragmentFavorites extends Fragment {
         if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, key)).equals("1")) {
             Room room = new Room(key, name, category, time, passwd, admin);
             if (!nmMsg.isEmpty()) {
-                Message newestMessage = new Message(null, nmMsg, nmTime, false, nmKey, nmType, "", "", "", "");
+                Message newestMessage = new Message(null, nmMsg, nmTime, false, nmKey, nmType, "", "", "", false);
                 room.setnM(newestMessage);
             }
 

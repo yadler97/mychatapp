@@ -249,7 +249,7 @@ public class ChatActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(userReceiver, new IntentFilter("userprofile"));
         LocalBroadcastManager.getInstance(this).registerReceiver(forwardReceiver, new IntentFilter("forward"));
         LocalBroadcastManager.getInstance(this).registerReceiver(fullscreenReceiver, new IntentFilter("fullscreenimage"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(pinReceiver, new IntentFilter("pinnen"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(pinReceiver, new IntentFilter("pinMessage"));
         LocalBroadcastManager.getInstance(this).registerReceiver(jumppinnedReceiver, new IntentFilter("jumppinned"));
         LocalBroadcastManager.getInstance(this).registerReceiver(closeFullscreenReceiver, new IntentFilter("closefullscreen"));
 
@@ -302,22 +302,21 @@ public class ChatActivity extends AppCompatActivity {
                     searchView.setIconified(true);
                     searchView.setIconified(true);
                 }
-                Map<String, Object> map = new HashMap<String, Object>();
+
                 String newMessageKey = root.push().getKey();
-                root.updateChildren(map);
 
                 String currentDateAndTime = sdf.format(new Date());
 
                 DatabaseReference message_root = root.child(newMessageKey);
-                Map<String, Object> map2 = new HashMap<String, Object>();
-                map2.put("name", userID);
-                map2.put("msg", input_msg.getText().toString().trim());
-                map2.put("img", "");
-                map2.put("pin", "0");
-                map2.put("quote", quoteStatus);
-                map2.put("time", currentDateAndTime);
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("name", userID);
+                map.put("msg", input_msg.getText().toString().trim());
+                map.put("img", "");
+                map.put("pinned", false);
+                map.put("quote", quoteStatus);
+                map.put("time", currentDateAndTime);
 
-                message_root.updateChildren(map2);
+                message_root.updateChildren(map);
                 input_msg.getText().clear();
                 quoteStatus = "";
                 quote_text.setText("");
@@ -491,7 +490,7 @@ public class ChatActivity extends AppCompatActivity {
             }
             String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
             String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
-            Message m = new Message(user, text, creationTime, false, room.getKey(), Message.Type.HEADER, "", "", "", "0");
+            Message m = new Message(user, text, creationTime, false, room.getKey(), Message.Type.HEADER, "", "", "", false);
 
             messageList.add(m);
             if (!memberList.contains(m.getUser())) {
@@ -502,7 +501,7 @@ public class ChatActivity extends AppCompatActivity {
             String chat_msg = dataSnapshot.child("msg").getValue().toString();
             String img = dataSnapshot.child("img").getValue().toString();
             String chat_user_id = dataSnapshot.child("name").getValue().toString();
-            String pin = dataSnapshot.child("pin").getValue().toString();
+            boolean pinned = (boolean) dataSnapshot.child("pinned").getValue();
             String quote = dataSnapshot.child("quote").getValue().toString();
             String time = dataSnapshot.child("time").getValue().toString();
 
@@ -514,14 +513,14 @@ public class ChatActivity extends AppCompatActivity {
                 Log.e("ParseException", e.toString());
             }
             if (lastReadMessage.equals(key_last) && !lastReadMessageReached) {
-                Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, false, "-", Message.Type.HEADER, "", "", "", "0");
+                Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, false, "-", Message.Type.HEADER, "", "", "", false);
                 messageList.add(m);
             }
             key_last = key;
 
             if (index == -1 && !messageList.get(messageList.size() - 1).getTime().substring(0, 8).equals(time.substring(0, 8))) {
                 String text = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
-                Message m = new Message(user, text, time, false, "-", Message.Type.HEADER, "", "", "", "0");
+                Message m = new Message(user, text, time, false, "-", Message.Type.HEADER, "", "", "", false);
                 messageList.add(m);
             }
 
@@ -539,22 +538,22 @@ public class ChatActivity extends AppCompatActivity {
                 if (!chat_msg.equals("")) {
                     if (chat_msg.length() > 11 && chat_msg.substring(0, 12).equals("(Forwarded) ")) {
                         if (chat_msg.length() > 2000 + 12) {
-                            m = new Message(user, chat_msg.substring(12), time, sender, key, Message.getFittingForwardedExpandableMessageType(sender, con), "", "", "", pin);
+                            m = new Message(user, chat_msg.substring(12), time, sender, key, Message.getFittingForwardedExpandableMessageType(sender, con), "", "", "", pinned);
                         } else {
-                            m = new Message(user, chat_msg.substring(12), time, sender, key, Message.getFittingForwardedMessageType(sender, con), "", "", "", pin);
+                            m = new Message(user, chat_msg.substring(12), time, sender, key, Message.getFittingForwardedMessageType(sender, con), "", "", "", pinned);
                         }
                     } else {
                         if (chat_msg.length() > 2000) {
-                            m = new Message(user, chat_msg, time, sender, key, Message.getFittingExpandableMessageType(sender, con), "", "", "", pin);
+                            m = new Message(user, chat_msg, time, sender, key, Message.getFittingExpandableMessageType(sender, con), "", "", "", pinned);
                         } else {
-                            m = new Message(user, chat_msg, time, sender, key, Message.getFittingBasicMessageType(sender, con), "", "", "", pin);
+                            m = new Message(user, chat_msg, time, sender, key, Message.getFittingBasicMessageType(sender, con), "", "", "", pinned);
                         }
                     }
                 } else {
                     if (!imageList.contains(img)) {
                         imageList.add(img);
                     }
-                    m = new Message(user, img, time, sender, key, Message.getFittingImageMessageType(sender, con), "", "", "", pin);
+                    m = new Message(user, img, time, sender, key, Message.getFittingImageMessageType(sender, con), "", "", "", pinned);
                 }
             } else {
                 Message.Type quoteType = Message.Type.HEADER;
@@ -572,12 +571,12 @@ public class ChatActivity extends AppCompatActivity {
                 }
                 if (!Message.isImage(quoteType)) {
                     if (!quoteMessage.equals(getResources().getString(R.string.quotedmessagenolongeravailable))) {
-                        m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteMessageType(sender, con), quoteName, quoteMessage, quoteKey, pin);
+                        m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
                     } else {
-                        m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteDeletedMessageType(sender, con), quoteName, quoteMessage, quoteKey, pin);
+                        m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteDeletedMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
                     }
                 } else {
-                    m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteImageMessageType(sender, con), quoteName, quoteMessage, quoteKey, pin);
+                    m = new Message(user, chat_msg, time, sender, key, Message.getFittingQuoteImageMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
                 }
             }
             if (index != -1 && messageList.get(ind).getTime().equals("")) {
@@ -588,7 +587,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (!memberList.contains(m.getUser())) {
                     memberList.add(m.getUser());
                 }
-                if (pin.equals("1")) {
+                if (pinned) {
                     pinnedList.add(m);
                 }
             } else {
@@ -816,22 +815,20 @@ public class ChatActivity extends AppCompatActivity {
             Toast.makeText(ChatActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
 
             if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
-                Map<String, Object> map = new HashMap<String, Object>();
                 String newMessageKey = root.push().getKey();
-                root.updateChildren(map);
 
                 String currentDateAndTime = sdf.format(new Date());
 
                 DatabaseReference message_root = root.child(newMessageKey);
-                Map<String, Object> map2 = new HashMap<String, Object>();
-                map2.put("name", userID);
-                map2.put("msg", "");
-                map2.put("img", imgName);
-                map2.put("pin", "0");
-                map2.put("quote", "");
-                map2.put("time", currentDateAndTime);
+                Map<String, Object> map = new HashMap<String, Object>();
+                map.put("name", userID);
+                map.put("msg", "");
+                map.put("img", imgName);
+                map.put("pinned", false);
+                map.put("quote", "");
+                map.put("time", currentDateAndTime);
 
-                message_root.updateChildren(map2);
+                message_root.updateChildren(map);
 
                 quoteStatus = "";
 
@@ -1337,14 +1334,14 @@ public class ChatActivity extends AppCompatActivity {
         if (m.getMsg().toLowerCase().contains(text.toLowerCase()) && m.getType() != Message.Type.HEADER && !Message.isImage(m.getType())) {
             if (searchedMessageList.isEmpty() || !searchedMessageList.get(searchedMessageList.size() - 1).getTime().substring(0, 8).equals(m.getTime().substring(0, 8))) {
                 String time = m.getTime().substring(6, 8) + "." + m.getTime().substring(4, 6) + "." + m.getTime().substring(0, 4);
-                Message m2 = new Message(user, time, m.getTime(), false, "-", Message.Type.HEADER, "", "", "", m.getPin());
+                Message m2 = new Message(user, time, m.getTime(), false, "-", Message.Type.HEADER, "", "", "", m.isPinned());
                 searchedMessageList.add(m2);
             }
             Message m2;
             if (Message.isConMessage(m.getType())) {
-                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuote_name(), m.getQuote_message(), m.getQuote_key(), m.getPin());
+                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuote_name(), m.getQuote_message(), m.getQuote_key(), m.isPinned());
             } else {
-                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), m.getType(), m.getQuote_name(), m.getQuote_message(), m.getQuote_key(), m.getPin());
+                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), m.getType(), m.getQuote_name(), m.getQuote_message(), m.getQuote_key(), m.isPinned());
             }
             m2.setSearchString(text);
             searchedMessageList.add(m2);
@@ -1612,7 +1609,7 @@ public class ChatActivity extends AppCompatActivity {
                 map.put("msg", "(Forwarded) " + fMessage.getMsg());
                 map.put("img", "");
             }
-            map.put("pin", "0");
+            map.put("pinned", false);
             map.put("quote", quoteStatus);
             map.put("time", currentDateAndTime);
 
@@ -1741,12 +1738,12 @@ public class ChatActivity extends AppCompatActivity {
                 boolean removed = false;
                 for (Message m2 : pinnedList) {
                     if (m2.getKey().equals(m.getKey())) {
-                        m.setPin("0");
+                        m.setPinned(false);
                         pinnedList.remove(m2);
 
                         Map<String, Object> map = new HashMap<String, Object>();
                         DatabaseReference message_root = root.child(m.getKey());
-                        map.put("pin", "0");
+                        map.put("pinned", false);
                         message_root.updateChildren(map);
 
                         Toast.makeText(getApplicationContext(), R.string.messageunpinned, Toast.LENGTH_SHORT).show();
@@ -1756,7 +1753,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
                 }
                 if (!removed) {
-                    m.setPin("1");
+                    m.setPinned(true);
                     if (!pinnedList.isEmpty()) {
                         int index = 0;
                         for (Message pm : pinnedList) {
@@ -1773,7 +1770,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     Map<String, Object> map = new HashMap<String, Object>();
                     DatabaseReference message_root = root.child(m.getKey());
-                    map.put("pin", "1");
+                    map.put("pinned", true);
                     message_root.updateChildren(map);
 
                     Toast.makeText(getApplicationContext(), R.string.messagepinned, Toast.LENGTH_SHORT).show();

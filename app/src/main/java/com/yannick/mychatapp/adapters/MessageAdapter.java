@@ -232,7 +232,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 intent.putExtra("forwardID", message.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.pin) {
-                Intent intent = new Intent("pinnen");
+                Intent intent = new Intent("pinMessage");
                 intent.putExtra("pinID", message.getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.jump) {
@@ -267,19 +267,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 });
 
                 if (Message.isImage(type)) {
-                    if (clickedDataItem.getPin().equals("0")) {
+                    if (!clickedDataItem.isPinned()) {
                         sheetMenu.setMenu(R.menu.menu_image);
                     } else {
                         sheetMenu.setMenu(R.menu.menu_image_unpin);
                     }
                 } else if (Message.isQuoteImage(type)) {
-                    if (clickedDataItem.getPin().equals("0")) {
+                    if (!clickedDataItem.isPinned()) {
                         sheetMenu.setMenu(R.menu.menu_quote_image);
                     } else {
                         sheetMenu.setMenu(R.menu.menu_quote_image_unpin);
                     }
                 } else {
-                    if (clickedDataItem.getPin().equals("0")) {
+                    if (!clickedDataItem.isPinned()) {
                         sheetMenu.setMenu(R.menu.menu_message);
                     } else {
                         sheetMenu.setMenu(R.menu.menu_message_unpin);

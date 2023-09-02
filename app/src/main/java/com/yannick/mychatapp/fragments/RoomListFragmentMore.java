@@ -126,11 +126,11 @@ public class RoomListFragmentMore extends Fragment {
                                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                                     String key = child.getKey();
                                     String message = child.child("msg").getValue().toString();
-                                    String pin = child.child("pin").getValue().toString();
+                                    boolean pinned = (boolean) child.child("pinned").getValue();
                                     String quote = child.child("quote").getValue().toString();
                                     String time = child.child("time").getValue().toString();
 
-                                    Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pin);
+                                    Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
 
                                     room.setnM(newestMessage);
                                     roomList.add(room);
