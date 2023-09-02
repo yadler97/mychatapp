@@ -890,22 +890,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SwitchCompat save = view.findViewById(R.id.save);
         SwitchCompat preview = view.findViewById(R.id.preview);
         SwitchCompat camera = view.findViewById(R.id.camera);
-        boolean s_push = sharedPref.getBoolean(settingsPushNotificationsKey, false);
-        boolean s_save = sharedPref.getBoolean(settingsSaveEnteredTextKey, false);
-        boolean s_preview = sharedPref.getBoolean(settingsPreviewImagesKey, false);
-        boolean s_camera = sharedPref.getBoolean(settingsStoreCameraPicturesKey, false);
-        if (s_push) {
-            push.setChecked(true);
-        }
-        if (s_save) {
-            save.setChecked(true);
-        }
-        if (s_preview) {
-            preview.setChecked(true);
-        }
-        if (s_camera) {
-            camera.setChecked(true);
-        }
+
+        boolean s_push = sharedPref.getBoolean(settingsPushNotificationsKey, true);
+        boolean s_save = sharedPref.getBoolean(settingsSaveEnteredTextKey, true);
+        boolean s_preview = sharedPref.getBoolean(settingsPreviewImagesKey, true);
+        boolean s_camera = sharedPref.getBoolean(settingsStoreCameraPicturesKey, true);
+
+        push.setChecked(s_push);
+        save.setChecked(s_save);
+        preview.setChecked(s_preview);
+        camera.setChecked(s_camera);
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
