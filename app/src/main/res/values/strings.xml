@@ -361,6 +361,11 @@
         "- Many code improvements\n"
         "\n "</string>
 
+    <string name="v111_title">"Version 1.1.1 (September 2nd, 2023)"</string>
+    <string name="v111_text">"- Login screen now uses correct theme for buttons\n"
+        "- Many code improvements\n"
+        "\n "</string>
+
     <string name="copyright">"Yannick Adler, 2018–2023\nVersion %s\n\n"
         "Used libraries:\n"
         "- Droidparts by Alex Yanchenko\n"
