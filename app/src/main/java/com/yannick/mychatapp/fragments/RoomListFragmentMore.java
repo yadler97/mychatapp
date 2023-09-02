@@ -132,7 +132,7 @@ public class RoomListFragmentMore extends Fragment {
 
                                     Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
 
-                                    room.setnM(newestMessage);
+                                    room.setNewestMessage(newestMessage);
                                     roomList.add(room);
                                     adapter.notifyDataSetChanged();
                                 }
@@ -210,13 +210,13 @@ public class RoomListFragmentMore extends Fragment {
                         intent.putExtra("room_name", room.getName());
                         intent.putExtra("room_key", roomKey);
                         intent.putExtra("last_read_message", fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomKey)));
-                        if (room.getnM() != null) {
-                            intent.putExtra("nmid", room.getnM().getKey());
+                        if (room.getNewestMessage() != null) {
+                            intent.putExtra("nmid", room.getNewestMessage().getKey());
                         } else {
                             intent.putExtra("nmid", roomKey);
                         }
-                        if (room.getnM() != null) {
-                            fileOperations.writeToFile(room.getnM().getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
+                        if (room.getNewestMessage() != null) {
+                            fileOperations.writeToFile(room.getNewestMessage().getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
                         } else {
                             fileOperations.writeToFile(roomKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
                         }

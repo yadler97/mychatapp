@@ -129,7 +129,7 @@ public class RoomListFragmentFavorites extends Fragment {
                                     } else {
                                         newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
                                     }
-                                    room.setnM(newestMessage);
+                                    room.setNewestMessage(newestMessage);
 
                                     sortByTime(room, userid);
                                 }
@@ -159,8 +159,8 @@ public class RoomListFragmentFavorites extends Fragment {
                 String key = dataSnapshot.getKey();
                 User u = dataSnapshot.getValue(User.class);
                 u.setUserID(key);
-                if (room.getnM() != null) {
-                    room.getnM().setUser(u);
+                if (room.getNewestMessage() != null) {
+                    room.getNewestMessage().setUser(u);
                 } else {
                     room.setUsername(u.getName());
                 }
@@ -169,13 +169,13 @@ public class RoomListFragmentFavorites extends Fragment {
                 if (!roomList.isEmpty()) {
                     for (Room r : roomList) {
                         long t, t2;
-                        if (r.getnM() != null) {
-                            t = Long.parseLong(r.getnM().getTime().substring(0, 8) + r.getnM().getTime().substring(9, 15));
+                        if (r.getNewestMessage() != null) {
+                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
                         } else {
                             t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
                         }
-                        if (room.getnM() != null) {
-                            t2 = Long.parseLong(room.getnM().getTime().substring(0, 8) + room.getnM().getTime().substring(9, 15));
+                        if (room.getNewestMessage() != null) {
+                            t2 = Long.parseLong(room.getNewestMessage().getTime().substring(0, 8) + room.getNewestMessage().getTime().substring(9, 15));
                         } else {
                             t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
                         }
@@ -216,9 +216,9 @@ public class RoomListFragmentFavorites extends Fragment {
             intent.putExtra("room_name", room.getName());
             intent.putExtra("room_key", roomKey);
             intent.putExtra("last_read_message", fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomKey)));
-            if (room.getnM() != null) {
-                intent.putExtra("nmid", room.getnM().getKey());
-                fileOperations.writeToFile(room.getnM().getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
+            if (room.getNewestMessage() != null) {
+                intent.putExtra("nmid", room.getNewestMessage().getKey());
+                fileOperations.writeToFile(room.getNewestMessage().getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
             } else {
                 intent.putExtra("nmid", roomKey);
                 fileOperations.writeToFile(room.getKey(), String.format(FileOperations.newestMessageFilePattern, roomKey));
@@ -251,7 +251,7 @@ public class RoomListFragmentFavorites extends Fragment {
             Room room = new Room(key, name, category, time, passwd, admin);
             if (!nmMsg.isEmpty()) {
                 Message newestMessage = new Message(null, nmMsg, nmTime, false, nmKey, nmType, "", "", "", false);
-                room.setnM(newestMessage);
+                room.setNewestMessage(newestMessage);
             }
 
             int index = 0;
@@ -259,19 +259,19 @@ public class RoomListFragmentFavorites extends Fragment {
                 for (Room r : roomList) {
                     Long t, t2;
                     if (nmMsg.isEmpty()) {
-                        if (r.getnM() != null) {
-                            t = Long.parseLong(r.getnM().getTime().substring(0, 8) + r.getnM().getTime().substring(9, 15));
+                        if (r.getNewestMessage() != null) {
+                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
                         } else {
                             t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
                         }
                         t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
                     } else {
-                        if (r.getnM() != null) {
-                            t = Long.parseLong(r.getnM().getTime().substring(0, 8) + r.getnM().getTime().substring(9, 15));
+                        if (r.getNewestMessage() != null) {
+                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
                         } else {
                             t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
                         }
-                        t2 = Long.parseLong(room.getnM().getTime().substring(0, 8) + room.getnM().getTime().substring(9, 15));
+                        t2 = Long.parseLong(room.getNewestMessage().getTime().substring(0, 8) + room.getNewestMessage().getTime().substring(9, 15));
                     }
                     if (t < t2) {
                         break;

@@ -88,18 +88,18 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         if (type == RoomListType.MORE) {
             viewHolder.categoryText.setText(context.getResources().getStringArray(R.array.categories)[Integer.parseInt(roomList.get(position).getCategory())]);
         } else {
-            if (roomList.get(position).getnM() != null) {
-                if (roomList.get(position).getnM().getType() == Message.Type.MESSAGE_RECEIVED) {
-                    if (roomList.get(position).getnM().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
-                        viewHolder.categoryText.setText(context.getResources().getString(R.string.you) + ": " + roomList.get(position).getnM().getMsg());
+            if (roomList.get(position).getNewestMessage() != null) {
+                if (roomList.get(position).getNewestMessage().getType() == Message.Type.MESSAGE_RECEIVED) {
+                    if (roomList.get(position).getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
+                        viewHolder.categoryText.setText(context.getResources().getString(R.string.you) + ": " + roomList.get(position).getNewestMessage().getMsg());
                     } else {
-                        viewHolder.categoryText.setText(roomList.get(position).getnM().getUser().getName() + ": " + roomList.get(position).getnM().getMsg());
+                        viewHolder.categoryText.setText(roomList.get(position).getNewestMessage().getUser().getName() + ": " + roomList.get(position).getNewestMessage().getMsg());
                     }
-                } else if (roomList.get(position).getnM().getType() == Message.Type.IMAGE_RECEIVED) {
-                    if (roomList.get(position).getnM().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
+                } else if (roomList.get(position).getNewestMessage().getType() == Message.Type.IMAGE_RECEIVED) {
+                    if (roomList.get(position).getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
                         viewHolder.categoryText.setText(context.getResources().getString(R.string.yousharedapicture));
                     } else {
-                        viewHolder.categoryText.setText(roomList.get(position).getnM().getUser().getName() + " " + context.getResources().getString(R.string.sharedapicture));
+                        viewHolder.categoryText.setText(roomList.get(position).getNewestMessage().getUser().getName() + " " + context.getResources().getString(R.string.sharedapicture));
                     }
                 }
             } else {
@@ -111,8 +111,8 @@ public class RoomAdapter extends ArrayAdapter<Room> {
             }
         }
         if (type == RoomListType.MY_ROOMS || type == RoomListType.FAVORITES) {
-            if (roomList.get(position).getnM() != null) {
-                viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getnM().getTime()));
+            if (roomList.get(position).getNewestMessage() != null) {
+                viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getNewestMessage().getTime()));
             } else {
                 viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getTime()));
             }
@@ -125,8 +125,8 @@ public class RoomAdapter extends ArrayAdapter<Room> {
 
         FileOperations fileOperations = new FileOperations(this.context);
         if (type == RoomListType.MY_ROOMS || type == RoomListType.FAVORITES) {
-            if (roomList.get(position).getnM() != null) {
-                if (!roomList.get(position).getnM().getKey().equals(fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomList.get(position).getKey())))) {
+            if (roomList.get(position).getNewestMessage() != null) {
+                if (!roomList.get(position).getNewestMessage().getKey().equals(fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomList.get(position).getKey())))) {
                     if (Theme.getCurrentTheme(context) == Theme.DARK) {
                         viewHolder.background.setBackgroundColor(context.getResources().getColor(R.color.roomhighlight_dark));
                     } else {
