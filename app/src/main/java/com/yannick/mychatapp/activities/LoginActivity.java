@@ -347,7 +347,7 @@ public class LoginActivity extends AppCompatActivity {
                             img = UUID.randomUUID().toString();
                         }
 
-                        DatabaseReference user_root = userRoot.child(userID);
+                        DatabaseReference newUserRoot = userRoot.child(userID);
                         Map<String, Object> map = new HashMap<>();
                         map.put("name", name);
                         map.put("profileDescription", description);
@@ -357,7 +357,7 @@ public class LoginActivity extends AppCompatActivity {
                         map.put("img", img);
                         map.put("banner", banner);
                         map.put("ownProfileImage", ownProfileImage);
-                        user_root.updateChildren(map);
+                        newUserRoot.updateChildren(map);
                         Toast.makeText(getApplicationContext(), R.string.profilecreated, Toast.LENGTH_SHORT).show();
 
                         if (!ownProfileImage) {
@@ -373,7 +373,7 @@ public class LoginActivity extends AppCompatActivity {
                             drawable.draw(canvas);
 
                             byte[] byteArray;
-                            final StorageReference pathReference_image = storageRef.child("profile_images/" + img);
+                            final StorageReference refProfileImage = storageRef.child("profile_images/" + img);
                             ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                             byteArray = stream.toByteArray();
@@ -382,7 +382,7 @@ public class LoginActivity extends AppCompatActivity {
                             } catch (IOException ioe) {
                                 ioe.printStackTrace();
                             }
-                            pathReference_image.putBytes(byteArray);
+                            refProfileImage.putBytes(byteArray);
                         }
 
                         user.sendEmailVerification();
@@ -466,15 +466,15 @@ public class LoginActivity extends AppCompatActivity {
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference pathReference_image = storageRef.child("profile_images/" + img);
-        final StorageReference pathReference_banner = storageRef.child("profile_banners/" + banner);
+        final StorageReference refProfileImage = storageRef.child("profile_images/" + img);
+        final StorageReference refProfileBanner = storageRef.child("profile_banners/" + banner);
 
         birthdayEdit.setText(birthday);
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(pathReference_image)
+                    .load(refProfileImage)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
@@ -482,7 +482,7 @@ public class LoginActivity extends AppCompatActivity {
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(pathReference_banner)
+                    .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
@@ -490,7 +490,7 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(pathReference_image)
+                    .load(refProfileImage)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
@@ -498,7 +498,7 @@ public class LoginActivity extends AppCompatActivity {
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(pathReference_banner)
+                    .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
@@ -525,13 +525,9 @@ public class LoginActivity extends AppCompatActivity {
         favColour.setBackground(shape);
 
         birthdayEdit.setOnClickListener(view14 -> {
-            DatePickerDialog datePicker = new DatePickerDialog(view14.getContext(), new DatePickerDialog.OnDateSetListener() {
-
-                @Override
-                public void onDateSet(DatePicker view14, int year, int monthOfYear, int dayOfMonth) {
-                    String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
-                    birthdayEdit.setText(date);
-                }
+            DatePickerDialog datePicker = new DatePickerDialog(view14.getContext(), (view141, year, monthOfYear, dayOfMonth) -> {
+                String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
+                birthdayEdit.setText(date);
             }, StringOperations.getYear(birthday), StringOperations.getMonth(birthday), StringOperations.getDay(birthday));
             if (theme == Theme.DARK) {
                 datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
@@ -697,10 +693,10 @@ public class LoginActivity extends AppCompatActivity {
             progressDialog.dismiss();
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
                 ownProfileImage = true;
-                DatabaseReference user_root = userRoot.child(userID);
+                DatabaseReference newUserRoot = userRoot.child(userID);
                 Map<String, Object> map = new HashMap<>();
                 map.put("ownProfileImage", ownProfileImage);
-                user_root.updateChildren(map);
+                newUserRoot.updateChildren(map);
             }
             updateEditProfileImages();
             Toast.makeText(LoginActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
@@ -718,18 +714,18 @@ public class LoginActivity extends AppCompatActivity {
     private void updateEditProfileImages() {
         storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
 
-        StorageReference pathReference_image = storageRef.child("profile_images/" + img);
-        pathReference_image.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
+        StorageReference refProfileImage = storageRef.child("profile_images/" + img);
+        refProfileImage.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
-                .load(pathReference_image)
+                .load(refProfileImage)
                 .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                 .centerCrop()
                 .into(profileImageButton));
 
-        StorageReference pathReference_banner = storageRef.child("profile_banners/" + banner);
-        pathReference_banner.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
+        StorageReference refProfileBanner = storageRef.child("profile_banners/" + banner);
+        refProfileBanner.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
-                .load(pathReference_banner)
+                .load(refProfileBanner)
                 .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                 .centerCrop()
                 .thumbnail(0.05f)

@@ -57,7 +57,7 @@ public class RoomListFragmentMore extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.roomlist_fragment,container,false);
+        View view = inflater.inflate(R.layout.roomlist_fragment, container, false);
 
         listView = view.findViewById(R.id.listView);
         noRoomFound = view.findViewById(R.id.keinraumgefunden);
@@ -157,9 +157,9 @@ public class RoomListFragmentMore extends Fragment {
     private void requestPassword(final Room room, final int position) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.enter_room, null);
-        final EditText input_field = view.findViewById(R.id.room_password);
-        final TextInputLayout input_field_layout = view.findViewById(R.id.room_password_layout);
-        input_field.addTextChangedListener(new TextWatcher() {
+        final EditText inputPassword = view.findViewById(R.id.room_password);
+        final TextInputLayout inputPasswordLayout = view.findViewById(R.id.room_password_layout);
+        inputPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -173,7 +173,7 @@ public class RoomListFragmentMore extends Fragment {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    input_field_layout.setError(null);
+                    inputPasswordLayout.setError(null);
                 }
             }
         });
@@ -201,8 +201,8 @@ public class RoomListFragmentMore extends Fragment {
 
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view12 -> {
-                if (!input_field.getText().toString().isEmpty()) {
-                    if (input_field.getText().toString().trim().equals(room.getPasswd())) {
+                if (!inputPassword.getText().toString().isEmpty()) {
+                    if (inputPassword.getText().toString().trim().equals(room.getPasswd())) {
                         String roomKey = room.getKey();
                         Intent tabIntent = new Intent("tab");
                         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(tabIntent);
@@ -226,10 +226,10 @@ public class RoomListFragmentMore extends Fragment {
                         alert.cancel();
                         startActivity(intent);
                     } else {
-                        input_field_layout.setError(getResources().getString(R.string.wrongpassword));
+                        inputPasswordLayout.setError(getResources().getString(R.string.wrongpassword));
                     }
                 } else {
-                    input_field_layout.setError(getResources().getString(R.string.enterpassword));
+                    inputPasswordLayout.setError(getResources().getString(R.string.enterpassword));
                 }
             });
         });

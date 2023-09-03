@@ -148,9 +148,9 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         }
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference pathReference_image = storageRef.child("room_images/" + roomList.get(position).getImg());
+        final StorageReference refImage = storageRef.child("room_images/" + roomList.get(position).getImg());
         GlideApp.with(context)
-                .load(pathReference_image)
+                .load(refImage)
                 .centerCrop()
                 .thumbnail(0.05f)
                 .into(viewHolder.roomImage);

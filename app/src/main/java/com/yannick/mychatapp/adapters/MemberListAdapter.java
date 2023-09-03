@@ -61,9 +61,9 @@ public class MemberListAdapter extends ArrayAdapter<User> {
         viewHolder.userText.setText(memberList.get(position).getName());
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference pathReference_image = storageRef.child("profile_images/" + memberList.get(position).getImg());
+        final StorageReference refImage = storageRef.child("profile_images/" + memberList.get(position).getImg());
         GlideApp.with(context)
-                .load(pathReference_image)
+                .load(refImage)
                 .centerCrop()
                 .into(viewHolder.profileImage);
 
