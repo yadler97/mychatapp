@@ -62,7 +62,6 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private Theme theme;
     private FirebaseStorage storage;
-    private StorageReference storageRef;
     private static String userID = "";
     private static final String birthday = "01.01.2000";
     private static boolean ownProfileImage = false;
@@ -361,7 +360,7 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), R.string.profilecreated, Toast.LENGTH_SHORT).show();
 
                         if (!ownProfileImage) {
-                            storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+                            StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
                             TextDrawable drawable = TextDrawable.builder()
                                     .beginConfig()
                                     .bold()
@@ -465,7 +464,7 @@ public class LoginActivity extends AppCompatActivity {
         profileImageButton = view.findViewById(R.id.user_profile_image);
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
-        storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         final StorageReference refProfileImage = storageRef.child("profile_images/" + img);
         final StorageReference refProfileBanner = storageRef.child("profile_banners/" + banner);
 
@@ -675,7 +674,7 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setTitle(R.string.upload);
         progressDialog.show();
 
-        storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference ref;
         if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
             img = UUID.randomUUID().toString();
@@ -712,7 +711,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateEditProfileImages() {
-        storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
 
         StorageReference refProfileImage = storageRef.child("profile_images/" + img);
         refProfileImage.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())

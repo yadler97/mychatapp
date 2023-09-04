@@ -148,6 +148,8 @@
     <string name="resendverificationmail">Resend verification mail</string>
     <string name="profilecreationfailed">Profile creation failed</string>
     <string name="verificationmailsent">Verification mail sent</string>
+    <string name="unknownuser">Unknown User</string>
+    <string name="unknown">Unknown</string>
 
     <string-array name="categories">
         <item>Select category</item>

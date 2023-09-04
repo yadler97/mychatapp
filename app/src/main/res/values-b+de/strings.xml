@@ -148,6 +148,8 @@
     <string name="resendverificationmail">Bestätigungsmail erneut versenden</string>
     <string name="profilecreationfailed">Erstellen des Profils fehlgeschlagen</string>
     <string name="verificationmailsent">Bestätigungsmail versandt</string>
+    <string name="unknownuser">Unbekannter Nutzer</string>
+    <string name="unknown">Unbekannt</string>
 
     <string-array name="categories">
         <item>Kategorie auswählen</item>

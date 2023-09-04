@@ -1628,7 +1628,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
-        return new User(userId, "unknown user", "", "", "", 0, "", "");
+        return new User(userId, getResources().getString(R.string.unknownuser), "19700101", "", getResources().getString(R.string.unknown), 0, "unknown_user", "");
     }
 
     private void showFullscreenImage(String image, int type) {
