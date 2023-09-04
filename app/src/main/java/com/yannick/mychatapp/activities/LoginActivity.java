@@ -353,7 +353,7 @@ public class LoginActivity extends AppCompatActivity {
                         map.put("profileDescription", description);
                         map.put("location", location);
                         map.put("birthday", birthday.substring(6, 10) + birthday.substring(3, 5) + birthday.substring(0, 2));
-                        map.put("favColour", String.valueOf(colour));
+                        map.put("favColour", colour);
                         map.put("img", img);
                         map.put("banner", banner);
                         map.put("ownProfileImage", ownProfileImage);

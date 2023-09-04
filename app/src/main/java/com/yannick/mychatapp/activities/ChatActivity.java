@@ -175,7 +175,7 @@ public class ChatActivity extends AppCompatActivity {
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private SimpleDateFormat sdf_local = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
 
-    private int katindex = 0;
+    private int categoryIndex = 0;
 
     private GravityImageView backgroundView;
     private ImageButton roomImageButton;
@@ -1253,7 +1253,7 @@ public class ChatActivity extends AppCompatActivity {
 
         String time = room.getTime().substring(6, 8) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(0, 4);
         roomDescriptionText.setText(room.getDesc());
-        roomCategoryText.setText(getResources().getStringArray(R.array.categories)[Integer.parseInt(room.getCategory())]);
+        roomCategoryText.setText(getResources().getStringArray(R.array.categories)[room.getCategory()]);
         roomCreationDateText.setText(time);
         roomMessageCountText.setText(String.valueOf(messageCount));
 
@@ -1354,7 +1354,7 @@ public class ChatActivity extends AppCompatActivity {
         String fcdat = currentDateAndTime.substring(0, 4) + "." + currentDateAndTime.substring(4, 6) + "." + currentDateAndTime.substring(6, 8) + " " + currentDateAndTime.substring(9, 11) + ":" + currentDateAndTime.substring(11, 13) + ":" + currentDateAndTime.substring(13, 15);
         String ftime = room.getTime().substring(0, 4) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(6, 8) + " " + room.getTime().substring(9, 11) + ":" + room.getTime().substring(11, 13) + ":" + room.getTime().substring(13, 15);
         String backup = getResources().getString(R.string.backupof) + " " + roomName + "\n" + getResources().getString(R.string.createdon) + ": " + fcdat + "\n\n" +
-                getResources().getString(R.string.category) + ": " + getResources().getStringArray(R.array.categories)[Integer.parseInt(room.getCategory())] + "\n" + getResources().getString(R.string.admin) + ": " + getUser(room.getAdmin()).getName() + "\n" + getResources().getString(R.string.foundation) + ": " + ftime + "\n" + getResources().getString(R.string.sentmessages) + ": " + messageCount + "\n----------------------------------------\n";
+                getResources().getString(R.string.category) + ": " + getResources().getStringArray(R.array.categories)[room.getCategory()] + "\n" + getResources().getString(R.string.admin) + ": " + getUser(room.getAdmin()).getName() + "\n" + getResources().getString(R.string.foundation) + ": " + ftime + "\n" + getResources().getString(R.string.sentmessages) + ": " + messageCount + "\n----------------------------------------\n";
 
         String newDay = "";
         for (Message m : messageList) {
@@ -1631,7 +1631,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
-        return new User(userId, "unknown user", "", "", "", "", "", "");
+        return new User(userId, "unknown user", "", "", "", 0, "", "");
     }
 
     private void showFullscreenImage(String image, int type) {
@@ -1835,7 +1835,7 @@ public class ChatActivity extends AppCompatActivity {
         final Spinner spinner = view.findViewById(R.id.spinner);
         roomImageButton = view.findViewById(R.id.room_image);
 
-        spinner.setSelection(Integer.parseInt(room.getCategory()));
+        spinner.setSelection(room.getCategory());
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -1844,7 +1844,7 @@ public class ChatActivity extends AppCompatActivity {
                 String[] categories = getResources().getStringArray(R.array.categories);
                 for (int i = 0; i < categories.length; i++) {
                     if (categories[i].equals(category)) {
-                        katindex = i;
+                        categoryIndex = i;
                     }
                 }
             }
@@ -1982,7 +1982,7 @@ public class ChatActivity extends AppCompatActivity {
                 final String roomDescription = roomDescriptionEditText.getText().toString().trim();
                 if (!roomName.isEmpty()) {
                     if (!roomDescription.isEmpty()) {
-                        if (katindex!=0) {
+                        if (categoryIndex != 0) {
                             if (!roomPassword.isEmpty()) {
                                 if (!roomPasswordRepeat.isEmpty()) {
                                     if (roomPassword.equals(roomPasswordRepeat)) {
@@ -1995,13 +1995,13 @@ public class ChatActivity extends AppCompatActivity {
                                         map.put("name", roomName);
                                         map.put("passwd", roomPassword);
                                         map.put("desc", roomDescription);
-                                        map.put("category", String.valueOf(katindex));
+                                        map.put("category", categoryIndex);
                                         message_root.updateChildren(map);
                                         fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
                                         setTitle(roomName);
                                         Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();
                                         room.setDesc(roomDescription);
-                                        room.setCategory(String.valueOf(katindex));
+                                        room.setCategory(categoryIndex);
                                         room.setPasswd(roomPassword);
                                         alert.cancel();
                                         openInfo();

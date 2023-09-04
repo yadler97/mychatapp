@@ -51,7 +51,7 @@ public class RoomListFragmentFavorites extends Fragment {
         View view = inflater.inflate(R.layout.roomlist_fragment, container, false);
 
         listView = view.findViewById(R.id.listView);
-        noRoomFound = view.findViewById(R.id.keinraumgefunden);
+        noRoomFound = view.findViewById(R.id.no_room_found);
 
         adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.FAVORITES);
         listView.setAdapter(adapter);
@@ -235,7 +235,7 @@ public class RoomListFragmentFavorites extends Fragment {
                     intent.getStringExtra("roomKey"),
                     intent.getStringExtra("roomName"),
                     intent.getStringExtra("admin"),
-                    intent.getStringExtra("category"),
+                    intent.getIntExtra("category", 0),
                     intent.getStringExtra("newestMessage"),
                     intent.getStringExtra("passwd"),
                     intent.getStringExtra("nmMessage"),
@@ -246,7 +246,7 @@ public class RoomListFragmentFavorites extends Fragment {
         }
     };
 
-    private void updateRoomList(String key, String name, String admin, String category, String time, String passwd, String nmMsg, String nmTime, String nmKey, Message.Type nmType) {
+    private void updateRoomList(String key, String name, String admin, int category, String time, String passwd, String nmMsg, String nmTime, String nmKey, Message.Type nmType) {
         if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, key)).equals("1")) {
             Room room = new Room(key, name, category, time, passwd, admin);
             if (!nmMsg.isEmpty()) {

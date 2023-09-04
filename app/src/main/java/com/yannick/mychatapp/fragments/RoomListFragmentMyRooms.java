@@ -51,7 +51,7 @@ public class RoomListFragmentMyRooms extends Fragment {
         View view = inflater.inflate(R.layout.roomlist_fragment, container, false);
 
         listView = view.findViewById(R.id.listView);
-        noRoomFound = view.findViewById(R.id.keinraumgefunden);
+        noRoomFound = view.findViewById(R.id.no_room_found);
 
         adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MY_ROOMS);
         listView.setAdapter(adapter);

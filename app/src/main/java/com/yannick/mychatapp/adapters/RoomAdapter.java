@@ -86,7 +86,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
 
         viewHolder.roomNameText.setText(roomList.get(position).getName());
         if (type == RoomListType.MORE) {
-            viewHolder.categoryText.setText(context.getResources().getStringArray(R.array.categories)[Integer.parseInt(roomList.get(position).getCategory())]);
+            viewHolder.categoryText.setText(context.getResources().getStringArray(R.array.categories)[roomList.get(position).getCategory()]);
         } else {
             if (roomList.get(position).getNewestMessage() != null) {
                 if (roomList.get(position).getNewestMessage().getType() == Message.Type.MESSAGE_RECEIVED) {

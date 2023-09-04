@@ -6,7 +6,7 @@ public class User {
     private String birthday;
     private String profileDescription;
     private String location;
-    private String favColour;
+    private int favColour;
     private boolean ownProfileImage;
     private String img;
     private String banner;
@@ -15,7 +15,7 @@ public class User {
 
     }
 
-    public User(String userid, String name, String birthday, String profileDescription, String location, String favColour, String img, String banner) {
+    public User(String userid, String name, String birthday, String profileDescription, String location, int favColour, String img, String banner) {
         this.userID = userid;
         this.name = name;
         this.birthday = birthday;
@@ -50,7 +50,7 @@ public class User {
         return location;
     }
 
-    public String getFavColour() {
+    public int getFavColour() {
         return favColour;
     }
 

@@ -60,7 +60,7 @@ public class RoomListFragmentMore extends Fragment {
         View view = inflater.inflate(R.layout.roomlist_fragment, container, false);
 
         listView = view.findViewById(R.id.listView);
-        noRoomFound = view.findViewById(R.id.keinraumgefunden);
+        noRoomFound = view.findViewById(R.id.no_room_found);
 
         theme = Theme.getCurrentTheme(getContext());
         fileOperations = new FileOperations(getActivity());

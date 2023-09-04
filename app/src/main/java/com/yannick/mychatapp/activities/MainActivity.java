@@ -401,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 final String roomDescription = roomDescriptionEditText.getText().toString().trim();
                 if (!roomName.isEmpty()) {
                     if (!roomDescription.isEmpty()) {
-                        if (categoryIndex !=0) {
+                        if (categoryIndex != 0) {
                             if (!roomPassword.isEmpty()) {
                                 if (!roomPasswordRepeat.isEmpty()) {
                                     if (roomPassword.equals(roomPasswordRepeat)) {
@@ -427,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                     map.put("time", currentDateAndTime);
                                                     map.put("passwd", roomPassword);
                                                     map.put("desc", roomDescription);
-                                                    map.put("category", String.valueOf(categoryIndex));
+                                                    map.put("category", categoryIndex);
                                                     map.put("img", imgRoom);
                                                     messageRoot.updateChildren(map);
                                                     fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
@@ -775,7 +775,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 map.put("profileDescription", currentUser.getProfileDescription());
                                 map.put("location", currentUser.getLocation());
                                 map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
-                                map.put("favColour", String.valueOf(color));
+                                map.put("favColour", color);
                                 if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
                                     imgUser = UUID.randomUUID().toString();
                                     map.put("img", imgUser);
