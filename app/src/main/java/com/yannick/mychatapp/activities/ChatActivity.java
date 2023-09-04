@@ -136,13 +136,10 @@ public class ChatActivity extends AppCompatActivity {
     private String lastReadMessage;
     private String lastKey;
     private String lastSearch = "";
-
-    private DatabaseReference root;
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
     private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private FirebaseStorage storage;
     private StorageReference storageReference;
-    private StorageReference storageReferenceRoomImages;
     private Uri photoURI;
 
     private RecyclerView recyclerView;
@@ -294,7 +291,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey);
+        DatabaseReference root = roomRoot.child(roomKey);
 
         sendMessageButton.setOnClickListener(view -> {
             if (!messageInput.getText().toString().trim().isEmpty()) {
@@ -815,11 +812,11 @@ public class ChatActivity extends AppCompatActivity {
             Toast.makeText(ChatActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
 
             if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
-                String newMessageKey = root.push().getKey();
+                String newMessageKey = roomRoot.child(roomKey).push().getKey();
 
                 String currentDateAndTime = sdf.format(new Date());
 
-                DatabaseReference messageRoot = root.child(newMessageKey);
+                DatabaseReference messageRoot = roomRoot.child(roomKey).child(newMessageKey);
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("name", userID);
                 map.put("msg", "");
@@ -836,15 +833,15 @@ public class ChatActivity extends AppCompatActivity {
                     downloadImage(imgName, type);
                 }
             } else {
-                DatabaseReference messageRoot = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey).child(roomDataKey);
+                DatabaseReference messageRoot = roomRoot.child(roomKey).child(roomDataKey);
                 Map<String, Object> map = new HashMap<>();
                 map.put("img", imgName);
                 messageRoot.updateChildren(map);
 
                 room.setImg(imgName);
 
-                storageReferenceRoomImages = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                final StorageReference pathReference = storageReferenceRoomImages.child("room_images/" + imgName);
+                StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+                StorageReference pathReference = storageRef.child("room_images/" + imgName);
                 GlideApp.with(getApplicationContext())
                         .load(pathReference)
                         .centerCrop()
@@ -1738,7 +1735,7 @@ public class ChatActivity extends AppCompatActivity {
                         pinnedList.remove(m2);
 
                         Map<String, Object> map = new HashMap<String, Object>();
-                        DatabaseReference messageRoot = root.child(m.getKey());
+                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(m.getKey());
                         map.put("pinned", false);
                         messageRoot.updateChildren(map);
 
@@ -1765,7 +1762,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
 
                     Map<String, Object> map = new HashMap<String, Object>();
-                    DatabaseReference messageRoot = root.child(m.getKey());
+                    DatabaseReference messageRoot = roomRoot.child(roomKey).child(m.getKey());
                     map.put("pinned", true);
                     messageRoot.updateChildren(map);
 
@@ -1990,13 +1987,13 @@ public class ChatActivity extends AppCompatActivity {
                                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                                             imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                                         }
-                                        DatabaseReference message_root = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey).child(roomDataKey);
+                                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(roomDataKey);
                                         Map<String, Object> map = new HashMap<>();
                                         map.put("name", roomName);
                                         map.put("passwd", roomPassword);
                                         map.put("desc", roomDescription);
                                         map.put("category", categoryIndex);
-                                        message_root.updateChildren(map);
+                                        messageRoot.updateChildren(map);
                                         fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
                                         setTitle(roomName);
                                         Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();

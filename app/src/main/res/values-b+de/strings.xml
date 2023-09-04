@@ -343,7 +343,7 @@
 
     <string name="v109_title">"Version 1.0.9 (14.11.2019)"</string>
     <string name="v109_text">"- Das Accountsystem wurde verbessert. Die Benutzung der App ist jetzt nur noch für authentifizierte User möglich\n"
-        "- Push-Nachrichten haben jetzt eine "Antworten"- und "Als gelesen markieren"-Funktion\n"
+        "- Push-Nachrichten haben jetzt eine \"Antworten\"- und \"Als gelesen markieren\"-Funktion\n"
         "- Der Admin kann jetzt ein Raumbild hochladen\n"
         "- Man kann jetzt durch die Bilderliste durchsliden, wenn ein Bild im Vollbild geöffnet ist\n"
         "- Alle AlertDialogs haben jetzt einen neuen Header\n"
@@ -378,7 +378,7 @@
         "- ExpandableTextView von Blogc.at\n"
         "- WhatsappFormatter von Harish Sridharan\n"
         "- CircleImageView von Henning Dodenhof\n"
-        "- TextDrawable von Amulya Khare\n"
+        "- TextDrawable von Sethuraman Srinivasan (ursprünglich von Amulya Khare)\n"
         "\nAndere genutzte Tools:\n"
         "- Firebase\n"
         "- Jsoup\n"
