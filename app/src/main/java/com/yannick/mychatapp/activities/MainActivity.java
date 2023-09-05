@@ -71,6 +71,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.StringOperations;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.adapters.BackgroundAdapter;
@@ -413,7 +414,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                             @Override
                                             public void onDataChange(DataSnapshot snapshot) {
                                                 if (!snapshot.exists()) {
-                                                    DatabaseReference messageRoot = root.child("-0roomdata");
+                                                    DatabaseReference messageRoot = root.child(Constants.roomDataKey);
                                                     Map<String, Object> map = new HashMap<>();
                                                     String currentDateAndTime = sdf.format(new Date());
                                                     map.put("admin", currentUser.getUserID());
@@ -425,7 +426,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                     map.put("img", imgRoom);
                                                     messageRoot.updateChildren(map);
                                                     fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
-                                                    fileOperations.writeToFile("-0roomdata", String.format(FileOperations.newestMessageFilePattern, roomKey));
+                                                    fileOperations.writeToFile(Constants.roomDataKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
                                                     FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                                                     Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
                                                     alert.cancel();
@@ -706,21 +707,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
             }
-            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[color]).setFixedColumnCount(5).setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
-                @Override
-                public void onColorSelected(boolean positiveResult, @ColorInt int scolor) {
-                    if (positiveResult) {
-                        int i = 0;
-                        for (int c : getResources().getIntArray(R.array.favcolors)) {
-                            if (c == scolor) {
-                                tmpcolor = i;
-                                GradientDrawable shape1 = new GradientDrawable();
-                                shape1.setShape(GradientDrawable.OVAL);
-                                shape1.setColor(getResources().getIntArray(R.array.favcolors)[i]);
-                                favColour.setBackground(shape1);
-                            }
-                            i++;
+            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[color]).setFixedColumnCount(5).setOnColorSelectedListener((positiveResult, scolor) -> {
+                if (positiveResult) {
+                    int i = 0;
+                    for (int c : getResources().getIntArray(R.array.favcolors)) {
+                        if (c == scolor) {
+                            tmpcolor = i;
+                            GradientDrawable shape1 = new GradientDrawable();
+                            shape1.setShape(GradientDrawable.OVAL);
+                            shape1.setColor(getResources().getIntArray(R.array.favcolors)[i]);
+                            favColour.setBackground(shape1);
                         }
+                        i++;
                     }
                 }
             }).build().show(getSupportFragmentManager(), "ColorPicker");

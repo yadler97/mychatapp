@@ -80,6 +80,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.BuildConfig;
 import com.yannick.mychatapp.CatchViewPager;
@@ -130,7 +131,6 @@ public class ChatActivity extends AppCompatActivity {
     private String userID;
     private String roomKey;
     private String imgurl;
-    private final String roomDataKey = "-0roomdata";
     private String appName;
     private String roomName;
     private String lastReadMessage;
@@ -148,7 +148,6 @@ public class ChatActivity extends AppCompatActivity {
     private GestureDetector gestureDetector;
     private String quoteStatus = "";
     private int messageCount = 0;
-    private User user = new User();
 
     private final ArrayList<Message> messageList = new ArrayList<>();
     private final ArrayList<User> userList = new ArrayList<>();
@@ -161,8 +160,6 @@ public class ChatActivity extends AppCompatActivity {
 
     private AlertDialog imageListAlert;
     private AlertDialog pinboardAlert;
-
-    private boolean firstMessage = true;
     private boolean userListCreated = false;
     private boolean cancelFullscreenImage = false;
     private boolean imageListOpened = false;
@@ -304,7 +301,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 String currentDateAndTime = sdf.format(new Date());
 
-                DatabaseReference messageRoot = root.child(newMessageKey);
+                DatabaseReference messageRoot = root.child(Constants.messagesKey).child(newMessageKey);
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("name", userID);
                 map.put("msg", messageInput.getText().toString().trim());
@@ -406,6 +403,7 @@ public class ChatActivity extends AppCompatActivity {
                 Toast.makeText(ChatActivity.this, R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
             }
         });
+
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -413,7 +411,22 @@ public class ChatActivity extends AppCompatActivity {
                 if (!userListCreated) {
                     handler.postDelayed(this, 1000);
                 } else {
-                    root.addChildEventListener(new ChildEventListener() {
+                    root.child(Constants.roomDataKey).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                            getRoomData(snapshot);
+                            if (messageList.isEmpty()) {
+                                addHeaderMessage();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+
+                    root.child(Constants.messagesKey).addChildEventListener(new ChildEventListener() {
                         @Override
                         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                             addMessage(dataSnapshot, -1);
@@ -449,16 +462,14 @@ public class ChatActivity extends AppCompatActivity {
                 for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
                     String roomKey = uniqueKeySnapshot.getKey();
                     if (roomKey.equals(ChatActivity.this.roomKey)) {
-                        messageCount = (int)uniqueKeySnapshot.getChildrenCount() - 1;
+                        messageCount = (int)uniqueKeySnapshot.child(Constants.messagesKey).getChildrenCount();
                     }
-                    for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
-                        Room room = roomSnapshot.getValue(Room.class);
-                        room.setKey(roomKey);
-                        if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && !roomKey.equals(ChatActivity.this.roomKey)) {
-                            roomList.add(room.getName());
-                            roomKeysList.add(room.getKey());
-                        }
-                        break;
+
+                    Room room = uniqueKeySnapshot.child(Constants.roomDataKey).getValue(Room.class);
+                    room.setKey(roomKey);
+                    if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && !roomKey.equals(ChatActivity.this.roomKey)) {
+                        roomList.add(room.getName());
+                        roomKeysList.add(room.getKey());
                     }
                 }
             }
@@ -470,130 +481,134 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    private void getRoomData(DataSnapshot dataSnapshot) {
+        room = dataSnapshot.getValue(Room.class);
+        room.setKey(dataSnapshot.getRef().getParent().getKey());
+        User user = getUser(room.getAdmin());
+
+        if (!memberList.contains(user)) {
+            memberList.add(user);
+        }
+    }
+
+    private void addHeaderMessage() {
+        String creationTime = room.getTime();
+
+        try {
+            creationTime = sdf_local.format(sdf_local.parse(creationTime));
+        } catch (ParseException e) {
+            Log.e("ParseException", e.toString());
+        }
+
+        User user = getUser(room.getAdmin());
+        String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
+        String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
+        Message m = new Message(user, text, creationTime, false, room.getKey(), Message.Type.HEADER, "", "", "", false);
+
+        messageList.add(m);
+        mAdapter.notifyDataSetChanged();
+    }
+
     private void addMessage(DataSnapshot dataSnapshot, int index) {
-        if (firstMessage) {
-            firstMessage = false;
+        String key = dataSnapshot.getKey();
+        String message = dataSnapshot.child("msg").getValue().toString();
+        String img = dataSnapshot.child("img").getValue().toString();
+        String userId = dataSnapshot.child("name").getValue().toString();
+        boolean pinned = (boolean) dataSnapshot.child("pinned").getValue();
+        String quote = dataSnapshot.child("quote").getValue().toString();
+        String time = dataSnapshot.child("time").getValue().toString();
 
-            room = dataSnapshot.getValue(Room.class);
-            room.setKey(dataSnapshot.getRef().getParent().getKey());
-            user = getUser(room.getAdmin());
+        User user = getUser(userId);
 
-            String creationTime = room.getTime();
+        try {
+            time = sdf_local.format(sdf_local.parse(time));
+        } catch (ParseException e) {
+            Log.e("ParseException", e.toString());
+        }
+        if (lastReadMessage.equals(lastKey) && !lastReadMessageReached) {
+            Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, false, "-", Message.Type.HEADER, "", "", "", false);
+            messageList.add(m);
+        }
+        lastKey = key;
 
-            try {
-                creationTime = sdf_local.format(sdf_local.parse(creationTime));
-            } catch (ParseException e) {
-                Log.e("ParseException", e.toString());
+        if (index == -1 && !messageList.get(messageList.size() - 1).getTime().substring(0, 8).equals(time.substring(0, 8))) {
+            String text = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
+            Message m = new Message(user, text, time, false, "-", Message.Type.HEADER, "", "", "", false);
+            messageList.add(m);
+        }
+
+        boolean sender = userID.equals(user.getUserID());
+        boolean con = false;
+        int ind = (index == -1) ? messageList.size() : index;
+        if (messageList.size() - 1 > 0 && messageList.get(ind - 1).getType() != Message.Type.HEADER && messageList.get(ind - 1).getUser().getUserID().equals(userId) && messageList.get(ind - 1).getTime().substring(0, 13).equals(time.substring(0, 13))) {
+            con = true;
+            messageList.get(ind - 1).setTime("");
+            mAdapter.notifyDataSetChanged();
+        }
+
+        Message m;
+        if (quote.equals("")) {
+            if (!message.equals("")) {
+                if (message.length() > 11 && message.substring(0, 12).equals("(Forwarded) ")) {
+                    if (message.length() > 2000 + 12) {
+                        m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedExpandableMessageType(sender, con), "", "", "", pinned);
+                    } else {
+                        m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedMessageType(sender, con), "", "", "", pinned);
+                    }
+                } else {
+                    if (message.length() > 2000) {
+                        m = new Message(user, message, time, sender, key, Message.getFittingExpandableMessageType(sender, con), "", "", "", pinned);
+                    } else {
+                        m = new Message(user, message, time, sender, key, Message.getFittingBasicMessageType(sender, con), "", "", "", pinned);
+                    }
+                }
+            } else {
+                if (!imageList.contains(img)) {
+                    imageList.add(img);
+                }
+                m = new Message(user, img, time, sender, key, Message.getFittingImageMessageType(sender, con), "", "", "", pinned);
             }
-            String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
-            String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
-            Message m = new Message(user, text, creationTime, false, room.getKey(), Message.Type.HEADER, "", "", "", false);
-
+        } else {
+            Message.Type quoteType = Message.Type.HEADER;
+            String quoteMessage = getResources().getString(R.string.quotedmessagenolongeravailable);
+            String quoteName = "";
+            String quoteKey = "";
+            for (Message quoteMsg : messageList) {
+                if (quoteMsg.getKey().equals(quote)) {
+                    quoteMessage = quoteMsg.getMsg();
+                    quoteName = quoteMsg.getUser().getName();
+                    quoteKey = quoteMsg.getKey();
+                    quoteType = quoteMsg.getType();
+                    break;
+                }
+            }
+            if (!Message.isImage(quoteType)) {
+                if (!quoteMessage.equals(getResources().getString(R.string.quotedmessagenolongeravailable))) {
+                    m = new Message(user, message, time, sender, key, Message.getFittingQuoteMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
+                } else {
+                    m = new Message(user, message, time, sender, key, Message.getFittingQuoteDeletedMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
+                }
+            } else {
+                m = new Message(user, message, time, sender, key, Message.getFittingQuoteImageMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
+            }
+        }
+        if (index != -1 && messageList.get(ind).getTime().equals("")) {
+            m.setTime("");
+        }
+        if (index == -1) {
             messageList.add(m);
             if (!memberList.contains(m.getUser())) {
                 memberList.add(m.getUser());
             }
+            if (pinned) {
+                pinnedList.add(m);
+            }
         } else {
-            String key = dataSnapshot.getKey();
-            String message = dataSnapshot.child("msg").getValue().toString();
-            String img = dataSnapshot.child("img").getValue().toString();
-            String userId = dataSnapshot.child("name").getValue().toString();
-            boolean pinned = (boolean) dataSnapshot.child("pinned").getValue();
-            String quote = dataSnapshot.child("quote").getValue().toString();
-            String time = dataSnapshot.child("time").getValue().toString();
-
-            user = getUser(userId);
-
-            try {
-                time = sdf_local.format(sdf_local.parse(time));
-            } catch (ParseException e) {
-                Log.e("ParseException", e.toString());
-            }
-            if (lastReadMessage.equals(lastKey) && !lastReadMessageReached) {
-                Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, false, "-", Message.Type.HEADER, "", "", "", false);
-                messageList.add(m);
-            }
-            lastKey = key;
-
-            if (index == -1 && !messageList.get(messageList.size() - 1).getTime().substring(0, 8).equals(time.substring(0, 8))) {
-                String text = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
-                Message m = new Message(user, text, time, false, "-", Message.Type.HEADER, "", "", "", false);
-                messageList.add(m);
-            }
-
-            boolean sender = userID.equals(user.getUserID());
-            boolean con = false;
-            int ind = (index == -1) ? messageList.size() : index;
-            if (messageList.size() - 1 > 0 && messageList.get(ind - 1).getType() != Message.Type.HEADER && messageList.get(ind - 1).getUser().getUserID().equals(userId) && messageList.get(ind - 1).getTime().substring(0, 13).equals(time.substring(0, 13))) {
-                con = true;
-                messageList.get(ind - 1).setTime("");
-                mAdapter.notifyDataSetChanged();
-            }
-
-            Message m;
-            if (quote.equals("")) {
-                if (!message.equals("")) {
-                    if (message.length() > 11 && message.substring(0, 12).equals("(Forwarded) ")) {
-                        if (message.length() > 2000 + 12) {
-                            m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedExpandableMessageType(sender, con), "", "", "", pinned);
-                        } else {
-                            m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedMessageType(sender, con), "", "", "", pinned);
-                        }
-                    } else {
-                        if (message.length() > 2000) {
-                            m = new Message(user, message, time, sender, key, Message.getFittingExpandableMessageType(sender, con), "", "", "", pinned);
-                        } else {
-                            m = new Message(user, message, time, sender, key, Message.getFittingBasicMessageType(sender, con), "", "", "", pinned);
-                        }
-                    }
-                } else {
-                    if (!imageList.contains(img)) {
-                        imageList.add(img);
-                    }
-                    m = new Message(user, img, time, sender, key, Message.getFittingImageMessageType(sender, con), "", "", "", pinned);
-                }
-            } else {
-                Message.Type quoteType = Message.Type.HEADER;
-                String quoteMessage = getResources().getString(R.string.quotedmessagenolongeravailable);
-                String quoteName = "";
-                String quoteKey = "";
-                for (Message quoteMsg : messageList) {
-                    if (quoteMsg.getKey().equals(quote)) {
-                        quoteMessage = quoteMsg.getMsg();
-                        quoteName = quoteMsg.getUser().getName();
-                        quoteKey = quoteMsg.getKey();
-                        quoteType = quoteMsg.getType();
-                        break;
-                    }
-                }
-                if (!Message.isImage(quoteType)) {
-                    if (!quoteMessage.equals(getResources().getString(R.string.quotedmessagenolongeravailable))) {
-                        m = new Message(user, message, time, sender, key, Message.getFittingQuoteMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
-                    } else {
-                        m = new Message(user, message, time, sender, key, Message.getFittingQuoteDeletedMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
-                    }
-                } else {
-                    m = new Message(user, message, time, sender, key, Message.getFittingQuoteImageMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
-                }
-            }
-            if (index != -1 && messageList.get(ind).getTime().equals("")) {
-                m.setTime("");
-            }
-            if (index == -1) {
-                messageList.add(m);
-                if (!memberList.contains(m.getUser())) {
-                    memberList.add(m.getUser());
-                }
-                if (pinned) {
-                    pinnedList.add(m);
-                }
-            } else {
-                ArrayList<Message> templist = new ArrayList<>(messageList);
-                messageList.clear();
-                templist.add(index+1, m);
-                messageList.addAll(templist);
-                mAdapter.notifyDataSetChanged();
-            }
+            ArrayList<Message> templist = new ArrayList<>(messageList);
+            messageList.clear();
+            templist.add(index+1, m);
+            messageList.addAll(templist);
+            mAdapter.notifyDataSetChanged();
         }
 
         recyclerView.scrollToPosition(messageList.size() - 1);
@@ -812,11 +827,11 @@ public class ChatActivity extends AppCompatActivity {
             Toast.makeText(ChatActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
 
             if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
-                String newMessageKey = roomRoot.child(roomKey).push().getKey();
+                String newMessageKey = roomRoot.child(roomKey).child(Constants.messagesKey).push().getKey();
 
                 String currentDateAndTime = sdf.format(new Date());
 
-                DatabaseReference messageRoot = roomRoot.child(roomKey).child(newMessageKey);
+                DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesKey).child(newMessageKey);
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("name", userID);
                 map.put("msg", "");
@@ -833,7 +848,7 @@ public class ChatActivity extends AppCompatActivity {
                     downloadImage(imgName, type);
                 }
             } else {
-                DatabaseReference messageRoot = roomRoot.child(roomKey).child(roomDataKey);
+                DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataKey);
                 Map<String, Object> map = new HashMap<>();
                 map.put("img", imgName);
                 messageRoot.updateChildren(map);
@@ -1331,7 +1346,7 @@ public class ChatActivity extends AppCompatActivity {
         if (m.getMsg().toLowerCase().contains(text.toLowerCase()) && m.getType() != Message.Type.HEADER && !Message.isImage(m.getType())) {
             if (searchedMessageList.isEmpty() || !searchedMessageList.get(searchedMessageList.size() - 1).getTime().substring(0, 8).equals(m.getTime().substring(0, 8))) {
                 String time = m.getTime().substring(6, 8) + "." + m.getTime().substring(4, 6) + "." + m.getTime().substring(0, 4);
-                Message m2 = new Message(user, time, m.getTime(), false, "-", Message.Type.HEADER, "", "", "", m.isPinned());
+                Message m2 = new Message(m.getUser(), time, m.getTime(), false, "-", Message.Type.HEADER, "", "", "", m.isPinned());
                 searchedMessageList.add(m2);
             }
             Message m2;
@@ -1592,11 +1607,11 @@ public class ChatActivity extends AppCompatActivity {
                     break;
                 }
             }
-            String newMessageKey = roomRoot.child(roomKey).push().getKey();
+            String newMessageKey = roomRoot.child(roomKey).child(Constants.messagesKey).push().getKey();
 
             String currentDateAndTime = sdf.format(new Date());
 
-            DatabaseReference messageRoot = roomRoot.child(roomKey).child(newMessageKey);
+            DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesKey).child(newMessageKey);
             Map<String, Object> map = new HashMap<>();
             map.put("name", userID);
             if (Message.isImage(fMessage.getType())) {
@@ -1735,7 +1750,7 @@ public class ChatActivity extends AppCompatActivity {
                         pinnedList.remove(m2);
 
                         Map<String, Object> map = new HashMap<String, Object>();
-                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(m.getKey());
+                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesKey).child(m.getKey());
                         map.put("pinned", false);
                         messageRoot.updateChildren(map);
 
@@ -1762,7 +1777,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
 
                     Map<String, Object> map = new HashMap<String, Object>();
-                    DatabaseReference messageRoot = roomRoot.child(roomKey).child(m.getKey());
+                    DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesKey).child(m.getKey());
                     map.put("pinned", true);
                     messageRoot.updateChildren(map);
 
@@ -1987,7 +2002,7 @@ public class ChatActivity extends AppCompatActivity {
                                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                                             imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                                         }
-                                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(roomDataKey);
+                                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataKey);
                                         Map<String, Object> map = new HashMap<>();
                                         map.put("name", roomName);
                                         map.put("passwd", roomPassword);

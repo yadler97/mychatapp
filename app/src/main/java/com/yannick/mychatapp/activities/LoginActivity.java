@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -63,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
     private Theme theme;
     private FirebaseStorage storage;
     private static String userID = "";
-    private static final String birthday = "01.01.2000";
+    private static final String DEFAULT_BIRTHDAY = "01.01.2000";
     private static boolean ownProfileImage = false;
     private static int colour = 0;
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
@@ -468,7 +467,7 @@ public class LoginActivity extends AppCompatActivity {
         final StorageReference refProfileImage = storageRef.child("profile_images/" + img);
         final StorageReference refProfileBanner = storageRef.child("profile_banners/" + banner);
 
-        birthdayEdit.setText(birthday);
+        birthdayEdit.setText(DEFAULT_BIRTHDAY);
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
@@ -527,7 +526,7 @@ public class LoginActivity extends AppCompatActivity {
             DatePickerDialog datePicker = new DatePickerDialog(view14.getContext(), (view141, year, monthOfYear, dayOfMonth) -> {
                 String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
                 birthdayEdit.setText(date);
-            }, StringOperations.getYear(birthday), StringOperations.getMonth(birthday), StringOperations.getDay(birthday));
+            }, StringOperations.getYear(DEFAULT_BIRTHDAY), StringOperations.getMonth(DEFAULT_BIRTHDAY), StringOperations.getDay(DEFAULT_BIRTHDAY));
             if (theme == Theme.DARK) {
                 datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
             }
@@ -544,21 +543,18 @@ public class LoginActivity extends AppCompatActivity {
             } else {
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
             }
-            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[colour]).setFixedColumnCount(5).setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
-                @Override
-                public void onColorSelected(boolean positiveResult, @ColorInt int scolor) {
-                    if (positiveResult) {
-                        int i = 0;
-                        for (int c : getResources().getIntArray(R.array.favcolors)) {
-                            if (c == scolor) {
-                                colour = i;
-                                GradientDrawable shape1 = new GradientDrawable();
-                                shape1.setShape(GradientDrawable.OVAL);
-                                shape1.setColor(getResources().getIntArray(R.array.favcolors)[i]);
-                                favColour.setBackground(shape1);
-                            }
-                            i++;
+            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[colour]).setFixedColumnCount(5).setOnColorSelectedListener((positiveResult, scolor) -> {
+                if (positiveResult) {
+                    int i = 0;
+                    for (int c : getResources().getIntArray(R.array.favcolors)) {
+                        if (c == scolor) {
+                            colour = i;
+                            GradientDrawable shape1 = new GradientDrawable();
+                            shape1.setShape(GradientDrawable.OVAL);
+                            shape1.setColor(getResources().getIntArray(R.array.favcolors)[i]);
+                            favColour.setBackground(shape1);
                         }
+                        i++;
                     }
                 }
             }).build().show(getSupportFragmentManager(), "ColorPicker");

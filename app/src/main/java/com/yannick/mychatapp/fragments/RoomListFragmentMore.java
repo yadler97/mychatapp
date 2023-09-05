@@ -26,6 +26,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,6 +34,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.activities.ChatActivity;
@@ -70,12 +72,31 @@ public class RoomListFragmentMore extends Fragment {
 
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(searchReceiver, new IntentFilter("searchroom"));
 
-        root.addValueEventListener(new ValueEventListener() {
+        root.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (isAdded()) {
-                    addRoomToList(dataSnapshot);
+                    addRoom(dataSnapshot);
                 }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                if (isAdded()) {
+                    changeRoom(dataSnapshot);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                if (isAdded()) {
+                    removeRoom(dataSnapshot);
+                }
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
             }
 
             @Override
@@ -94,6 +115,8 @@ public class RoomListFragmentMore extends Fragment {
             requestPassword(room, position);
         });
 
+        noRoomFound.setText(R.string.noroomfound);
+
         adapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
@@ -108,49 +131,55 @@ public class RoomListFragmentMore extends Fragment {
         return view;
     }
 
-    private void addRoomToList(DataSnapshot dataSnapshot) {
-        roomList.clear();
+    private void addRoom(DataSnapshot dataSnapshot) {
+        final String roomKey = dataSnapshot.getKey();
+        final Room room = dataSnapshot.child(Constants.roomDataKey).getValue(Room.class);
+        room.setKey(roomKey);
 
-        for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
-            String roomKey = uniqueKeySnapshot.getKey();
-            for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
-                final Room room = roomSnapshot.getValue(Room.class);
-                room.setKey(roomKey);
-                if (!room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
-                    if (uniqueKeySnapshot.getChildrenCount() > 1) {
-                        DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(roomKey);
-                        Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
-                        lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                    String key = child.getKey();
-                                    String message = child.child("msg").getValue().toString();
-                                    boolean pinned = (boolean) child.child("pinned").getValue();
-                                    String quote = child.child("quote").getValue().toString();
-                                    String time = child.child("time").getValue().toString();
+        if (!room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
+            if (dataSnapshot.child(Constants.messagesKey).getChildrenCount() > 0) {
+                DatabaseReference newestMessageRoot = root.child(roomKey).child(Constants.messagesKey);
+                Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
+                lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for (DataSnapshot child : dataSnapshot.getChildren()) {
+                            String key = child.getKey();
+                            String message = child.child("msg").getValue().toString();
+                            boolean pinned = (boolean) child.child("pinned").getValue();
+                            String quote = child.child("quote").getValue().toString();
+                            String time = child.child("time").getValue().toString();
 
-                                    Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
+                            Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
 
-                                    room.setNewestMessage(newestMessage);
-                                    roomList.add(room);
-                                    adapter.notifyDataSetChanged();
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                //Handle possible errors.
-                            }
-                        });
-                    } else {
-                        roomList.add(room);
+                            room.setNewestMessage(newestMessage);
+                            roomList.add(room);
+                            adapter.notifyDataSetChanged();
+                        }
                     }
-                }
-                break;
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+                        //Handle possible errors.
+                    }
+                });
+            } else {
+                roomList.add(room);
             }
         }
 
+        adapter.notifyDataSetChanged();
+    }
+
+    public void changeRoom(DataSnapshot dataSnapshot) {
+        final String roomKey = dataSnapshot.getKey();
+        roomList.removeIf(r -> r.getKey().equals(roomKey));
+        addRoom(dataSnapshot);
+    }
+
+    public void removeRoom(DataSnapshot dataSnapshot) {
+        final String roomKey = dataSnapshot.getKey();
+        roomList.removeIf(r -> r.getKey().equals(roomKey));
         adapter.notifyDataSetChanged();
     }
 
