@@ -1564,8 +1564,8 @@ public class ChatActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(profileIcon);
 
-        profileIcon.setOnClickListener(v -> showFullscreenImage(userId, 0));
-        banner.setOnClickListener(v -> showFullscreenImage(userId, 1));
+        profileIcon.setOnClickListener(v -> showFullscreenImage(user.getImg(), 0));
+        banner.setOnClickListener(v -> showFullscreenImage(user.getBanner(), 1));
 
         profileName.setText(user.getName());
         profileDescription.setText(user.getProfileDescription());

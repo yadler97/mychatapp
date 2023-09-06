@@ -61,7 +61,7 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@drawable/ic_home"
-                    android:tint="?iconColor" />
+                    app:tint="?iconColor" />
 
                 <TextView
                     android:id="@+id/profile_location"
@@ -74,7 +74,7 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@drawable/ic_birthday"
-                    android:tint="?iconColor" />
+                    app:tint="?iconColor" />
 
                 <TextView
                     android:id="@+id/profile_birthday"
