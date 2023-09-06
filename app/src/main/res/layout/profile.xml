@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto" >
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical" >
 
         <ImageView
             android:id="@+id/background_profile"
             android:layout_width="match_parent"
             android:layout_height="150dp"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop" />
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -22,7 +23,7 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:layout_marginTop="-36dp"
             android:orientation="vertical"
-            android:gravity="center_horizontal">
+            android:gravity="center_horizontal" >
 
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/icon_profile"
@@ -31,7 +32,7 @@
                 android:layout_marginTop="4dp"
                 android:src="?android:attr/colorBackground"
                 app:civ_border_width="4dp"
-                app:civ_border_color="?android:attr/colorBackground"/>
+                app:civ_border_color="?android:attr/colorBackground" />
 
             <TextView
                 android:id="@+id/name_profile"
@@ -55,28 +56,36 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:paddingTop="@dimen/activity_vertical_margin" >
+
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@drawable/ic_home"
                     android:tint="?iconColor" />
+
                 <TextView
                     android:id="@+id/profile_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="3dp"
                     android:paddingRight="10dp" />
+
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@drawable/ic_birthday"
                     android:tint="?iconColor" />
+
                 <TextView
                     android:id="@+id/profile_birthday"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:paddingLeft="3dp" />
+
             </LinearLayout>
+
         </LinearLayout>
+
     </LinearLayout>
+
 </ScrollView>

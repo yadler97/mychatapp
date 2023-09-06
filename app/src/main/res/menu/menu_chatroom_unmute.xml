@@ -3,7 +3,7 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".activities.ChatActivity">
+    tools:context=".activities.ChatActivity" >
 
     <item
         android:id="@+id/roominfo"
@@ -53,4 +53,5 @@
         android:title="@string/leaveroom"
         android:icon="@drawable/icon_leave"
         app:showAsAction="never" />
+
 </menu>

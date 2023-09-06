@@ -16,18 +16,21 @@
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent" >
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginRight="8dp"
             android:layout_marginLeft="8dp" >
+
             <ImageView
                 android:layout_width="16dp"
                 android:layout_height="16dp"
                 android:background="@drawable/ic_fw"
                 android:layout_gravity="center"
                 android:layout_marginRight="5dp" />
+
             <TextView
                 android:textStyle="italic"
                 android:layout_width="wrap_content"
@@ -35,7 +38,9 @@
                 android:text="@string/forwarded"
                 android:textColor="@color/white"
                 android:textSize="12sp" />
+
         </LinearLayout>
+
         <TextView
             android:id="@+id/text_message_body"
             android:layout_width="match_parent"
@@ -45,13 +50,14 @@
             android:textColorLink="@color/white"
             android:textColor="@color/white"
             android:padding="4dp" />
+
     </LinearLayout>
 
     <TextView
         android:id="@+id/text_message_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="10sp"
+        android:textSize="@dimen/message_time_text_size"
         android:layout_marginLeft="4dp"
         app:layout_constraintLeft_toRightOf="@+id/messagebox"
         app:layout_constraintBottom_toBottomOf="@+id/messagebox" />

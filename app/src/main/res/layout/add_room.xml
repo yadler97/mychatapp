@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -21,6 +22,7 @@
             app:counterEnabled="true"
             app:counterMaxLength="25"
             app:errorEnabled="true" >
+
             <org.droidparts.widget.ClearableEditText
                 android:id="@+id/room_name"
                 android:layout_width="match_parent"
@@ -30,6 +32,7 @@
                 android:hint="@string/roomname"
                 android:maxLength="25"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -38,6 +41,7 @@
             android:layout_height="wrap_content"
             app:counterEnabled="true"
             app:counterMaxLength="150" >
+
             <org.droidparts.widget.ClearableEditText
                 android:id="@+id/room_description"
                 android:layout_width="match_parent"
@@ -49,6 +53,7 @@
                 android:hint="@string/roomdesc"
                 android:maxLength="150"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <Spinner
@@ -67,6 +72,7 @@
             android:paddingLeft="5dp"
             android:paddingBottom="5dp"
             android:orientation="horizontal" >
+
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -80,6 +86,7 @@
                 android:layout_height="20dp"
                 android:layout_gravity="center_vertical"
                 android:background="?attr/selectableItemBackground"/>
+
         </LinearLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -90,6 +97,7 @@
             app:counterMaxLength="16"
             app:passwordToggleEnabled="true"
             app:passwordToggleTint="?android:textColorHint" >
+
             <org.droidparts.widget.ClearableEditText
                 android:id="@+id/room_password"
                 android:layout_width="match_parent"
@@ -99,6 +107,7 @@
                 android:hint="@string/password"
                 android:maxLength="16"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -109,6 +118,7 @@
             app:counterMaxLength="16"
             app:passwordToggleEnabled="true"
             app:passwordToggleTint="?android:textColorHint" >
+
             <org.droidparts.widget.ClearableEditText
                 android:id="@+id/room_password_repeat"
                 android:layout_width="match_parent"
@@ -118,7 +128,9 @@
                 android:hint="@string/confirmpassword"
                 android:maxLength="16"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
     </LinearLayout>
+
 </ScrollView>

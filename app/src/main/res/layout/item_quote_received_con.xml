@@ -17,6 +17,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_marginLeft="48dp" >
+
         <LinearLayout
             android:id="@+id/quotebox_content"
             android:layout_width="match_parent"
@@ -24,6 +25,7 @@
             android:orientation="vertical"
             android:paddingLeft="8dp"
             android:paddingRight="8dp" >
+
             <TextView
                 android:id="@+id/quote_name"
                 android:textStyle="bold"
@@ -32,6 +34,7 @@
                 android:maxWidth="208dp"
                 android:textColor="@color/black"
                 android:layout_marginTop="4dp" />
+
             <TextView
                 android:id="@+id/quote_message"
                 android:textStyle="italic"
@@ -44,7 +47,9 @@
                 android:textColorLink="@color/black"
                 android:textColor="@color/black"
                 android:layout_marginBottom="4dp" />
+
         </LinearLayout>
+
         <TextView
             android:id="@+id/text_message_body"
             android:layout_width="match_parent"
@@ -54,13 +59,14 @@
             android:textColorLink="@color/white"
             android:textColor="@color/white"
             android:padding="4dp" />
+
     </LinearLayout>
 
     <TextView
         android:id="@+id/text_message_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="10sp"
+        android:textSize="@dimen/message_time_text_size"
         android:layout_marginLeft="4dp"
         app:layout_constraintLeft_toRightOf="@+id/quotebox"
         app:layout_constraintBottom_toBottomOf="@+id/quotebox" />

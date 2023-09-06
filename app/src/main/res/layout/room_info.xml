@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <TableLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:stretchColumns="1">
+    android:stretchColumns="1" >
 
     <TextView
         android:id="@+id/room_description"
@@ -14,30 +15,39 @@
         android:paddingRight="5dip" />
 
     <TableRow>
+
         <TextView
             android:text="@string/category"
             android:padding="5dip" />
+
         <TextView
             android:id="@+id/room_cat"
             android:padding="5dip" />
+
     </TableRow>
 
     <TableRow>
+
         <TextView
             android:text="@string/foundation"
             android:padding="5dip" />
+
         <TextView
             android:id="@+id/room_creation"
             android:padding="5dip" />
+
     </TableRow>
 
     <TableRow>
+
         <TextView
             android:text="@string/sentmessages"
             android:padding="5dip" />
+
         <TextView
             android:id="@+id/room_amount_messages"
             android:padding="5dip" />
+
     </TableRow>
 
     <TextView

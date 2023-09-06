@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -6,7 +7,7 @@
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin">
+    android:paddingRight="@dimen/activity_horizontal_margin" >
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/userid_layout"
@@ -17,6 +18,7 @@
         app:passwordToggleEnabled="true"
         app:passwordToggleTint="?android:textColorHint"
         app:errorEnabled="true" >
+
         <org.droidparts.widget.ClearableEditText
             android:id="@+id/userid"
             android:layout_width="match_parent"
@@ -27,6 +29,7 @@
             android:maxLength="15"
             android:digits="abcdefghijklmnopqrstuvwxyzöäüßABCDEFGHIJKLMNOPQRSTUVWXYZÖÄÜ0123456789-_"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
     </com.google.android.material.textfield.TextInputLayout>
 
 </LinearLayout>
