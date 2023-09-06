@@ -22,11 +22,9 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -79,22 +77,12 @@ public class LoginActivity extends AppCompatActivity {
         changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.activity_login);
 
-        ImageView imgSplash = findViewById(R.id.imgsplash);
         MaterialButton loginButton = findViewById(R.id.loginbutton);
         MaterialButton createButton = findViewById(R.id.createbutton);
         EditText inputEmail = findViewById(R.id.login_email);
         EditText inputPassword = findViewById(R.id.login_password);
         TextInputLayout inputEmailLayout = findViewById(R.id.login_email_layout);
         TextInputLayout inputPasswordLayout = findViewById(R.id.login_password_layout);
-
-        inputEmail.setTextColor(getResources().getColor(R.color.black));
-        inputPassword.setTextColor(getResources().getColor(R.color.black));
-
-        if (theme == Theme.DARK) {
-            imgSplash.setImageResource(R.drawable.ic_splash_dark);
-        } else {
-            imgSplash.setImageResource(R.drawable.ic_splash);
-        }
 
         mAuth = FirebaseAuth.getInstance();
         storage = FirebaseStorage.getInstance();

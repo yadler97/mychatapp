@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
-import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,14 +28,11 @@ public class SplashActivity extends AppCompatActivity{
         changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.activity_splash);
 
-        ImageView imgSplash = findViewById(R.id.imgsplash);
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Bundle params = new Bundle();
         if (theme == Theme.DARK) {
-            imgSplash.setImageResource(R.drawable.ic_splash_dark);
             params.putString("theme", "dark");
         } else {
-            imgSplash.setImageResource(R.drawable.ic_splash);
             params.putString("theme", "light");
         }
         mFirebaseAnalytics.logEvent("theme_type", params);

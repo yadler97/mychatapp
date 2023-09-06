@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:textColor="?android:textColorPrimary"
         android:text="@string/receivepushnotifications" />
 
     <androidx.appcompat.widget.SwitchCompat
@@ -20,6 +21,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
+        android:textColor="?android:textColorPrimary"
         android:text="@string/saveenteredmessage" />
 
     <androidx.appcompat.widget.SwitchCompat
@@ -27,6 +29,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
+        android:textColor="?android:textColorPrimary"
         android:text="@string/previewimages" />
 
     <androidx.appcompat.widget.SwitchCompat
@@ -34,5 +37,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
+        android:textColor="?android:textColorPrimary"
         android:text="@string/savecamerapictures" />
 </LinearLayout>

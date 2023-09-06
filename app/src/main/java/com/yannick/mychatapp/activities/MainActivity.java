@@ -38,7 +38,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.ColorInt;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
@@ -891,10 +890,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
-            push.setTextColor(getResources().getColor(R.color.white));
-            save.setTextColor(getResources().getColor(R.color.white));
-            preview.setTextColor(getResources().getColor(R.color.white));
-            camera.setTextColor(getResources().getColor(R.color.white));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
         }

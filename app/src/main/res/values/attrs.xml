@@ -3,4 +3,6 @@
     <attr name="colorTextChangelog" format="reference" />
     <attr name="colorDivider" format="reference" />
     <attr name="colorTabSelected" format="reference" />
+
+    <attr name="splashIcon" format="reference" />
 </resources>

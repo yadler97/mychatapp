@@ -80,6 +80,8 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowTranslucentStatus">false</item>
+
+        <item name="splashIcon">@drawable/ic_splash</item>
     </style>
 
     <style name="SplashDark" parent="Theme.MaterialComponents.Light.NoActionBar">
@@ -97,6 +99,8 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowActionBar">false</item>
         <item name="android:windowTranslucentStatus">false</item>
+
+        <item name="splashIcon">@drawable/ic_splash_dark</item>
     </style>
 
     <style name="DarkDialog" parent="@android:style/Widget.DeviceDefault.DatePicker">
