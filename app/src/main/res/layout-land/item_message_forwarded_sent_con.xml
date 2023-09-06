@@ -34,7 +34,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/forwarded"
                 android:textColor="@color/white"
-                android:textSize="12dp" />
+                android:textSize="12sp" />
         </LinearLayout>
         <com.cooltechworks.views.WhatsAppTextView
             android:id="@+id/text_message_body"

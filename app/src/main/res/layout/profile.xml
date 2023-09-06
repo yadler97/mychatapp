@@ -40,13 +40,13 @@
                 android:paddingTop="10dp"
                 android:gravity="center_horizontal"
                 android:textStyle="bold"
-                android:textSize="20dp"
+                android:textSize="20sp"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
             <TextView
                 android:id="@+id/profile_bio"
                 android:paddingTop="@dimen/activity_vertical_margin"
-                android:textSize="16dp"
+                android:textSize="16sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
