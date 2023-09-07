@@ -274,16 +274,23 @@ public class RoomListFragmentFavorites extends Fragment {
                     intent.getStringExtra("nmMessage"),
                     intent.getStringExtra("nmTime"),
                     intent.getStringExtra("nmKey"),
-                    Message.Type.valueOf(intent.getStringExtra("nmType"))
+                    Message.Type.valueOf(intent.getStringExtra("nmType")),
+                    intent.getStringExtra("username"),
+                    intent.getStringExtra("userid"),
+                    intent.getStringExtra("roomImage")
             );
         }
     };
 
-    private void updateRoomList(String roomKey, String name, String admin, int category, String time, String passwd, String nmMsg, String nmTime, String nmKey, Message.Type nmType) {
+    private void updateRoomList(String roomKey, String name, String admin, int category, String time, String passwd, String nmMsg, String nmTime, String nmKey, Message.Type nmType, String username, String userid, String roomImage) {
         if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
             Room room = new Room(roomKey, name, category, time, passwd, admin);
+            room.setImg(roomImage);
             if (!nmMsg.isEmpty()) {
-                Message newestMessage = new Message(null, nmMsg, nmTime, false, nmKey, nmType, "", "", "", false);
+                User user = new User();
+                user.setUserID(userid);
+                user.setName(username);
+                Message newestMessage = new Message(user, nmMsg, nmTime, false, nmKey, nmType, "", "", "", false);
                 room.setNewestMessage(newestMessage);
             }
 
@@ -300,17 +307,11 @@ public class RoomListFragmentFavorites extends Fragment {
             } else {
                 roomList.add(room);
             }
-
-            adapter.notifyDataSetChanged();
         } else {
-            for (int i = 0; i < roomList.size(); i++) {
-                if (roomList.get(i).getKey().equals(roomKey)) {
-                    roomList.remove(i);
-                    adapter.notifyDataSetChanged();
-                    break;
-                }
-            }
+            roomList.removeIf(r -> r.getKey().equals(roomKey));
         }
+
+        adapter.notifyDataSetChanged();
     }
 
     @Override

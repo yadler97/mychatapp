@@ -1474,8 +1474,9 @@ public class ChatActivity extends AppCompatActivity {
         }
         intent.putExtra("newestMessage", creationTime);
         intent.putExtra("passwd", room.getPasswd());
+        intent.putExtra("roomImage", room.getImg());
         Message newest = messageList.get(messageList.size() - 1);
-        if (messageList.size()!=1) {
+        if (messageList.size() != 1) {
             intent.putExtra("nmMessage", newest.getMsg());
             String parsedTime = "";
             try {
@@ -1485,12 +1486,20 @@ public class ChatActivity extends AppCompatActivity {
             }
             intent.putExtra("nmTime", parsedTime);
             intent.putExtra("nmKey", newest.getKey());
-            intent.putExtra("nmType", newest.getType().toString());
+            if (Message.isImage(newest.getType())) {
+                intent.putExtra("nmType", Message.Type.IMAGE_RECEIVED.toString());
+            } else {
+                intent.putExtra("nmType", Message.Type.MESSAGE_RECEIVED.toString());
+            }
+            intent.putExtra("username", newest.getUser().getName());
+            intent.putExtra("userid", newest.getUser().getUserID());
         } else {
             intent.putExtra("nmMessage", "");
             intent.putExtra("nmTime", "");
             intent.putExtra("nmKey", "");
             intent.putExtra("nmType", Message.Type.HEADER.toString());
+            intent.putExtra("username", "");
+            intent.putExtra("userid", "");
         }
         if (!fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
             fileOperations.writeToFile("1", String.format(FileOperations.favFilePattern, roomKey));
