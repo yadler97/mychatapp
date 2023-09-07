@@ -11,12 +11,8 @@ import com.google.firebase.storage.StorageReference;
 
 import java.io.InputStream;
 
-/**
- * Created by devdeeds.com on 8/9/17.
- */
-
 @GlideModule
-public class SampleGlideModule extends AppGlideModule {
+public class FirebaseGlideModule extends AppGlideModule {
 
     @Override
     public void registerComponents(Context context, Glide glide, Registry registry) {
