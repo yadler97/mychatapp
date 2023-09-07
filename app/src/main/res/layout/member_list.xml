@@ -9,8 +9,8 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/icon_profile"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="@dimen/member_list_profile_image_size"
+        android:layout_height="@dimen/member_list_profile_image_size"
         android:gravity="center"
         android:layout_marginTop="6dp"
         android:layout_marginLeft="10dp"

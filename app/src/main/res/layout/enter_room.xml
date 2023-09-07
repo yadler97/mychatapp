@@ -23,7 +23,7 @@
             android:id="@+id/room_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingTop="14dp"
+            android:paddingTop="@dimen/edit_text_padding_top"
             android:inputType="textPassword"
             android:hint="@string/password"
             android:maxLength="16"
