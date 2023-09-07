@@ -542,7 +542,6 @@ public class ChatActivity extends AppCompatActivity {
         int ind = (index == -1) ? messageList.size() : index;
         if (messageList.size() - 1 > 0 && messageList.get(ind - 1).getType() != Message.Type.HEADER && messageList.get(ind - 1).getUser().getUserID().equals(userId) && messageList.get(ind - 1).getTime().substring(0, 13).equals(time.substring(0, 13))) {
             con = true;
-            messageList.get(ind - 1).setTime("");
             mAdapter.notifyDataSetChanged();
         }
 

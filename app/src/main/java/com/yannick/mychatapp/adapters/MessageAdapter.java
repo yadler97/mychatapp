@@ -502,6 +502,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         } else if (Message.isForwardedMessage(type) || Message.isLinkPreview(type) || Message.isExpandable(type) || Message.isForwardedExpandable(type)) {
             holder.messageBox.setBackground(shape);
         }
+
+        if (messageList.size() > position + 1 && Message.isConMessage(messageList.get(position + 1).getType())) {
+            holder.time.setText("");
+        }
     }
 
     @Override
