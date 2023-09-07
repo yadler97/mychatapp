@@ -291,34 +291,39 @@ public class ChatActivity extends AppCompatActivity {
         DatabaseReference root = roomRoot.child(roomKey);
 
         sendMessageButton.setOnClickListener(view -> {
-            if (!messageInput.getText().toString().trim().isEmpty()) {
-                if (!searchView.isIconified()) {
-                    searchView.setIconified(true);
-                    searchView.setIconified(true);
+            String newMessage = messageInput.getText().toString().trim();
+            if (!newMessage.isEmpty()) {
+                if (!newMessage.replaceAll("\\*", "").replaceAll("_", "").replaceAll("~", "").isEmpty()) {
+                    if (!searchView.isIconified()) {
+                        searchView.setIconified(true);
+                        searchView.setIconified(true);
+                    }
+
+                    String newMessageKey = root.push().getKey();
+
+                    String currentDateAndTime = sdf.format(new Date());
+
+                    DatabaseReference messageRoot = root.child(Constants.messagesKey).child(newMessageKey);
+                    Map<String, Object> map = new HashMap<String, Object>();
+                    map.put("name", userID);
+                    map.put("msg", messageInput.getText().toString().trim());
+                    map.put("img", "");
+                    map.put("pinned", false);
+                    map.put("quote", quoteStatus);
+                    map.put("time", currentDateAndTime);
+
+                    messageRoot.updateChildren(map);
+                    messageInput.getText().clear();
+                    quoteStatus = "";
+                    quoteText.setText("");
+                    quoteImageImageView.setImageDrawable(null);
+                    quoteImageImageView.setVisibility(View.GONE);
+                    quoteLayout.setVisibility(View.GONE);
+                    fileOperations.writeToFile("", String.format(FileOperations.currentInputFilePattern, roomKey));
+                    fileOperations.writeToFile(newMessageKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
+                } else {
+                    Toast.makeText(ChatActivity.this, R.string.illegalinput, Toast.LENGTH_SHORT).show();
                 }
-
-                String newMessageKey = root.push().getKey();
-
-                String currentDateAndTime = sdf.format(new Date());
-
-                DatabaseReference messageRoot = root.child(Constants.messagesKey).child(newMessageKey);
-                Map<String, Object> map = new HashMap<String, Object>();
-                map.put("name", userID);
-                map.put("msg", messageInput.getText().toString().trim());
-                map.put("img", "");
-                map.put("pinned", false);
-                map.put("quote", quoteStatus);
-                map.put("time", currentDateAndTime);
-
-                messageRoot.updateChildren(map);
-                messageInput.getText().clear();
-                quoteStatus = "";
-                quoteText.setText("");
-                quoteImageImageView.setImageDrawable(null);
-                quoteImageImageView.setVisibility(View.GONE);
-                quoteLayout.setVisibility(View.GONE);
-                fileOperations.writeToFile("", String.format(FileOperations.currentInputFilePattern, roomKey));
-                fileOperations.writeToFile(newMessageKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
             }
         });
 

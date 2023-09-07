@@ -150,6 +150,7 @@
     <string name="verificationmailsent">Verification mail sent</string>
     <string name="unknownuser">Unknown User</string>
     <string name="unknown">Unknown</string>
+    <string name="illegalinput">Illegal input</string>
 
     <string-array name="categories">
         <item>Select category</item>

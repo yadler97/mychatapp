@@ -150,6 +150,7 @@
     <string name="verificationmailsent">Bestätigungsmail versandt</string>
     <string name="unknownuser">Unbekannter Nutzer</string>
     <string name="unknown">Unbekannt</string>
+    <string name="illegalinput">Eingabe nicht erlaubt</string>
 
     <string-array name="categories">
         <item>Kategorie auswählen</item>
