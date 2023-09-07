@@ -197,18 +197,7 @@ public class RoomListFragmentFavorites extends Fragment {
                 int index = 0;
                 if (!roomList.isEmpty()) {
                     for (Room r : roomList) {
-                        long t, t2;
-                        if (r.getNewestMessage() != null) {
-                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
-                        } else {
-                            t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
-                        }
-                        if (room.getNewestMessage() != null) {
-                            t2 = Long.parseLong(room.getNewestMessage().getTime().substring(0, 8) + room.getNewestMessage().getTime().substring(9, 15));
-                        } else {
-                            t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
-                        }
-                        if (t < t2) {
+                        if (room.isNewer(r)) {
                             break;
                         } else {
                             index++;
@@ -219,6 +208,7 @@ public class RoomListFragmentFavorites extends Fragment {
                         for (Room r : roomList) {
                             if (r.getKey().equals(room.getKey())) {
                                 inList = true;
+                                break;
                             }
                         }
                         if (!inList) {
@@ -275,9 +265,9 @@ public class RoomListFragmentFavorites extends Fragment {
         }
     };
 
-    private void updateRoomList(String key, String name, String admin, int category, String time, String passwd, String nmMsg, String nmTime, String nmKey, Message.Type nmType) {
-        if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, key)).equals("1")) {
-            Room room = new Room(key, name, category, time, passwd, admin);
+    private void updateRoomList(String roomKey, String name, String admin, int category, String time, String passwd, String nmMsg, String nmTime, String nmKey, Message.Type nmType) {
+        if (fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+            Room room = new Room(roomKey, name, category, time, passwd, admin);
             if (!nmMsg.isEmpty()) {
                 Message newestMessage = new Message(null, nmMsg, nmTime, false, nmKey, nmType, "", "", "", false);
                 room.setNewestMessage(newestMessage);
@@ -286,23 +276,7 @@ public class RoomListFragmentFavorites extends Fragment {
             int index = 0;
             if (!roomList.isEmpty()) {
                 for (Room r : roomList) {
-                    Long t, t2;
-                    if (nmMsg.isEmpty()) {
-                        if (r.getNewestMessage() != null) {
-                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
-                        } else {
-                            t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
-                        }
-                        t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
-                    } else {
-                        if (r.getNewestMessage() != null) {
-                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
-                        } else {
-                            t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
-                        }
-                        t2 = Long.parseLong(room.getNewestMessage().getTime().substring(0, 8) + room.getNewestMessage().getTime().substring(9, 15));
-                    }
-                    if (t < t2) {
+                    if (room.isNewer(r)) {
                         break;
                     } else {
                         index++;
@@ -316,7 +290,7 @@ public class RoomListFragmentFavorites extends Fragment {
             adapter.notifyDataSetChanged();
         } else {
             for (int i = 0; i < roomList.size(); i++) {
-                if (roomList.get(i).getKey().equals(key)) {
+                if (roomList.get(i).getKey().equals(roomKey)) {
                     roomList.remove(i);
                     adapter.notifyDataSetChanged();
                     break;

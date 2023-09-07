@@ -1,6 +1,11 @@
 package com.yannick.mychatapp.data;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 public class Room {
+
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private String key;
     private String name;
     private String admin;
@@ -92,5 +97,37 @@ public class Room {
 
     public void setImg(String img) {
         this.img = img;
+    }
+
+    public boolean isNewer(Room comparedRoom) {
+        if (this.getNewestMessage() != null) {
+            if (comparedRoom.getNewestMessage() != null) {
+                try {
+                    return sdf.parse(this.getNewestMessage().getTime()).after(sdf.parse(comparedRoom.getNewestMessage().getTime()));
+                } catch (ParseException e) {
+                    return false;
+                }
+            } else {
+                try {
+                    return sdf.parse(this.getNewestMessage().getTime()).after(sdf.parse(comparedRoom.getTime()));
+                } catch (ParseException e) {
+                    return false;
+                }
+            }
+        } else {
+            if (comparedRoom.getNewestMessage() != null) {
+                try {
+                    return sdf.parse(this.getTime()).after(sdf.parse(comparedRoom.getNewestMessage().getTime()));
+                } catch (ParseException e) {
+                    return false;
+                }
+            } else {
+                try {
+                    return sdf.parse(this.getTime()).after(sdf.parse(comparedRoom.getTime()));
+                } catch (ParseException e) {
+                    return false;
+                }
+            }
+        }
     }
 }

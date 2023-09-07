@@ -197,18 +197,7 @@ public class RoomListFragmentMyRooms extends Fragment {
                 int index = 0;
                 if (!roomList.isEmpty()) {
                     for (Room r : roomList) {
-                        long t, t2;
-                        if (r.getNewestMessage() != null) {
-                            t = Long.parseLong(r.getNewestMessage().getTime().substring(0, 8) + r.getNewestMessage().getTime().substring(9, 15));
-                        } else {
-                            t = Long.parseLong(r.getTime().substring(0, 8) + r.getTime().substring(9, 15));
-                        }
-                        if (room.getNewestMessage() != null) {
-                            t2 = Long.parseLong(room.getNewestMessage().getTime().substring(0, 8) + room.getNewestMessage().getTime().substring(9, 15));
-                        } else {
-                            t2 = Long.parseLong(room.getTime().substring(0, 8) + room.getTime().substring(9, 15));
-                        }
-                        if (t < t2) {
+                        if (room.isNewer(r)) {
                             break;
                         } else {
                             index++;
