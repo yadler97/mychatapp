@@ -137,33 +137,14 @@ public class RoomListFragmentMore extends Fragment {
         room.setKey(roomKey);
 
         if (!room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
-            if (dataSnapshot.child(Constants.messagesKey).getChildrenCount() > 0) {
-                DatabaseReference newestMessageRoot = root.child(roomKey).child(Constants.messagesKey);
-                Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
-                lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        for (DataSnapshot child : dataSnapshot.getChildren()) {
-                            String key = child.getKey();
-                            String message = child.child("msg").getValue().toString();
-                            boolean pinned = (boolean) child.child("pinned").getValue();
-                            String quote = child.child("quote").getValue().toString();
-                            String time = child.child("time").getValue().toString();
-
-                            Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
-
-                            room.setNewestMessage(newestMessage);
-                            roomList.add(room);
-                            adapter.notifyDataSetChanged();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        //Handle possible errors.
-                    }
-                });
-            } else {
+            boolean inList = false;
+            for (Room r : roomList) {
+                if (r.getKey().equals(room.getKey())) {
+                    inList = true;
+                    break;
+                }
+            }
+            if (!inList) {
                 roomList.add(room);
             }
         }

@@ -210,6 +210,7 @@ public class RoomListFragmentMyRooms extends Fragment {
                         for (Room r : roomList) {
                             if (r.getKey().equals(room.getKey())) {
                                 inList = true;
+                                break;
                             }
                         }
                         if (!inList) {
