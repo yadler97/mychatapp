@@ -60,6 +60,7 @@ public class RoomListFragmentFavorites extends Fragment {
 
         fileOperations = new FileOperations(getActivity());
 
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(muteReceiver, new IntentFilter("muteroom"));
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(favReceiver, new IntentFilter("favroom"));
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(searchReceiver, new IntentFilter("searchroom"));
 
@@ -126,6 +127,7 @@ public class RoomListFragmentFavorites extends Fragment {
         final String roomKey = dataSnapshot.getKey();
         final Room room = dataSnapshot.child(Constants.roomDataKey).getValue(Room.class);
         room.setKey(roomKey);
+        room.setMuted(fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1"));
 
         if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
             if (dataSnapshot.child(Constants.messagesKey).getChildrenCount() > 0) {
@@ -246,6 +248,18 @@ public class RoomListFragmentFavorites extends Fragment {
             startActivity(intent);
         }
     }
+
+    public BroadcastReceiver muteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            for (Room r : roomList) {
+                if (r.getKey().equals(intent.getStringExtra("roomkey"))) {
+                    r.setMuted(intent.getBooleanExtra("muted", false));
+                }
+            }
+            adapter.notifyDataSetChanged();
+        }
+    };
 
     public BroadcastReceiver favReceiver = new BroadcastReceiver() {
         @Override

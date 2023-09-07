@@ -134,16 +134,16 @@ public class RoomAdapter extends ArrayAdapter<Room> {
                     }
                 }
             }
-        }
 
-        if (type != RoomListType.MORE) {
-            if (fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomList.get(position).getKey())).equals("1")) {
+            if (roomList.get(position).isMuted()) {
                 viewHolder.muteIcon.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_muted, null));
                 if (Theme.getCurrentTheme(context) == Theme.DARK) {
                     viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
                 } else {
                     viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.iconGrey), PorterDuff.Mode.SRC_ATOP);
                 }
+            } else {
+                viewHolder.muteIcon.setImageDrawable(null);
             }
         }
 

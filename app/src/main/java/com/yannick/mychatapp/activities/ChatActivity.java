@@ -1788,15 +1788,23 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void muteRoom() {
+        Intent intent = new Intent("muteroom");
+
         if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
             fileOperations.writeToFile("1", String.format(FileOperations.muteFilePattern, roomKey));
             FirebaseMessaging.getInstance().unsubscribeFromTopic(roomKey);
+            intent.putExtra("muted", true);
             Toast.makeText(this, R.string.roommuted, Toast.LENGTH_SHORT).show();
         } else {
             fileOperations.writeToFile("0", String.format(FileOperations.muteFilePattern, roomKey));
             FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
+            intent.putExtra("muted", false);
             Toast.makeText(this, R.string.roomunmuted, Toast.LENGTH_SHORT).show();
         }
+
+        intent.putExtra("roomkey", roomKey);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(intent);
+
         invalidateOptionsMenu();
     }
 

@@ -60,6 +60,7 @@ public class RoomListFragmentMyRooms extends Fragment {
 
         fileOperations = new FileOperations(getActivity());
 
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(muteReceiver, new IntentFilter("muteroom"));
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(roomLeaveReceiver, new IntentFilter("leaveroom"));
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(searchReceiver, new IntentFilter("searchroom"));
 
@@ -126,6 +127,7 @@ public class RoomListFragmentMyRooms extends Fragment {
         final String roomKey = dataSnapshot.getKey();
         final Room room = dataSnapshot.child(Constants.roomDataKey).getValue(Room.class);
         room.setKey(roomKey);
+        room.setMuted(fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1"));
 
         if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
             if (dataSnapshot.child(Constants.messagesKey).getChildrenCount() > 0) {
@@ -247,20 +249,23 @@ public class RoomListFragmentMyRooms extends Fragment {
         }
     }
 
-    private void updateRoomList(String key) {
-        for (int i = 0; i < roomList.size(); i++) {
-            if (roomList.get(i).getKey().equals(key)) {
-                roomList.remove(i);
-                adapter.notifyDataSetChanged();
-                break;
+    public BroadcastReceiver muteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            for (Room r : roomList) {
+                if (r.getKey().equals(intent.getStringExtra("roomkey"))) {
+                    r.setMuted(intent.getBooleanExtra("muted", false));
+                }
             }
+            adapter.notifyDataSetChanged();
         }
-    }
+    };
 
     public BroadcastReceiver roomLeaveReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            updateRoomList(intent.getStringExtra("roomkey"));
+            roomList.removeIf(r -> r.getKey().equals(intent.getStringExtra("roomkey")));
+            adapter.notifyDataSetChanged();
         }
     };
 

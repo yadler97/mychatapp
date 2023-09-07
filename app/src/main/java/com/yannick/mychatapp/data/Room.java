@@ -16,6 +16,7 @@ public class Room {
     private Message newestMessage;
     private String username;
     private String img;
+    private boolean muted;
 
     public Room() {
 
@@ -97,6 +98,14 @@ public class Room {
 
     public void setImg(String img) {
         this.img = img;
+    }
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    public void setMuted(boolean muted) {
+        this.muted = muted;
     }
 
     public boolean isNewer(Room comparedRoom) {
