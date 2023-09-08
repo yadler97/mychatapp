@@ -927,15 +927,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_profil) {
+        if (id == R.id.nav_profile) {
             showProfile();
         } else if (id == R.id.nav_themes) {
             changeDesign();
-        } else if (id == R.id.nav_einstellungen) {
+        } else if (id == R.id.nav_settings) {
             showSettings();
         } else if (id == R.id.nav_changelog) {
             showChangelog();
-        } else if (id == R.id.nav_impressum) {
+        } else if (id == R.id.nav_aboutus) {
             showCopyright();
         } else if (id == R.id.nav_logout) {
             mAuth.signOut();

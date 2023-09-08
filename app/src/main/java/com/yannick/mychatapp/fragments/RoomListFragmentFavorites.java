@@ -40,9 +40,10 @@ import java.util.ArrayList;
 public class RoomListFragmentFavorites extends Fragment {
 
     private ListView listView;
-    private RoomAdapter adapter;
+    private RoomAdapter adapter, searchAdapter;
     private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private final ArrayList<Room> roomList = new ArrayList<>();
+    private final ArrayList<Room> searchRoomList = new ArrayList<>();
     private TextView noRoomFound;
 
     private FileOperations fileOperations;
@@ -56,6 +57,7 @@ public class RoomListFragmentFavorites extends Fragment {
         noRoomFound = view.findViewById(R.id.no_room_found);
 
         adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.FAVORITES);
+        searchAdapter = new RoomAdapter(getContext(), searchRoomList, RoomAdapter.RoomListType.FAVORITES);
         listView.setAdapter(adapter);
 
         fileOperations = new FileOperations(getActivity());
@@ -325,27 +327,25 @@ public class RoomListFragmentFavorites extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String s = intent.getStringExtra("searchkey");
             if (!s.trim().isEmpty()) {
-                ArrayList<Room> searchResultList = searchRoom(s);
+                searchRoom(s);
 
-                if (!searchResultList.isEmpty()) {
-                    adapter = new RoomAdapter(getContext(), searchResultList, RoomAdapter.RoomListType.FAVORITES);
-                    listView.setAdapter(adapter);
+                if (!searchRoomList.isEmpty()) {
+                    listView.setAdapter(searchAdapter);
                     listView.setVisibility(View.VISIBLE);
                     noRoomFound.setText("");
-                    adapter.notifyDataSetChanged();
+                    searchAdapter.notifyDataSetChanged();
                 } else {
                     listView.setVisibility(View.GONE);
                     noRoomFound.setText(R.string.noroomfound);
                 }
             } else {
-                adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.FAVORITES);
-                listView.setVisibility(View.VISIBLE);
                 if (!roomList.isEmpty()) {
                     noRoomFound.setText("");
                 } else {
                     noRoomFound.setText(R.string.noroomfound);
                 }
                 listView.setAdapter(adapter);
+                listView.setVisibility(View.VISIBLE);
                 adapter.notifyDataSetChanged();
             }
         }

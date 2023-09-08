@@ -49,9 +49,10 @@ public class RoomListFragmentMore extends Fragment {
 
     private ListView listView;
     private Theme theme;
-    private RoomAdapter adapter;
+    private RoomAdapter adapter, searchAdapter;
     private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private final ArrayList<Room> roomList = new ArrayList<>();
+    private final ArrayList<Room> searchRoomList = new ArrayList<>();
     private TextView noRoomFound;
 
     private FileOperations fileOperations;
@@ -68,6 +69,7 @@ public class RoomListFragmentMore extends Fragment {
         fileOperations = new FileOperations(getActivity());
 
         adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MORE);
+        searchAdapter = new RoomAdapter(getContext(), searchRoomList, RoomAdapter.RoomListType.MORE);
         listView.setAdapter(adapter);
 
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(searchReceiver, new IntentFilter("searchroom"));
@@ -257,27 +259,25 @@ public class RoomListFragmentMore extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String s = intent.getStringExtra("searchkey");
             if (!s.trim().isEmpty()) {
-                ArrayList<Room> searchResultList = searchRoom(s);
+                searchRoom(s);
 
-                if (!searchResultList.isEmpty()) {
-                    adapter = new RoomAdapter(getContext(), searchResultList, RoomAdapter.RoomListType.MORE);
-                    listView.setAdapter(adapter);
+                if (!searchRoomList.isEmpty()) {
+                    listView.setAdapter(searchAdapter);
                     listView.setVisibility(View.VISIBLE);
                     noRoomFound.setText("");
-                    adapter.notifyDataSetChanged();
+                    searchAdapter.notifyDataSetChanged();
                 } else {
                     listView.setVisibility(View.GONE);
                     noRoomFound.setText(R.string.noroomfound);
                 }
             } else {
-                adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MORE);
-                listView.setVisibility(View.VISIBLE);
                 if (!roomList.isEmpty()) {
                     noRoomFound.setText("");
                 } else {
                     noRoomFound.setText(R.string.noroomfound);
                 }
                 listView.setAdapter(adapter);
+                listView.setVisibility(View.VISIBLE);
                 adapter.notifyDataSetChanged();
             }
         }
