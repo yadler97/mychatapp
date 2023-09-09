@@ -31,7 +31,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -77,8 +76,8 @@ public class LoginActivity extends AppCompatActivity {
         changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.activity_login);
 
-        MaterialButton loginButton = findViewById(R.id.loginbutton);
-        MaterialButton createButton = findViewById(R.id.createbutton);
+        Button loginButton = findViewById(R.id.loginbutton);
+        Button createButton = findViewById(R.id.createbutton);
         EditText inputEmail = findViewById(R.id.login_email);
         EditText inputPassword = findViewById(R.id.login_password);
         TextInputLayout inputEmailLayout = findViewById(R.id.login_email_layout);
@@ -173,7 +172,7 @@ public class LoginActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.resend_email, null);
 
-        final MaterialButton resendEmailButton = view.findViewById(R.id.resendemailbutton);
+        final Button resendEmailButton = view.findViewById(R.id.resendemailbutton);
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
