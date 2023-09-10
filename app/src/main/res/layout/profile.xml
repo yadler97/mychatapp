@@ -33,7 +33,7 @@
                     android:id="@+id/icon_profile"
                     android:layout_width="@dimen/profile_image_size"
                     android:layout_height="@dimen/profile_image_size"
-                    android:src="?android:attr/colorBackground"
+                    android:src="@color/lightGrey"
                     app:civ_border_width="4dp"
                     app:civ_border_color="?android:attr/colorBackground" />
 
