@@ -154,6 +154,7 @@
     <string name="delete_account">Account löschen</string>
     <string name="account_successfully_deleted">Account erfolgreich gelöscht</string>
     <string name="account_deletion_info">ACHTUNG: Du bist kurz davor, deinen Account zu löschen. Diese Aktion kann nicht rückgängig gemacht werden! Wenn du wirklich deinen Account löschen möchtest, dann gib bitte dein Passwort ein, um fortzufahren.</string>
+    <string name="email_verification_info">Du musst deine Mail-Adresse bestätigen, bevor du deinen Account nutzen kannst. Wenn du keine Mail erhalten hast, klicke bitte den \"Erneut Versenden\"-Button. Wenn du deine Mail-Adresse bestätigt hast, kannst du dieses Fenster schließen und mit dem Login fortfahren.</string>
 
     <string-array name="categories">
         <item>Kategorie auswählen</item>

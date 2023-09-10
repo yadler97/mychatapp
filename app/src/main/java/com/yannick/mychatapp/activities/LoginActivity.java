@@ -184,7 +184,7 @@ public class LoginActivity extends AppCompatActivity {
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.pleaseverifyemail)));
         builder.setCancelable(false);
         builder.setView(view);
-        builder.setPositiveButton(R.string.cancel, (dialogInterface, i) -> mAuth.signOut());
+        builder.setPositiveButton(R.string.close, (dialogInterface, i) -> mAuth.signOut());
 
         final AlertDialog alert = builder.create();
 
