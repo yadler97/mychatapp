@@ -151,6 +151,9 @@
     <string name="unknownuser">Unbekannter Nutzer</string>
     <string name="unknown">Unbekannt</string>
     <string name="illegalinput">Eingabe nicht erlaubt</string>
+    <string name="delete_account">Account löschen</string>
+    <string name="account_successfully_deleted">Account erfolgreich gelöscht</string>
+    <string name="account_deletion_info">ACHTUNG: Du bist kurz davor, deinen Account zu löschen. Diese Aktion kann nicht rückgängig gemacht werden! Wenn du wirklich deinen Account löschen möchtest, dann gib bitte dein Passwort ein, um fortzufahren.</string>
 
     <string-array name="categories">
         <item>Kategorie auswählen</item>

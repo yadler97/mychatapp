@@ -38,6 +38,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
@@ -55,10 +57,14 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -876,6 +882,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SwitchCompat save = view.findViewById(R.id.save);
         SwitchCompat preview = view.findViewById(R.id.preview);
         SwitchCompat camera = view.findViewById(R.id.camera);
+        Button deleteAccount = view.findViewById(R.id.delete_account);
 
         boolean settingPushNotification = sharedPref.getBoolean(settingsPushNotificationsKey, true);
         boolean settingSavEnteredText = sharedPref.getBoolean(settingsSaveEnteredTextKey, true);
@@ -886,6 +893,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         save.setChecked(settingSavEnteredText);
         preview.setChecked(settingPreviewImages);
         camera.setChecked(settingStoreCameraPictures);
+
+        deleteAccount.setOnClickListener(view1 -> showPasswordRequest());
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -907,6 +916,82 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
         builder.setNegativeButton(R.string.cancel, null);
         AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private void showPasswordRequest() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.enter_profile_password, null);
+
+        final EditText passwordEdit = view.findViewById(R.id.profile_password);
+        final TextInputLayout passwordLayout = view.findViewById(R.id.profile_password_layout);
+
+        passwordEdit.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.length() != 0) {
+                    passwordLayout.setError(null);
+                }
+            }
+        });
+
+        AlertDialog.Builder builder;
+        if (theme == Theme.DARK) {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
+        } else {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
+        }
+
+        builder.setCustomTitle(setupHeader(getResources().getString(R.string.delete_account)));
+        builder.setCancelable(false);
+        builder.setView(view);
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (view1 != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+            }
+            dialogInterface.cancel();
+        });
+
+        final AlertDialog alert = builder.create();
+        alert.setOnShowListener(dialogInterface -> {
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view12 -> {
+                if (!passwordEdit.getText().toString().isEmpty()) {
+                    AuthCredential credential = EmailAuthProvider.getCredential(mAuth.getCurrentUser().getEmail(), passwordEdit.getText().toString());
+                    mAuth.getCurrentUser().reauthenticate(credential).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            deleteAccount();
+
+                            if (view12 != null) {
+                                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                            }
+
+                            alert.cancel();
+                        } else {
+                            passwordLayout.setError(getResources().getString(R.string.wrongpassword));
+                        }
+                    });
+                } else {
+                    passwordLayout.setError(getResources().getString(R.string.enterpassword));
+                }
+            });
+        });
+        alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         alert.show();
     }
 
@@ -1248,6 +1333,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         fullscreendialog.show();
+    }
+
+    private void deleteAccount() {
+        if (mAuth.getCurrentUser() != null) {
+            userRoot.child(currentUser.getUserID()).removeValue((error, ref) -> mAuth.getCurrentUser().delete().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Intent homeIntent = new Intent(MainActivity.this, LoginActivity.class);
+                    startActivity(homeIntent);
+                    finish();
+                    Toast.makeText(MainActivity.this, R.string.account_successfully_deleted, Toast.LENGTH_SHORT).show();
+                }
+            }));
+        }
     }
 
     private TextView setupHeader(String title) {

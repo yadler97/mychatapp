@@ -41,4 +41,17 @@
         android:textColor="?android:textColorPrimary"
         android:text="@string/savecamerapictures" />
 
+    <Button
+        android:id="@+id/delete_account"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/button_rounded"
+        android:textColor="@color/white"
+        android:layout_marginLeft="40dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="20dp"
+        android:textStyle="bold"
+        android:text="@string/delete_account" />
+
 </LinearLayout>

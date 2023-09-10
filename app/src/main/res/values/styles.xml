@@ -10,6 +10,7 @@
         <item name="colorPrimaryDark">@color/logo_background</item>
         <item name="colorAccent">@color/red</item>
         <item name="colorButtonNormal">@color/red</item>
+        <item name="colorButtonPressed">@color/darkRed</item>
         <item name="android:colorBackground">@color/white</item>
         <item name="iconColor">@color/iconGrey</item>
         <item name="colorTextChangelog">@color/standardTextColor</item>
@@ -35,6 +36,7 @@
         <item name="colorPrimaryDark">@color/dark_actionbar</item>
         <item name="colorAccent">@color/dark_button</item>
         <item name="colorButtonNormal">@color/dark_button</item>
+        <item name="colorButtonPressed">@color/dark_button_pressed</item>
         <item name="android:colorBackground">@color/dark_background</item>
         <item name="android:itemBackground">@color/dark_background</item>
         <item name="android:textColor">@color/white</item>

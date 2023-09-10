@@ -151,6 +151,9 @@
     <string name="unknownuser">Unknown User</string>
     <string name="unknown">Unknown</string>
     <string name="illegalinput">Illegal input</string>
+    <string name="delete_account">Delete account</string>
+    <string name="account_successfully_deleted">Account successfully deleted</string>
+    <string name="account_deletion_info">CAUTION: You are about to delete your account. This action cannot be reverted! If you really want to delete your account, please enter your password to proceed.</string>
 
     <string-array name="categories">
         <item>Select category</item>
