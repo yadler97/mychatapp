@@ -190,8 +190,14 @@ public class RoomListFragmentMyRooms extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String key = dataSnapshot.getKey();
-                User u = dataSnapshot.getValue(User.class);
-                u.setUserID(key);
+                User u;
+                if (dataSnapshot.getValue() == null) {
+                    u = new User(key, getResources().getString(R.string.unknownuser), "19700101", "", getResources().getString(R.string.unknown), 0, "unknown_user", "");
+                } else {
+                    u = dataSnapshot.getValue(User.class);
+                    u.setUserID(key);
+                }
+
                 if (room.getNewestMessage() != null) {
                     room.getNewestMessage().setUser(u);
                 } else {
