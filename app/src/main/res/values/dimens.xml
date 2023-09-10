@@ -20,6 +20,6 @@
     <dimen name="edit_text_padding_top">14dp</dimen>
 
     <dimen name="member_list_profile_image_size">32dp</dimen>
-    <dimen name="profile_image_size">72dp</dimen>
+    <dimen name="profile_image_size">96dp</dimen>
     <dimen name="room_list_image_size">56dp</dimen>
 </resources>
