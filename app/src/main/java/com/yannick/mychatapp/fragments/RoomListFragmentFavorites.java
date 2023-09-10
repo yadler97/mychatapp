@@ -351,14 +351,16 @@ public class RoomListFragmentFavorites extends Fragment {
         }
     };
 
-    private ArrayList<Room> searchRoom(String text) {
-        ArrayList<Room> searchedRoomList = new ArrayList<>();
+    private void searchRoom(String text) {
+        searchRoomList.clear();
         for (Room r : roomList) {
             if (r.getName().toLowerCase().contains(text.toLowerCase())) {
-                searchedRoomList.add(r);
+                Room r2 = new Room(r.getKey(), r.getName(), r.getCategory(), r.getTime(), r.getPasswd(), r.getAdmin());
+                r2.setImg(r.getImg());
+                r2.setNewestMessage(r.getNewestMessage());
+                r2.setSearchString(text);
+                searchRoomList.add(r2);
             }
         }
-
-        return searchedRoomList;
     }
 }

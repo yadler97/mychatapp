@@ -17,9 +17,10 @@ public class Room {
     private String username;
     private String img;
     private boolean muted;
+    private String searchString;
 
     public Room() {
-
+        this.searchString = "";
     }
 
     public Room(String key, String name, int category, String time, String passwd, String admin) {
@@ -30,6 +31,7 @@ public class Room {
         this.passwd = passwd;
         this.admin = admin;
         this.desc = "";
+        this.searchString = "";
     }
 
     public String getName() {
@@ -106,6 +108,14 @@ public class Room {
 
     public void setMuted(boolean muted) {
         this.muted = muted;
+    }
+
+    public String getSearchString() {
+        return searchString;
+    }
+
+    public void setSearchString(String searchString) {
+        this.searchString = searchString;
     }
 
     public boolean isNewer(Room comparedRoom) {

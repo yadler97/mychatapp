@@ -1,7 +1,12 @@
 package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.PorterDuff;
+import android.graphics.Typeface;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,6 +72,8 @@ public class RoomAdapter extends ArrayAdapter<Room> {
     public View getView(final int position, View view, ViewGroup parent) {
         ViewHolder viewHolder;
 
+        Room r = roomList.get(position);
+
         if (view == null) {
             viewHolder = new ViewHolder();
             view = LayoutInflater.from(parent.getContext()).inflate(R.layout.room_list, parent, false);
@@ -84,37 +91,43 @@ public class RoomAdapter extends ArrayAdapter<Room> {
             viewHolder = (ViewHolder) view.getTag();
         }
 
-        viewHolder.roomNameText.setText(roomList.get(position).getName());
-        if (type == RoomListType.MORE) {
-            viewHolder.categoryText.setText(context.getResources().getStringArray(R.array.categories)[roomList.get(position).getCategory()]);
+        if (!r.getSearchString().isEmpty()) {
+            SpannableStringBuilder sbuilder = highlightSearchedText(r.getName(), r.getSearchString());
+            viewHolder.roomNameText.setText(sbuilder);
         } else {
-            if (roomList.get(position).getNewestMessage() != null) {
-                if (roomList.get(position).getNewestMessage().getType() == Message.Type.MESSAGE_RECEIVED) {
-                    if (roomList.get(position).getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
-                        viewHolder.categoryText.setText(context.getResources().getString(R.string.you) + ": " + roomList.get(position).getNewestMessage().getMsg());
+            viewHolder.roomNameText.setText(r.getName());
+        }
+
+        if (type == RoomListType.MORE) {
+            viewHolder.categoryText.setText(context.getResources().getStringArray(R.array.categories)[r.getCategory()]);
+        } else {
+            if (r.getNewestMessage() != null) {
+                if (r.getNewestMessage().getType() == Message.Type.MESSAGE_RECEIVED) {
+                    if (r.getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
+                        viewHolder.categoryText.setText(context.getResources().getString(R.string.you) + ": " + r.getNewestMessage().getMsg());
                     } else {
-                        viewHolder.categoryText.setText(roomList.get(position).getNewestMessage().getUser().getName() + ": " + roomList.get(position).getNewestMessage().getMsg());
+                        viewHolder.categoryText.setText(r.getNewestMessage().getUser().getName() + ": " + r.getNewestMessage().getMsg());
                     }
-                } else if (roomList.get(position).getNewestMessage().getType() == Message.Type.IMAGE_RECEIVED) {
-                    if (roomList.get(position).getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
+                } else if (r.getNewestMessage().getType() == Message.Type.IMAGE_RECEIVED) {
+                    if (r.getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
                         viewHolder.categoryText.setText(context.getResources().getString(R.string.yousharedapicture));
                     } else {
-                        viewHolder.categoryText.setText(roomList.get(position).getNewestMessage().getUser().getName() + " " + context.getResources().getString(R.string.sharedapicture));
+                        viewHolder.categoryText.setText(r.getNewestMessage().getUser().getName() + " " + context.getResources().getString(R.string.sharedapicture));
                     }
                 }
             } else {
-                if (roomList.get(position).getAdmin().equals(mAuth.getCurrentUser().getUid())) {
+                if (r.getAdmin().equals(mAuth.getCurrentUser().getUid())) {
                     viewHolder.categoryText.setText(R.string.youcreatedthisroom);
                 } else {
-                    viewHolder.categoryText.setText(roomList.get(position).getUsername() + " " + context.getResources().getString(R.string.createdthisroom));
+                    viewHolder.categoryText.setText(r.getUsername() + " " + context.getResources().getString(R.string.createdthisroom));
                 }
             }
         }
         if (type == RoomListType.MY_ROOMS || type == RoomListType.FAVORITES) {
-            if (roomList.get(position).getNewestMessage() != null) {
-                viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getNewestMessage().getTime()));
+            if (r.getNewestMessage() != null) {
+                viewHolder.newestMessageText.setText(parseTime(r.getNewestMessage().getTime()));
             } else {
-                viewHolder.newestMessageText.setText(parseTime(roomList.get(position).getTime()));
+                viewHolder.newestMessageText.setText(parseTime(r.getTime()));
             }
         }
         if (type == RoomListType.FAVORITES) {
@@ -125,8 +138,8 @@ public class RoomAdapter extends ArrayAdapter<Room> {
 
         FileOperations fileOperations = new FileOperations(this.context);
         if (type == RoomListType.MY_ROOMS || type == RoomListType.FAVORITES) {
-            if (roomList.get(position).getNewestMessage() != null) {
-                if (!roomList.get(position).getNewestMessage().getKey().equals(fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, roomList.get(position).getKey())))) {
+            if (r.getNewestMessage() != null) {
+                if (!r.getNewestMessage().getKey().equals(fileOperations.readFromFile(String.format(FileOperations.newestMessageFilePattern, r.getKey())))) {
                     if (Theme.getCurrentTheme(context) == Theme.DARK) {
                         viewHolder.background.setBackgroundColor(context.getResources().getColor(R.color.roomhighlight_dark));
                     } else {
@@ -135,7 +148,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
                 }
             }
 
-            if (roomList.get(position).isMuted()) {
+            if (r.isMuted()) {
                 viewHolder.muteIcon.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_muted, null));
                 if (Theme.getCurrentTheme(context) == Theme.DARK) {
                     viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
@@ -148,7 +161,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         }
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refImage = storageRef.child("room_images/" + roomList.get(position).getImg());
+        final StorageReference refImage = storageRef.child("room_images/" + r.getImg());
         GlideApp.with(context)
                 .load(refImage)
                 .centerCrop()
@@ -168,6 +181,21 @@ public class RoomAdapter extends ArrayAdapter<Room> {
             return time.substring(9, 11) + ":" + time.substring(11, 13);
         } else {
             return time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
+        }
+    }
+
+    private static SpannableStringBuilder highlightSearchedText(String text, String textToBold) {
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+
+        if (textToBold.length() > 0 && !textToBold.trim().equals("")) {
+            int startingIndex = text.toLowerCase().indexOf(textToBold.toLowerCase());
+            int endingIndex = startingIndex + textToBold.length();
+            builder.append(text);
+            builder.setSpan(new StyleSpan(Typeface.BOLD), startingIndex, endingIndex, 0);
+            builder.setSpan(new ForegroundColorSpan(Color.RED), startingIndex, endingIndex, 0);
+            return builder;
+        } else {
+            return builder.append(text);
         }
     }
 }

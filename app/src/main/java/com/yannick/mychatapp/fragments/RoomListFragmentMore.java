@@ -31,15 +31,12 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.activities.ChatActivity;
 import com.yannick.mychatapp.adapters.RoomAdapter;
-import com.yannick.mychatapp.data.Message;
 import com.yannick.mychatapp.data.Room;
 import com.yannick.mychatapp.data.Theme;
 
@@ -283,14 +280,16 @@ public class RoomListFragmentMore extends Fragment {
         }
     };
 
-    private ArrayList<Room> searchRoom(String text) {
-        ArrayList<Room> searchedRoomList = new ArrayList<>();
+    private void searchRoom(String text) {
+        searchRoomList.clear();
         for (Room r : roomList) {
             if (r.getName().toLowerCase().contains(text.toLowerCase())) {
-                searchedRoomList.add(r);
+                Room r2 = new Room(r.getKey(), r.getName(), r.getCategory(), r.getTime(), r.getPasswd(), r.getAdmin());
+                r2.setImg(r.getImg());
+                r2.setNewestMessage(r.getNewestMessage());
+                r2.setSearchString(text);
+                searchRoomList.add(r2);
             }
         }
-
-        return searchedRoomList;
     }
 }
