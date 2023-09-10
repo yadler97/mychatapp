@@ -369,6 +369,21 @@
         "- Zahlreiche Verbesserungen am Code\n"
         "\n "</string>
 
+    <string name="v112_title">"Version 1.1.2 (10.09.2023)"</string>
+    <string name="v112_text">"- Ein Absturz wurde behoben, wenn der Ersteller einer Nachricht keine gültige Nutzer-ID hat\n"
+        "- Ein Fehler wurde behoben, dass die Schriftgröße bei vielen Texten nicht entsprechend der Systemeinstellungen angepasst wurde\n"
+        "- Ein Fehler wurde behoben, dass der Suchtext in weitergeleiteten Nachrichten nicht korrekt markiert wurde\n"
+        "- Ein Fehler wurde behoben, dass Profilbilder und Profilbanner in einem Chatraum sich nicht im Vollbild öffnen liesen\n"
+        "- Ein Absturz wurde behoben, der bei der Suche auftrat, wenn Nachrichten zur selben Uhrzeit abgeschickt wurden\n"
+        "- Ein Fehler wurde behoben, dass das Symbol für stummgeschaltete Räume in der Raumliste nicht korrekt aktualisiert wurde\n"
+        "- Ein Fehler wurde behoben, dass Räume mehrmals in der Raumliste \"Mehr\" auftraten\n"
+        "- Ein Fehler wurde behoben, dass bei neu zur Raumliste \"Favoriten\" hinzugefügten Räumen das Raumbild und die Vorschau der neusten Nachricht gefehlt haben\n"
+        "- Ein Fehler wurde behoben, der es erlaubte mit Hilfe von Formatierungszeichen faktisch leere Nachrichten zu verschicken\n"
+        "- Ein Absturz wurde behoben, der unter bestimmten Umständen bei der Raumsuche auftreten konnte\n"
+        "- Ein Fehler wurde behoben, dass das gewählte Theme nicht korrekt bei den Dialogen des Anmeldebirdschirms genutzt wurde\n"
+        "- Zahlreiche Verbesserungen am Code\n"
+        "\n "</string>
+
     <string name="copyright">"Yannick Adler, 2018–2023\nVersion %s\n\n"
         "Genutzte Libraries:\n"
         "- Droidparts von Alex Yanchenko\n"
