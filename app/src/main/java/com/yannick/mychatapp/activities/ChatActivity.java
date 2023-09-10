@@ -36,7 +36,6 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -81,6 +80,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.yannick.mychatapp.Constants;
+import com.yannick.mychatapp.adapters.ForwardMessageAdapter;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.BuildConfig;
 import com.yannick.mychatapp.CatchViewPager;
@@ -152,8 +152,7 @@ public class ChatActivity extends AppCompatActivity {
     private final ArrayList<Message> messageList = new ArrayList<>();
     private final ArrayList<User> userList = new ArrayList<>();
     private ArrayList<Message> searchResultList = new ArrayList<>();
-    private final ArrayList<String> roomList = new ArrayList<>();
-    private final ArrayList<String> roomKeysList = new ArrayList<>();
+    private final ArrayList<Room> roomList = new ArrayList<>();
     private final ArrayList<String> imageList = new ArrayList<>();
     private final ArrayList<Message> pinnedList = new ArrayList<>();
     private final ArrayList<User> memberList = new ArrayList<>();
@@ -473,8 +472,7 @@ public class ChatActivity extends AppCompatActivity {
                     Room room = uniqueKeySnapshot.child(Constants.roomDataKey).getValue(Room.class);
                     room.setKey(roomKey);
                     if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && !roomKey.equals(ChatActivity.this.roomKey)) {
-                        roomList.add(room.getName());
-                        roomKeysList.add(room.getKey());
+                        roomList.add(room);
                     }
                 }
             }
@@ -1598,7 +1596,7 @@ public class ChatActivity extends AppCompatActivity {
         View view = inflater.inflate(R.layout.forward_message, null);
 
         final ListView listView = view.findViewById(R.id.listView);
-        listView.setAdapter(new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, roomList));
+        listView.setAdapter(new ForwardMessageAdapter(this, roomList));
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
@@ -1612,7 +1610,7 @@ public class ChatActivity extends AppCompatActivity {
         alert.show();
         listView.setOnItemClickListener((adapterView, view1, i, l) -> {
             int position = listView.getPositionForView(view1);
-            String roomKey = roomKeysList.get(position);
+            String roomKey = roomList.get(position).getKey();
             Message fMessage = new Message();
             for (Message m : messageList) {
                 if (m.getKey().equals(messageID)) {
