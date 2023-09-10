@@ -10,7 +10,7 @@ android {
     defaultConfig {
         applicationId "com.yannick.mychatapp"
         minSdk 26
-        targetSdk 33
+        targetSdk 34
         versionCode 4
         versionName "1.1.2"
 
