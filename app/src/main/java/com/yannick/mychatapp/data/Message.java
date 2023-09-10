@@ -7,9 +7,9 @@ public class Message {
     private boolean sender;
     private String key;
     private Type type;
-    private String quote_name;
-    private String quote_message;
-    private String quote_key;
+    private String quoteName;
+    private String quoteMessage;
+    private String quoteKey;
     private String searchString;
     private boolean pinned;
 
@@ -17,16 +17,16 @@ public class Message {
 
     }
 
-    public Message(User user, String msg, String time, boolean sender, String id, Type type, String quote_name, String quote_message, String quote_key, boolean pinned) {
+    public Message(User user, String msg, String time, boolean sender, String id, Type type, String quoteName, String quoteMessage, String quoteKey, boolean pinned) {
         this.user = user;
         this.msg = msg;
         this.time = time;
         this.sender = sender;
         this.key = id;
         this.type = type;
-        this.quote_message = quote_message;
-        this.quote_name = quote_name;
-        this.quote_key = quote_key;
+        this.quoteMessage = quoteMessage;
+        this.quoteName = quoteName;
+        this.quoteKey = quoteKey;
         this.searchString = "";
         this.pinned = pinned;
     }
@@ -353,24 +353,24 @@ public class Message {
         this.sender = sender;
     }
 
-    public String getQuote_name() {
-        return quote_name;
+    public String getQuoteName() {
+        return quoteName;
     }
 
-    public void setQuote_name(String quote_name) {
-        this.quote_name = quote_name;
+    public void setQuoteName(String quoteName) {
+        this.quoteName = quoteName;
     }
 
-    public String getQuote_message() {
-        return quote_message;
+    public String getQuoteMessage() {
+        return quoteMessage;
     }
 
-    public void setQuote_message(String quote_message) {
-        this.quote_message = quote_message;
+    public void setQuoteMessage(String quoteMessage) {
+        this.quoteMessage = quoteMessage;
     }
 
-    public String getQuote_key() {
-        return quote_key;
+    public String getQuoteKey() {
+        return quoteKey;
     }
 
     public void setType(Type type) {

@@ -38,7 +38,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.ColorInt;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
@@ -71,6 +70,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.StringOperations;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.adapters.BackgroundAdapter;
@@ -105,14 +105,14 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
-    private String img_room, img_user, img_banner;
+    private String imgRoom, imgUser, imgBanner;
 
     private Theme theme;
 
     private Background background;
     private User currentUser;
-    private DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
-    private DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private int categoryIndex = 0;
     private static int color = 0;
@@ -125,21 +125,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private RoomListFragmentMyRooms rFragMyRooms = new RoomListFragmentMyRooms();
 
     private FirebaseStorage storage;
-    private StorageReference storageRef;
     private CircleImageView profileImage;
     private ImageView banner;
-    private ImageView banner_profile;
+    private ImageView profileBannerImageView;
     private ImageButton profileImageButton;
     private ImageButton profileBannerButton;
     private ImageButton roomImageButton;
-    private CircleImageView icon_profile;
-    private TextView text_profile;
+    private CircleImageView profileImageImageView;
+    private TextView profileNameText;
 
-    private StorageReference pathReference_image;
-    private StorageReference pathReference_banner;
-    private StorageReference pathReference_roomimage;
-
-    private ViewPager mViewPager;
     private SectionsPageAdapter pageadapter;
 
     private SearchView searchView;
@@ -173,11 +167,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        mViewPager = findViewById(R.id.container);
-        setupViewPager(mViewPager);
+        ViewPager viewPager = findViewById(R.id.container);
+        setupViewPager(viewPager);
 
         tabLayout = findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
+        tabLayout.setupWithViewPager(viewPager);
 
         mAuth = FirebaseAuth.getInstance();
 
@@ -193,22 +187,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
         View v = navigationView.getHeaderView(0);
 
-        icon_profile = v.findViewById(R.id.icon_profile);
-        text_profile = v.findViewById(R.id.name_profile);
-        banner_profile = v.findViewById(R.id.banner_profile);
+        profileNameText = v.findViewById(R.id.name_profile);
+        profileImageImageView = v.findViewById(R.id.icon_profile);
+        profileBannerImageView = v.findViewById(R.id.banner_profile);
 
-        icon_profile.setOnClickListener(view -> showProfile());
+        profileImageImageView.setOnClickListener(view -> showProfile());
 
         if (theme == Theme.DARK) {
-            banner_profile.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar_dark, null));
+            profileBannerImageView.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar_dark, null));
         } else {
-            banner_profile.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar, null));
+            profileBannerImageView.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar, null));
         }
 
         storage = FirebaseStorage.getInstance();
 
-        FloatingActionButton btn_add_room = findViewById(R.id.addroom);
-        btn_add_room.setOnClickListener(view -> addRoom());
+        FloatingActionButton addRoomButton = findViewById(R.id.addroom);
+        addRoomButton.setOnClickListener(view -> addRoom());
 
         userRoot.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -242,21 +236,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.add_room, null);
 
-        final EditText room_name = view.findViewById(R.id.room_name);
-        final EditText room_desc = view.findViewById(R.id.room_description);
-        final EditText room_password = view.findViewById(R.id.room_password);
-        final EditText room_password_repeat = view.findViewById(R.id.room_password_repeat);
+        final EditText roomNameEditText = view.findViewById(R.id.room_name);
+        final EditText roomDescriptionEditText = view.findViewById(R.id.room_description);
+        final EditText roomPasswordEditText = view.findViewById(R.id.room_password);
+        final EditText roomPasswordRepeatEditText = view.findViewById(R.id.room_password_repeat);
 
-        final TextInputLayout room_name_layout = view.findViewById(R.id.room_name_layout);
-        final TextInputLayout room_desc_layout = view.findViewById(R.id.room_description_layout);
-        final TextInputLayout room_password_layout = view.findViewById(R.id.room_password_layout);
-        final TextInputLayout room_password_repeat_layout = view.findViewById(R.id.room_password_repeat_layout);
+        final TextInputLayout roomNameLayout = view.findViewById(R.id.room_name_layout);
+        final TextInputLayout roomDescriptionLayout = view.findViewById(R.id.room_description_layout);
+        final TextInputLayout roomPasswordLayout = view.findViewById(R.id.room_password_layout);
+        final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
 
         final Spinner spinner = view.findViewById(R.id.spinner);
         roomImageButton = view.findViewById(R.id.room_image);
 
         Random rand = new Random();
-        img_room = "standard" + (rand.nextInt(4)+1);
+        imgRoom = "standard" + (rand.nextInt(4)+1);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -274,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        room_name.addTextChangedListener(new TextWatcher() {
+        roomNameEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -288,11 +282,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    room_name_layout.setError(null);
+                    roomNameLayout.setError(null);
                 }
             }
         });
-        room_desc.addTextChangedListener(new TextWatcher() {
+        roomDescriptionEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -306,11 +300,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    room_desc_layout.setError(null);
+                    roomDescriptionLayout.setError(null);
                 }
             }
         });
-        room_password.addTextChangedListener(new TextWatcher() {
+        roomPasswordEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -324,11 +318,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    room_password_layout.setError(null);
+                    roomPasswordLayout.setError(null);
                 }
             }
         });
-        room_password_repeat.addTextChangedListener(new TextWatcher() {
+        roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -342,24 +336,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    room_password_repeat_layout.setError(null);
+                    roomPasswordRepeatLayout.setError(null);
                 }
             }
         });
 
-        storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        pathReference_roomimage = storageRef.child("room_images/" + "0");
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        StorageReference refRoomImage = storageRef.child("room_images/" + "0");
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
-                    .load(pathReference_roomimage)
+                    .load(refRoomImage)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
                     .into(roomImageButton);
         } else {
             GlideApp.with(getApplicationContext())
-                    .load(pathReference_roomimage)
+                    .load(refRoomImage)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
@@ -395,13 +389,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view12 -> {
-                final String roomName = room_name.getText().toString().trim();
-                final String roomPassword = room_password.getText().toString().trim();
-                final String roomPasswordRepeat = room_password_repeat.getText().toString().trim();
-                final String roomDescription = room_desc.getText().toString().trim();
+                final String roomName = roomNameEditText.getText().toString().trim();
+                final String roomPassword = roomPasswordEditText.getText().toString().trim();
+                final String roomPasswordRepeat = roomPasswordRepeatEditText.getText().toString().trim();
+                final String roomDescription = roomDescriptionEditText.getText().toString().trim();
                 if (!roomName.isEmpty()) {
                     if (!roomDescription.isEmpty()) {
-                        if (categoryIndex !=0) {
+                        if (categoryIndex != 0) {
                             if (!roomPassword.isEmpty()) {
                                 if (!roomPasswordRepeat.isEmpty()) {
                                     if (roomPassword.equals(roomPasswordRepeat)) {
@@ -414,12 +408,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                             searchView.setIconified(true);
                                         }
                                         final String roomKey = roomRoot.push().getKey();
-                                        roomRoot = FirebaseDatabase.getInstance().getReference().child("rooms").child(roomKey);
-                                        roomRoot.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        DatabaseReference root = roomRoot.child(roomKey);
+                                        root.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot snapshot) {
                                                 if (!snapshot.exists()) {
-                                                    DatabaseReference message_root = roomRoot.child("-0roomdata");
+                                                    DatabaseReference messageRoot = root.child(Constants.roomDataKey);
                                                     Map<String, Object> map = new HashMap<>();
                                                     String currentDateAndTime = sdf.format(new Date());
                                                     map.put("admin", currentUser.getUserID());
@@ -427,11 +421,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                     map.put("time", currentDateAndTime);
                                                     map.put("passwd", roomPassword);
                                                     map.put("desc", roomDescription);
-                                                    map.put("category", String.valueOf(categoryIndex));
-                                                    map.put("img", img_room);
-                                                    message_root.updateChildren(map);
+                                                    map.put("category", categoryIndex);
+                                                    map.put("img", imgRoom);
+                                                    messageRoot.updateChildren(map);
                                                     fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
-                                                    fileOperations.writeToFile("-0roomdata", String.format(FileOperations.newestMessageFilePattern, roomKey));
+                                                    fileOperations.writeToFile(Constants.roomDataKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
                                                     FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                                                     Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
                                                     alert.cancel();
@@ -448,19 +442,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                         Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
                                     }
                                 } else {
-                                    room_password_repeat_layout.setError(getResources().getString(R.string.repeatpassword));
+                                    roomPasswordRepeatLayout.setError(getResources().getString(R.string.repeatpassword));
                                 }
                             } else {
-                                room_password_layout.setError(getResources().getString(R.string.enterpassword));
+                                roomPasswordLayout.setError(getResources().getString(R.string.enterpassword));
                             }
                         } else {
                             Toast.makeText(getApplicationContext(), R.string.selectcategory, Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        room_desc_layout.setError(getResources().getString(R.string.enterroomdesc));
+                        roomDescriptionLayout.setError(getResources().getString(R.string.enterroomdesc));
                     }
                 } else {
-                    room_name_layout.setError(getResources().getString(R.string.enterroomname));
+                    roomNameLayout.setError(getResources().getString(R.string.enterroomname));
                 }
             });
         });
@@ -526,17 +520,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        final StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
-                .load(pathReference_banner)
+                .load(refProfileBanner)
                 .centerCrop()
                 .thumbnail(0.05f)
                 .into(banner);
 
-        final StorageReference pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
+        final StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
         GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
-                .load(pathReference_image)
+                .load(refProfileImage)
                 .centerCrop()
                 .into(profileImage);
 
@@ -630,14 +624,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profileImageButton = view.findViewById(R.id.user_profile_image);
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
-        storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
-        final StorageReference pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
+        StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(pathReference_image)
+                    .load(refProfileImage)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
@@ -645,7 +639,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(pathReference_banner)
+                    .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
@@ -653,7 +647,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(pathReference_image)
+                    .load(refProfileImage)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
@@ -661,7 +655,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(pathReference_banner)
+                    .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
                     .centerCrop()
@@ -712,21 +706,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
             }
-            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[color]).setFixedColumnCount(5).setOnColorSelectedListener(new SpectrumDialog.OnColorSelectedListener() {
-                @Override
-                public void onColorSelected(boolean positiveResult, @ColorInt int scolor) {
-                    if (positiveResult) {
-                        int i = 0;
-                        for (int c : getResources().getIntArray(R.array.favcolors)) {
-                            if (c == scolor) {
-                                tmpcolor = i;
-                                GradientDrawable shape1 = new GradientDrawable();
-                                shape1.setShape(GradientDrawable.OVAL);
-                                shape1.setColor(getResources().getIntArray(R.array.favcolors)[i]);
-                                favColour.setBackground(shape1);
-                            }
-                            i++;
+            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[color]).setFixedColumnCount(5).setOnColorSelectedListener((positiveResult, scolor) -> {
+                if (positiveResult) {
+                    int i = 0;
+                    for (int c : getResources().getIntArray(R.array.favcolors)) {
+                        if (c == scolor) {
+                            tmpcolor = i;
+                            GradientDrawable shape1 = new GradientDrawable();
+                            shape1.setShape(GradientDrawable.OVAL);
+                            shape1.setColor(getResources().getIntArray(R.array.favcolors)[i]);
+                            favColour.setBackground(shape1);
                         }
+                        i++;
                     }
                 }
             }).build().show(getSupportFragmentManager(), "ColorPicker");
@@ -760,8 +751,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     if (!profileDescription.getText().toString().isEmpty()) {
                         if (!location.getText().toString().isEmpty()) {
                             if (!birthday.getText().toString().isEmpty()) {
-                                String old_name = currentUser.getName();
-                                int old_color = color;
+                                String oldUserName = currentUser.getName();
+                                int oldColor = color;
                                 currentUser.setName(username.getText().toString());
                                 currentUser.setProfileDescription(profileDescription.getText().toString());
                                 currentUser.setLocation(location.getText().toString());
@@ -769,26 +760,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 if (tmpcolor >= 0) {
                                     color = tmpcolor;
                                 }
-                                DatabaseReference user_root = userRoot.child(currentUser.getUserID());
+                                DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                                 Map<String, Object> map = new HashMap<>();
                                 map.put("name", currentUser.getName());
                                 map.put("profileDescription", currentUser.getProfileDescription());
                                 map.put("location", currentUser.getLocation());
                                 map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
-                                map.put("favColour", String.valueOf(color));
-                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
-                                    img_user = UUID.randomUUID().toString();
-                                    map.put("img", img_user);
+                                map.put("favColour", color);
+                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
+                                    imgUser = UUID.randomUUID().toString();
+                                    map.put("img", imgUser);
                                 }
-                                user_root.updateChildren(map);
-                                text_profile.setText(currentUser.getName());
+                                currentUserRoot.updateChildren(map);
+                                profileNameText.setText(currentUser.getName());
                                 Toast.makeText(getApplicationContext(), R.string.profileedited, Toast.LENGTH_SHORT).show();
                                 if (view1 != null) {
                                     InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                                     imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
                                 }
-                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(old_name.substring(0, 1)) || color != old_color))) {
-                                    storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
                                     TextDrawable drawable = TextDrawable.builder()
                                             .beginConfig()
                                             .bold()
@@ -800,7 +790,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     drawable.draw(canvas);
 
                                     byte[] byteArray;
-                                    final StorageReference pathReference_image1 = storageRef.child("profile_images/" + img_user);
+                                    final StorageReference refNewProfileImage = storageRef.child("profile_images/" + imgUser);
                                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                                     byteArray = stream.toByteArray();
@@ -809,7 +799,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     } catch (IOException ioe) {
                                         ioe.printStackTrace();
                                     }
-                                    pathReference_image1.putBytes(byteArray);
+                                    refNewProfileImage.putBytes(byteArray);
                                 }
                                 showProfile();
                                 alert.cancel();
@@ -859,22 +849,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         alert.setOnShowListener(dialogInterface -> {
 
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(new View.OnClickListener() {
-
-                @Override
-                public void onClick(View view1) {
-                    Theme.setTheme(getApplicationContext(), theme);
-                    Background.setBackground(getApplicationContext(), background);
-                    if (currentTheme != theme) {
-                        FragmentManager mFragmentManager = getSupportFragmentManager();
-                        mFragmentManager.beginTransaction().remove(rFragMore).commit();
-                        mFragmentManager.beginTransaction().remove(rFragMyRooms).commit();
-                        mFragmentManager.beginTransaction().remove(rFragFavs).commit();
-                        recreate();
-                    }
-                    Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();
-                    alert.cancel();
+            b.setOnClickListener(view1 -> {
+                Theme.setTheme(getApplicationContext(), theme);
+                Background.setBackground(getApplicationContext(), background);
+                if (currentTheme != theme) {
+                    FragmentManager mFragmentManager = getSupportFragmentManager();
+                    mFragmentManager.beginTransaction().remove(rFragMore).commit();
+                    mFragmentManager.beginTransaction().remove(rFragMyRooms).commit();
+                    mFragmentManager.beginTransaction().remove(rFragFavs).commit();
+                    recreate();
                 }
+                Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();
+                alert.cancel();
             });
         });
         alert.show();
@@ -891,23 +877,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SwitchCompat preview = view.findViewById(R.id.preview);
         SwitchCompat camera = view.findViewById(R.id.camera);
 
-        boolean s_push = sharedPref.getBoolean(settingsPushNotificationsKey, true);
-        boolean s_save = sharedPref.getBoolean(settingsSaveEnteredTextKey, true);
-        boolean s_preview = sharedPref.getBoolean(settingsPreviewImagesKey, true);
-        boolean s_camera = sharedPref.getBoolean(settingsStoreCameraPicturesKey, true);
+        boolean settingPushNotification = sharedPref.getBoolean(settingsPushNotificationsKey, true);
+        boolean settingSavEnteredText = sharedPref.getBoolean(settingsSaveEnteredTextKey, true);
+        boolean settingPreviewImages = sharedPref.getBoolean(settingsPreviewImagesKey, true);
+        boolean settingStoreCameraPictures = sharedPref.getBoolean(settingsStoreCameraPicturesKey, true);
 
-        push.setChecked(s_push);
-        save.setChecked(s_save);
-        preview.setChecked(s_preview);
-        camera.setChecked(s_camera);
+        push.setChecked(settingPushNotification);
+        save.setChecked(settingSavEnteredText);
+        preview.setChecked(settingPreviewImages);
+        camera.setChecked(settingStoreCameraPictures);
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
-            push.setTextColor(getResources().getColor(R.color.white));
-            save.setTextColor(getResources().getColor(R.color.white));
-            preview.setTextColor(getResources().getColor(R.color.white));
-            camera.setTextColor(getResources().getColor(R.color.white));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
         }
@@ -945,15 +927,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(MenuItem item) {
         int id = item.getItemId();
 
-        if (id == R.id.nav_profil) {
+        if (id == R.id.nav_profile) {
             showProfile();
         } else if (id == R.id.nav_themes) {
             changeDesign();
-        } else if (id == R.id.nav_einstellungen) {
+        } else if (id == R.id.nav_settings) {
             showSettings();
         } else if (id == R.id.nav_changelog) {
             showChangelog();
-        } else if (id == R.id.nav_impressum) {
+        } else if (id == R.id.nav_aboutus) {
             showCopyright();
         } else if (id == R.id.nav_logout) {
             mAuth.signOut();
@@ -988,8 +970,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             m.setOptionalIconsVisible(true);
         }
 
-        MenuItem search_item = menu.findItem(R.id.roomsearch);
-        searchView = (SearchView) search_item.getActionView();
+        MenuItem searchItem = menu.findItem(R.id.roomsearch);
+        searchView = (SearchView) searchItem.getActionView();
         searchView.setFocusable(false);
         searchView.setQueryHint(getResources().getString(R.string.searchroom));
         ImageView searchClose = searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
@@ -1028,49 +1010,49 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateNavigationDrawerIcon() {
-        storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
         GlideApp.with(getApplicationContext())
-                .load(pathReference_image)
+                .load(refProfileImage)
                 .centerCrop()
-                .into(icon_profile);
+                .into(profileImageImageView);
 
-        banner_profile.setImageDrawable(null);
-        pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        profileBannerImageView.setImageDrawable(null);
+        StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
-                .load(pathReference_banner)
+                .load(refProfileBanner)
                 .centerCrop()
                 .thumbnail(0.05f)
-                .into(banner_profile);
+                .into(profileBannerImageView);
     }
 
     private void updateProfileImages() {
-        storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
         GlideApp.with(getApplicationContext())
-                .load(pathReference_image)
+                .load(refProfileImage)
                 .centerCrop()
                 .into(profileImage);
 
-        pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
-                .load(pathReference_banner)
+                .load(refProfileBanner)
                 .centerCrop()
                 .thumbnail(0.05f)
                 .into(banner);
     }
 
     private void updateEditProfileImages() {
-        storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        pathReference_image = storageRef.child("profile_images/" + currentUser.getImg());
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
         GlideApp.with(getApplicationContext())
-                .load(pathReference_image)
+                .load(refProfileImage)
                 .centerCrop()
                 .into(profileImageButton);
 
-        pathReference_banner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
-                .load(pathReference_banner)
+                .load(refProfileBanner)
                 .centerCrop()
                 .thumbnail(0.05f)
                 .into(profileBannerButton);
@@ -1091,7 +1073,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 currentUser.setUserID(userID);
                 currentUser.setBirthday(currentUser.getBirthday().substring(6, 8) + "." + currentUser.getBirthday().substring(4, 6) + "." + currentUser.getBirthday().substring(0, 4));
                 updateNavigationDrawerIcon();
-                text_profile.setText(currentUser.getName());
+                profileNameText.setText(currentUser.getName());
             }
 
             @Override
@@ -1167,17 +1149,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         progressDialog.setTitle(R.string.upload);
         progressDialog.show();
 
-        storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference ref;
         if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
-            img_user = UUID.randomUUID().toString();
-            ref = storageRef.child("profile_images/" + img_user);
+            imgUser = UUID.randomUUID().toString();
+            ref = storageRef.child("profile_images/" + imgUser);
         } else if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
-            img_banner = UUID.randomUUID().toString();
-            ref = storageRef.child("profile_banners/" + img_banner);
+            imgBanner = UUID.randomUUID().toString();
+            ref = storageRef.child("profile_banners/" + imgBanner);
         } else {
-            img_room = UUID.randomUUID().toString();
-            ref = storageRef.child("room_images/" + img_room);
+            imgRoom = UUID.randomUUID().toString();
+            ref = storageRef.child("room_images/" + imgRoom);
         }
 
         ImageOperations imageOperations = new ImageOperations(getContentResolver());
@@ -1188,19 +1170,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             progressDialog.dismiss();
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
                 currentUser.setOwnProfileImage(true);
-                currentUser.setImg(img_user);
-                DatabaseReference user_root = userRoot.child(currentUser.getUserID());
+                currentUser.setImg(imgUser);
+                DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
                 map.put("ownProfileImage", true);
-                map.put("img", img_user);
-                user_root.updateChildren(map);
+                map.put("img", imgUser);
+                currentUserRoot.updateChildren(map);
             }
             if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
-                currentUser.setBanner(img_banner);
-                DatabaseReference user_root = userRoot.child(currentUser.getUserID());
+                currentUser.setBanner(imgBanner);
+                DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
-                map.put("banner", img_banner);
-                user_root.updateChildren(map);
+                map.put("banner", imgBanner);
+                currentUserRoot.updateChildren(map);
             }
             if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
                 updateNavigationDrawerIcon();
@@ -1209,9 +1191,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
             Toast.makeText(MainActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
             if (type == ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
-                pathReference_roomimage = storageRef.child("room_images/" + img_room);
+                StorageReference refRoomImage = storageRef.child("room_images/" + imgRoom);
                 GlideApp.with(getApplicationContext())
-                        .load(pathReference_roomimage)
+                        .load(refRoomImage)
                         .centerCrop()
                         .into(roomImageButton);
             }
@@ -1229,9 +1211,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showFullscreenImage(int type) {
         final View dialogView = getLayoutInflater().inflate(R.layout.fullscreen_image, null);
         if (theme == Theme.DARK) {
-            fullscreendialog = new Dialog(this,R.style.FullScreenImageDark);
+            fullscreendialog = new Dialog(this, R.style.FullScreenImageDark);
         } else {
-            fullscreendialog = new Dialog(this,R.style.FullScreenImage);
+            fullscreendialog = new Dialog(this, R.style.FullScreenImage);
         }
         fullscreendialog.setContentView(dialogView);
 

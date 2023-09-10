@@ -11,8 +11,8 @@
         android:id="@+id/text_message_body"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="240dp"
-        android:padding="8dp"
+        android:maxWidth="@dimen/message_max_width"
+        android:padding="@dimen/message_text_padding"
         android:autoLink="all"
         android:textColorLink="@color/white"
         android:textColor="@color/white"
@@ -24,9 +24,9 @@
         android:id="@+id/text_message_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="10sp"
+        android:textSize="@dimen/message_time_text_size"
         app:layout_constraintLeft_toRightOf="@+id/text_message_body"
-        android:layout_marginLeft="4dp"
+        android:layout_marginLeft="@dimen/message_time_margin"
         app:layout_constraintBottom_toBottomOf="@+id/text_message_body" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

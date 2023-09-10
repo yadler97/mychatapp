@@ -1,22 +1,28 @@
 package com.yannick.mychatapp.data;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 public class Room {
+
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private String key;
     private String name;
     private String admin;
-    private String category;
+    private int category;
     private String time;
     private String passwd;
     private String desc;
     private Message newestMessage;
     private String username;
     private String img;
+    private boolean muted;
 
     public Room() {
 
     }
 
-    public Room(String key, String name, String category, String time, String passwd, String admin) {
+    public Room(String key, String name, int category, String time, String passwd, String admin) {
         this.key = key;
         this.name = name;
         this.category = category;
@@ -30,11 +36,11 @@ public class Room {
         return name;
     }
 
-    public String getCategory() {
+    public int getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(int category) {
         this.category = category;
     }
 
@@ -92,5 +98,45 @@ public class Room {
 
     public void setImg(String img) {
         this.img = img;
+    }
+
+    public boolean isMuted() {
+        return muted;
+    }
+
+    public void setMuted(boolean muted) {
+        this.muted = muted;
+    }
+
+    public boolean isNewer(Room comparedRoom) {
+        if (this.getNewestMessage() != null) {
+            if (comparedRoom.getNewestMessage() != null) {
+                try {
+                    return sdf.parse(this.getNewestMessage().getTime()).after(sdf.parse(comparedRoom.getNewestMessage().getTime()));
+                } catch (ParseException e) {
+                    return false;
+                }
+            } else {
+                try {
+                    return sdf.parse(this.getNewestMessage().getTime()).after(sdf.parse(comparedRoom.getTime()));
+                } catch (ParseException e) {
+                    return false;
+                }
+            }
+        } else {
+            if (comparedRoom.getNewestMessage() != null) {
+                try {
+                    return sdf.parse(this.getTime()).after(sdf.parse(comparedRoom.getNewestMessage().getTime()));
+                } catch (ParseException e) {
+                    return false;
+                }
+            } else {
+                try {
+                    return sdf.parse(this.getTime()).after(sdf.parse(comparedRoom.getTime()));
+                } catch (ParseException e) {
+                    return false;
+                }
+            }
+        }
     }
 }

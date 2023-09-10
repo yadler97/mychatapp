@@ -26,6 +26,7 @@
     <color name="dark_actionbar">#2F3136</color>
     <color name="dark_divider">#4A4C52</color>
     <color name="dark_button">#7289DA</color>
+    <color name="dark_button_pressed">#997289DA</color>
 
     <color name="darkRed">#BF0000</color>
     <color name="darkGreen">#438C00</color>

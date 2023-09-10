@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:showIn="navigation_view">
+    tools:showIn="navigation_view" >
 
         <item
-            android:id="@+id/nav_profil"
+            android:id="@+id/nav_profile"
             android:icon="@drawable/ic_account"
             android:title="@string/myprofile" />
         <item
@@ -12,18 +13,18 @@
             android:icon="@drawable/ic_themes"
             android:title="@string/design" />
         <item
-            android:id="@+id/nav_einstellungen"
+            android:id="@+id/nav_settings"
             android:icon="@drawable/ic_options"
             android:title="@string/settings" />
 
-    <item android:title="@string/misc">
+    <item android:title="@string/misc" >
         <menu>
             <item
                 android:id="@+id/nav_changelog"
                 android:icon="@drawable/ic_info"
                 android:title="@string/changelog" />
             <item
-                android:id="@+id/nav_impressum"
+                android:id="@+id/nav_aboutus"
                 android:icon="@drawable/ic_copyright"
                 android:title="@string/aboutus" />
         </menu>

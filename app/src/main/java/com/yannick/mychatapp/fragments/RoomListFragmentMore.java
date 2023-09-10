@@ -26,6 +26,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -33,6 +34,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.activities.ChatActivity;
@@ -47,9 +49,10 @@ public class RoomListFragmentMore extends Fragment {
 
     private ListView listView;
     private Theme theme;
-    private RoomAdapter adapter;
+    private RoomAdapter adapter, searchAdapter;
     private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
     private final ArrayList<Room> roomList = new ArrayList<>();
+    private final ArrayList<Room> searchRoomList = new ArrayList<>();
     private TextView noRoomFound;
 
     private FileOperations fileOperations;
@@ -57,25 +60,45 @@ public class RoomListFragmentMore extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.roomlist_fragment,container,false);
+        View view = inflater.inflate(R.layout.roomlist_fragment, container, false);
 
         listView = view.findViewById(R.id.listView);
-        noRoomFound = view.findViewById(R.id.keinraumgefunden);
+        noRoomFound = view.findViewById(R.id.no_room_found);
 
         theme = Theme.getCurrentTheme(getContext());
         fileOperations = new FileOperations(getActivity());
 
         adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MORE);
+        searchAdapter = new RoomAdapter(getContext(), searchRoomList, RoomAdapter.RoomListType.MORE);
         listView.setAdapter(adapter);
 
         LocalBroadcastManager.getInstance(getContext()).registerReceiver(searchReceiver, new IntentFilter("searchroom"));
 
-        root.addValueEventListener(new ValueEventListener() {
+        root.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 if (isAdded()) {
-                    addRoomToList(dataSnapshot);
+                    addRoom(dataSnapshot);
                 }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                if (isAdded()) {
+                    changeRoom(dataSnapshot);
+                }
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                if (isAdded()) {
+                    removeRoom(dataSnapshot);
+                }
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
             }
 
             @Override
@@ -94,6 +117,8 @@ public class RoomListFragmentMore extends Fragment {
             requestPassword(room, position);
         });
 
+        noRoomFound.setText(R.string.noroomfound);
+
         adapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
@@ -108,58 +133,45 @@ public class RoomListFragmentMore extends Fragment {
         return view;
     }
 
-    private void addRoomToList(DataSnapshot dataSnapshot) {
-        roomList.clear();
+    private void addRoom(DataSnapshot dataSnapshot) {
+        final String roomKey = dataSnapshot.getKey();
+        final Room room = dataSnapshot.child(Constants.roomDataKey).getValue(Room.class);
+        room.setKey(roomKey);
 
-        for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
-            String roomKey = uniqueKeySnapshot.getKey();
-            for (DataSnapshot roomSnapshot : uniqueKeySnapshot.getChildren()) {
-                final Room room = roomSnapshot.getValue(Room.class);
-                room.setKey(roomKey);
-                if (!room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
-                    if (uniqueKeySnapshot.getChildrenCount() > 1) {
-                        DatabaseReference newestMessageRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(roomKey);
-                        Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
-                        lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                                    String key = child.getKey();
-                                    String message = child.child("msg").getValue().toString();
-                                    boolean pinned = (boolean) child.child("pinned").getValue();
-                                    String quote = child.child("quote").getValue().toString();
-                                    String time = child.child("time").getValue().toString();
-
-                                    Message newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
-
-                                    room.setNewestMessage(newestMessage);
-                                    roomList.add(room);
-                                    adapter.notifyDataSetChanged();
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                //Handle possible errors.
-                            }
-                        });
-                    } else {
-                        roomList.add(room);
-                    }
+        if (!room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
+            boolean inList = false;
+            for (Room r : roomList) {
+                if (r.getKey().equals(room.getKey())) {
+                    inList = true;
+                    break;
                 }
-                break;
+            }
+            if (!inList) {
+                roomList.add(room);
             }
         }
 
         adapter.notifyDataSetChanged();
     }
 
+    public void changeRoom(DataSnapshot dataSnapshot) {
+        final String roomKey = dataSnapshot.getKey();
+        roomList.removeIf(r -> r.getKey().equals(roomKey));
+        addRoom(dataSnapshot);
+    }
+
+    public void removeRoom(DataSnapshot dataSnapshot) {
+        final String roomKey = dataSnapshot.getKey();
+        roomList.removeIf(r -> r.getKey().equals(roomKey));
+        adapter.notifyDataSetChanged();
+    }
+
     private void requestPassword(final Room room, final int position) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.enter_room, null);
-        final EditText input_field = view.findViewById(R.id.room_password);
-        final TextInputLayout input_field_layout = view.findViewById(R.id.room_password_layout);
-        input_field.addTextChangedListener(new TextWatcher() {
+        final EditText inputPassword = view.findViewById(R.id.room_password);
+        final TextInputLayout inputPasswordLayout = view.findViewById(R.id.room_password_layout);
+        inputPassword.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -173,7 +185,7 @@ public class RoomListFragmentMore extends Fragment {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (editable.length() != 0) {
-                    input_field_layout.setError(null);
+                    inputPasswordLayout.setError(null);
                 }
             }
         });
@@ -201,8 +213,8 @@ public class RoomListFragmentMore extends Fragment {
 
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view12 -> {
-                if (!input_field.getText().toString().isEmpty()) {
-                    if (input_field.getText().toString().trim().equals(room.getPasswd())) {
+                if (!inputPassword.getText().toString().isEmpty()) {
+                    if (inputPassword.getText().toString().trim().equals(room.getPasswd())) {
                         String roomKey = room.getKey();
                         Intent tabIntent = new Intent("tab");
                         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(tabIntent);
@@ -226,10 +238,10 @@ public class RoomListFragmentMore extends Fragment {
                         alert.cancel();
                         startActivity(intent);
                     } else {
-                        input_field_layout.setError(getResources().getString(R.string.wrongpassword));
+                        inputPasswordLayout.setError(getResources().getString(R.string.wrongpassword));
                     }
                 } else {
-                    input_field_layout.setError(getResources().getString(R.string.enterpassword));
+                    inputPasswordLayout.setError(getResources().getString(R.string.enterpassword));
                 }
             });
         });
@@ -247,27 +259,25 @@ public class RoomListFragmentMore extends Fragment {
         public void onReceive(Context context, Intent intent) {
             String s = intent.getStringExtra("searchkey");
             if (!s.trim().isEmpty()) {
-                ArrayList<Room> searchResultList = searchRoom(s);
+                searchRoom(s);
 
-                if (!searchResultList.isEmpty()) {
-                    adapter = new RoomAdapter(getContext(), searchResultList, RoomAdapter.RoomListType.MORE);
-                    listView.setAdapter(adapter);
+                if (!searchRoomList.isEmpty()) {
+                    listView.setAdapter(searchAdapter);
                     listView.setVisibility(View.VISIBLE);
                     noRoomFound.setText("");
-                    adapter.notifyDataSetChanged();
+                    searchAdapter.notifyDataSetChanged();
                 } else {
                     listView.setVisibility(View.GONE);
                     noRoomFound.setText(R.string.noroomfound);
                 }
             } else {
-                adapter = new RoomAdapter(getContext(), roomList, RoomAdapter.RoomListType.MORE);
-                listView.setVisibility(View.VISIBLE);
                 if (!roomList.isEmpty()) {
                     noRoomFound.setText("");
                 } else {
                     noRoomFound.setText(R.string.noroomfound);
                 }
                 listView.setAdapter(adapter);
+                listView.setVisibility(View.VISIBLE);
                 adapter.notifyDataSetChanged();
             }
         }
