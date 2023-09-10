@@ -792,7 +792,7 @@ public class ChatActivity extends AppCompatActivity {
     private void changeTheme(Theme theme) {
         this.theme = theme;
         if (theme == Theme.DARK) {
-            setTheme(R.style.DarkChat);
+            setTheme(R.style.DarkThemeChat);
         } else {
             setTheme(R.style.AppThemeChat);
         }

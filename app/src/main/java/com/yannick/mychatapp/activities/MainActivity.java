@@ -1003,7 +1003,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void changeTheme(Theme theme) {
         this.theme = theme;
         if (theme == Theme.DARK) {
-            setTheme(R.style.Dark);
+            setTheme(R.style.DarkTheme);
         } else {
             setTheme(R.style.AppTheme);
         }
