@@ -106,20 +106,19 @@ public class PushService extends FirebaseMessagingService {
         }
     }
 
-    private PendingIntent getReplyPendingIntent(String roomid, int pushid) {
+    private PendingIntent getReplyPendingIntent(String roomKey, int pushID) {
         Intent intent = new Intent(getApplicationContext(), ReplyReceiver.class);
-        intent.putExtra("room_key", roomid);
+        intent.putExtra("room_key", roomKey);
         intent.putExtra("user_id", mAuth.getCurrentUser().getUid());
-        intent.putExtra("push_id", pushid);
+        intent.putExtra("push_id", pushID);
         return PendingIntent.getBroadcast(getApplicationContext(), 100, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    private PendingIntent getMarkAsReadPendingIntent(String roomid, int pushid, String messageid) {
+    private PendingIntent getMarkAsReadPendingIntent(String roomKey, int pushID, String messageKey) {
         Intent intent = new Intent(getApplicationContext(), MarkAsReadReceiver.class);
-        intent.putExtra("room_key", roomid);
-        intent.putExtra("user_id", mAuth.getCurrentUser().getUid());
-        intent.putExtra("push_id", pushid);
-        intent.putExtra("message_id", messageid);
+        intent.putExtra("room_key", roomKey);
+        intent.putExtra("push_id", pushID);
+        intent.putExtra("message_key", messageKey);
         return PendingIntent.getBroadcast(getApplicationContext(), 100, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 

@@ -145,6 +145,8 @@ public class RoomAdapter extends ArrayAdapter<Room> {
                     } else {
                         viewHolder.background.setBackgroundColor(context.getResources().getColor(R.color.roomhighlight));
                     }
+                } else {
+                    viewHolder.background.setBackgroundColor(context.getResources().getColor(android.R.color.transparent));
                 }
             }
 
