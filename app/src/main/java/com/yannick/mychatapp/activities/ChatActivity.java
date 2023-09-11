@@ -600,7 +600,7 @@ public class ChatActivity extends AppCompatActivity {
         }
         if (index == -1) {
             messageList.add(m);
-            if (!memberList.contains(m.getUser())) {
+            if (memberList.stream().noneMatch(u -> m.getUser().getUserID().equals(u.getUserID()))) {
                 memberList.add(m.getUser());
             }
             if (pinned) {
