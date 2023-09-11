@@ -87,6 +87,7 @@ import com.yannick.mychatapp.adapters.FullScreenImageAdapter;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.ImageOperations;
 import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Image;
 import com.yannick.mychatapp.fragments.RoomListFragmentFavorites;
 import com.yannick.mychatapp.fragments.RoomListFragmentMore;
 import com.yannick.mychatapp.fragments.RoomListFragmentMyRooms;
@@ -1325,11 +1326,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (type == 0) {
             ArrayList<String> images = new ArrayList<>();
             images.add(currentUser.getImg());
-            mViewPager.setAdapter(new FullScreenImageAdapter(this, images, 0));
+            mViewPager.setAdapter(new FullScreenImageAdapter(this, images, Image.PROFILE_IMAGE));
         } else if (type == 1) {
             ArrayList<String> images = new ArrayList<>();
             images.add(currentUser.getBanner());
-            mViewPager.setAdapter(new FullScreenImageAdapter(this, images, 1));
+            mViewPager.setAdapter(new FullScreenImageAdapter(this, images, Image.PROFILE_BANNER));
         }
 
         fullscreendialog.show();

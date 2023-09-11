@@ -15,6 +15,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Image;
 
 import java.util.ArrayList;
 
@@ -23,9 +24,9 @@ public class FullScreenImageAdapter extends PagerAdapter {
     private final Context context;
     private final ArrayList<String> imageList;
     private final LayoutInflater layoutInflater;
-    private final int type;
+    private final Image type;
 
-    public FullScreenImageAdapter(Context context, ArrayList<String> imageList, int type) {
+    public FullScreenImageAdapter(Context context, ArrayList<String> imageList, Image type) {
         this.context = context;
         this.imageList = imageList;
         this.type = type;
@@ -48,21 +49,21 @@ public class FullScreenImageAdapter extends PagerAdapter {
 
         ImageView imageView = itemView.findViewById(R.id.imageView);
 
-        String imgurl = imageList.get(position);
+        String imageURL = imageList.get(position);
         StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference pathReference;
 
-        if (type == 0) {
-            pathReference = storageRef.child("profile_images/" + imgurl);
-        } else if (type == 1) {
-            pathReference = storageRef.child("profile_banners/" + imgurl);
-        } else if (type == 2) {
-            pathReference = storageRef.child("room_images/" + imgurl);
+        if (type == Image.PROFILE_IMAGE) {
+            pathReference = storageRef.child("profile_images/" + imageURL);
+        } else if (type == Image.PROFILE_BANNER) {
+            pathReference = storageRef.child("profile_banners/" + imageURL);
+        } else if (type == Image.ROOM_IMAGE) {
+            pathReference = storageRef.child("room_images/" + imageURL);
         } else {
-            pathReference = storageRef.child("images/" + imgurl);
+            pathReference = storageRef.child("images/" + imageURL);
         }
 
-        if (type == 0 || type == 1 || type == 2) {
+        if (type == Image.PROFILE_IMAGE || type == Image.PROFILE_BANNER || type == Image.ROOM_IMAGE) {
             GlideApp.with(context)
                     .load(pathReference)
                     .placeholder(R.color.black)

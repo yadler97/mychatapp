@@ -409,9 +409,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 }
             }
         } else if (Message.isImage(type)) {
-            String imgurl = m.getMsg();
+            String imageURL = m.getMsg();
             StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-            StorageReference pathReference = storageRef.child("images/" + imgurl);
+            StorageReference pathReference = storageRef.child("images/" + imageURL);
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
             if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {
@@ -478,9 +478,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             if (!Message.isQuoteImage(type)) {
                 holder.quoteMessage.setText(m.getQuoteMessage());
             } else {
-                String imgurl = m.getQuoteMessage();
+                String imageURL = m.getQuoteMessage();
                 StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                StorageReference pathReference = storageRef.child("images/" + imgurl);
+                StorageReference pathReference = storageRef.child("images/" + imageURL);
 
                 GlideApp.with(context)
                         //.using(new FirebaseImageLoader())

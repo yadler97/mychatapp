@@ -44,9 +44,9 @@ public class ImageAdapter extends BaseAdapter {
         SquareImageView imageView = new SquareImageView(this.context);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        String imgurl = imageList.get(position);
+        String imageURL = imageList.get(position);
         StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        StorageReference pathReference = storageRef.child("images/" + imgurl);
+        StorageReference pathReference = storageRef.child("images/" + imageURL);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
         if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {

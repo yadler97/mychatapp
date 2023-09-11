@@ -90,6 +90,7 @@ import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.adapters.ImageAdapter;
 import com.yannick.mychatapp.ImageOperations;
 import com.yannick.mychatapp.adapters.MemberListAdapter;
+import com.yannick.mychatapp.data.Image;
 import com.yannick.mychatapp.data.Message;
 import com.yannick.mychatapp.adapters.MessageAdapter;
 import com.yannick.mychatapp.MyCallback;
@@ -130,7 +131,7 @@ public class ChatActivity extends AppCompatActivity {
 
     private String userID;
     private String roomKey;
-    private String imgurl;
+    private String imageURL;
     private String appName;
     private String roomName;
     private String lastReadMessage;
@@ -946,9 +947,9 @@ public class ChatActivity extends AppCompatActivity {
                     } else {
                         SpannableStringBuilder str = new SpannableStringBuilder(user);
                         str.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, user.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        String imgurl = m.getMsg();
+                        String imageURL = m.getMsg();
                         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                        StorageReference pathReference = storageRef.child("images/" + imgurl);
+                        StorageReference pathReference = storageRef.child("images/" + imageURL);
                         GlideApp.with(context)
                                 .load(pathReference)
                                 .placeholder(R.color.grey)
@@ -990,9 +991,9 @@ public class ChatActivity extends AppCompatActivity {
     public BroadcastReceiver permissionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            imgurl = intent.getStringExtra("imgurl");
+            imageURL = intent.getStringExtra("imgurl");
             if (isStoragePermissionGranted(0)) {
-                downloadImage(imgurl, ImageOperations.PICK_IMAGE_REQUEST);
+                downloadImage(imageURL, ImageOperations.PICK_IMAGE_REQUEST);
             }
         }
     };
@@ -1009,7 +1010,7 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String image = intent.getStringExtra("image");
-            showFullscreenImage(image, 3);
+            showFullscreenImage(image, Image.MESSAGE_IMAGE);
         }
     };
 
@@ -1085,7 +1086,7 @@ public class ChatActivity extends AppCompatActivity {
         if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             Log.v("StoragePermission", "Permission is granted");
             if (requestCode == 0) {
-                downloadImage(imgurl, ImageOperations.PICK_IMAGE_REQUEST);
+                downloadImage(imageURL, ImageOperations.PICK_IMAGE_REQUEST);
             } else if (requestCode == 1) {
                 takePicture();
             } else if (requestCode == 2) {
@@ -1096,9 +1097,9 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    private void downloadImage(String imgurl, final int type) {
+    private void downloadImage(String imageURL, final int type) {
         StorageReference storageRef = storage.getReferenceFromUrl(storageReference.toString());
-        final StorageReference pathReference = storageRef.child("images/" + imgurl);
+        final StorageReference pathReference = storageRef.child("images/" + imageURL);
 
         final Context context = getApplicationContext();
         final File rootPath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()+ "/" + appName);
@@ -1283,7 +1284,7 @@ public class ChatActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(roomImage);
 
-        roomImage.setOnClickListener(v -> showFullscreenImage(room.getImg(), 2));
+        roomImage.setOnClickListener(v -> showFullscreenImage(room.getImg(), Image.ROOM_IMAGE));
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -1589,8 +1590,8 @@ public class ChatActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(profileIcon);
 
-        profileIcon.setOnClickListener(v -> showFullscreenImage(user.getImg(), 0));
-        banner.setOnClickListener(v -> showFullscreenImage(user.getBanner(), 1));
+        profileIcon.setOnClickListener(v -> showFullscreenImage(user.getImg(), Image.PROFILE_IMAGE));
+        banner.setOnClickListener(v -> showFullscreenImage(user.getBanner(), Image.PROFILE_BANNER));
 
         profileName.setText(user.getName());
         profileDescription.setText(user.getProfileDescription());
@@ -1671,7 +1672,7 @@ public class ChatActivity extends AppCompatActivity {
         return new User(userId, getResources().getString(R.string.unknownuser), "19700101", "", getResources().getString(R.string.unknown), 0, "unknown_user", "");
     }
 
-    private void showFullscreenImage(String image, int type) {
+    private void showFullscreenImage(String image, Image type) {
         final View dialogView = getLayoutInflater().inflate(R.layout.fullscreen_image, null);
         if (theme == Theme.DARK) {
             fullscreendialog = new Dialog(this, R.style.FullScreenImageDark);
@@ -1701,7 +1702,7 @@ public class ChatActivity extends AppCompatActivity {
         CatchViewPager mViewPager = dialogView.findViewById(R.id.pager);
         mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
 
-        if (type == 0 || type == 1 || type == 2) {
+        if (type == Image.PROFILE_IMAGE || type == Image.PROFILE_BANNER || type == Image.ROOM_IMAGE) {
             ArrayList<String> images = new ArrayList<>();
             images.add(image);
             mViewPager.setAdapter(new FullScreenImageAdapter(this, images, type));
@@ -1719,7 +1720,7 @@ public class ChatActivity extends AppCompatActivity {
             View view = inflater.inflate(R.layout.image_list, null);
             GridView imageGrid = view.findViewById(R.id.gridview);
             imageGrid.setAdapter(new ImageAdapter(this, imageList));
-            imageGrid.setOnItemClickListener((adapterView, view1, i, l) -> showFullscreenImage(imageList.get(i), 3));
+            imageGrid.setOnItemClickListener((adapterView, view1, i, l) -> showFullscreenImage(imageList.get(i), Image.MESSAGE_IMAGE));
             AlertDialog.Builder builder;
             if (theme == Theme.DARK) {
                 builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
