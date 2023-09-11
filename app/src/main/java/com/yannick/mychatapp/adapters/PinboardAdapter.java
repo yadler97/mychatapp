@@ -66,13 +66,14 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
         viewHolder.timeText.setText(parsedTime);
         if (Message.isImage(type)) {
             String imageURL = pinnedList.get(position).getMsg();
-            StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
             StorageReference pathReference = storageRef.child("images/" + imageURL);
 
             GlideApp.with(context)
                     //.using(new FirebaseImageLoader())
                     .load(pathReference)
-                    .placeholder(R.color.black)
+                    .centerCrop()
+                    .thumbnail(0.05f)
                     .into(viewHolder.image);
         } else {
             viewHolder.messageText.setText(pinnedList.get(position).getMsg());
