@@ -56,11 +56,13 @@ public class FullScreenImageAdapter extends PagerAdapter {
             pathReference = storageRef.child("profile_images/" + imgurl);
         } else if (type == 1) {
             pathReference = storageRef.child("profile_banners/" + imgurl);
+        } else if (type == 2) {
+            pathReference = storageRef.child("room_images/" + imgurl);
         } else {
             pathReference = storageRef.child("images/" + imgurl);
         }
 
-        if (type == 0 || type == 1) {
+        if (type == 0 || type == 1 || type == 2) {
             GlideApp.with(context)
                     .load(pathReference)
                     .placeholder(R.color.black)

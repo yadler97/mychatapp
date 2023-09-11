@@ -1009,7 +1009,7 @@ public class ChatActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             String image = intent.getStringExtra("image");
-            showFullscreenImage(image, 2);
+            showFullscreenImage(image, 3);
         }
     };
 
@@ -1257,6 +1257,8 @@ public class ChatActivity extends AppCompatActivity {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.room_info, null);
 
+        final CircleImageView roomImage = view.findViewById(R.id.room_image);
+        final TextView roomNameText = view.findViewById(R.id.room_name);
         final TextView roomDescriptionText = view.findViewById(R.id.room_description);
         final TextView roomCategoryText = view.findViewById(R.id.room_cat);
         final TextView roomCreationDateText = view.findViewById(R.id.room_creation);
@@ -1266,10 +1268,22 @@ public class ChatActivity extends AppCompatActivity {
         memberListView.setAdapter(new MemberListAdapter(getApplicationContext(), memberList, room.getAdmin()));
 
         String time = room.getTime().substring(6, 8) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(0, 4);
+        roomNameText.setText(room.getName());
         roomDescriptionText.setText(room.getDesc());
         roomCategoryText.setText(getResources().getStringArray(R.array.categories)[room.getCategory()]);
         roomCreationDateText.setText(time);
         roomMessageCountText.setText(String.valueOf(messageCount));
+
+        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+
+        final StorageReference refRoomImage = storageRef.child("room_images/" + room.getImg());
+        GlideApp.with(getApplicationContext())
+                //.using(new FirebaseImageLoader())
+                .load(refRoomImage)
+                .centerCrop()
+                .into(roomImage);
+
+        roomImage.setOnClickListener(v -> showFullscreenImage(room.getImg(), 2));
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -1687,16 +1701,12 @@ public class ChatActivity extends AppCompatActivity {
         CatchViewPager mViewPager = dialogView.findViewById(R.id.pager);
         mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
 
-        if (type == 0) {
+        if (type == 0 || type == 1 || type == 2) {
             ArrayList<String> images = new ArrayList<>();
             images.add(image);
-            mViewPager.setAdapter(new FullScreenImageAdapter(this, images, 0));
-        } else if (type == 1) {
-            ArrayList<String> images = new ArrayList<>();
-            images.add(image);
-            mViewPager.setAdapter(new FullScreenImageAdapter(this, images, 1));
+            mViewPager.setAdapter(new FullScreenImageAdapter(this, images, type));
         } else {
-            mViewPager.setAdapter(new FullScreenImageAdapter(this, imageList, 2));
+            mViewPager.setAdapter(new FullScreenImageAdapter(this, imageList, type));
             mViewPager.setCurrentItem(imageList.indexOf(image));
         }
 
@@ -1709,7 +1719,7 @@ public class ChatActivity extends AppCompatActivity {
             View view = inflater.inflate(R.layout.image_list, null);
             GridView imageGrid = view.findViewById(R.id.gridview);
             imageGrid.setAdapter(new ImageAdapter(this, imageList));
-            imageGrid.setOnItemClickListener((adapterView, view1, i, l) -> showFullscreenImage(imageList.get(i), 2));
+            imageGrid.setOnItemClickListener((adapterView, view1, i, l) -> showFullscreenImage(imageList.get(i), 3));
             AlertDialog.Builder builder;
             if (theme == Theme.DARK) {
                 builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
