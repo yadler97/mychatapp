@@ -40,6 +40,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.ImageOperations;
 import com.yannick.mychatapp.R;
@@ -62,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String DEFAULT_BIRTHDAY = "01.01.2000";
     private static boolean ownProfileImage = false;
     private static int colour = 0;
-    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersKey);
 
     private String img = "";
     private String banner = "";

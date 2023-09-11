@@ -30,7 +30,7 @@ public class ReplyReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         CharSequence message = getReplyMessage(intent);
 
-        DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(intent.getStringExtra("room_key"));
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsKey).child(intent.getStringExtra("room_key"));
         String tempKey = root.push().getKey();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");

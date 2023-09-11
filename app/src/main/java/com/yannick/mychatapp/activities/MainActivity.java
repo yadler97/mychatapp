@@ -118,8 +118,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private Background background;
     private User currentUser;
-    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
-    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsKey);
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersKey);
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private int categoryIndex = 0;
     private static int color = 0;

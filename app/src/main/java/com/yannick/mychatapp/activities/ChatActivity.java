@@ -137,8 +137,8 @@ public class ChatActivity extends AppCompatActivity {
     private String lastReadMessage;
     private String lastKey;
     private String lastSearch = "";
-    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
-    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersKey);
+    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsKey);
     private FirebaseStorage storage;
     private StorageReference storageReference;
     private Uri photoURI;

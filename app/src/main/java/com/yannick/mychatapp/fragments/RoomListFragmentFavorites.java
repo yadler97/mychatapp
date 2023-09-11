@@ -41,7 +41,7 @@ public class RoomListFragmentFavorites extends Fragment {
 
     private ListView listView;
     private RoomAdapter adapter, searchAdapter;
-    private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsKey);
     private final ArrayList<Room> roomList = new ArrayList<>();
     private final ArrayList<Room> searchRoomList = new ArrayList<>();
     private TextView noRoomFound;
@@ -185,7 +185,7 @@ public class RoomListFragmentFavorites extends Fragment {
     }
 
     private void sortByTime(final Room room, String userid) {
-        DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users").child(userid);
+        DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersKey).child(userid);
         userRoot.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
