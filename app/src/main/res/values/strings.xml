@@ -190,39 +190,50 @@
         <item>Super Smash Bros. Ultimate</item>
     </string-array>
 
-    <string name="v100_title">"Version 1.0.0 (July 1st, 2018)"</string>
-    <string name="v100_text">" - Initial release\n"
-        "\n "</string>
+    <string-array name="changelog_titles">
+        <item>Version 1.0.0 (July 1st, 2018)</item>
+        <item>Version 1.0.1 (July 2nd, 2018)</item>
+        <item>Version 1.0.2 (July 2nd, 2018)</item>
+        <item>Version 1.0.3 (July 5th, 2018)</item>
+        <item>Version 1.0.4 (August 13th, 2018)</item>
+        <item>Version 1.0.5 (August 26th, 2018)</item>
+        <item>Version 1.0.6 (October 27th, 2018)</item>
+        <item>Version 1.0.7 (March 1st, 2019)</item>
+        <item>Version 1.0.8 (June 2nd, 2019)</item>
+        <item>Version 1.0.9 (November 14th, 2019)</item>
+        <item>Version 1.1.0 (August 20th, 2023)</item>
+        <item>Version 1.1.1 (September 2nd, 2023)</item>
+        <item>Version 1.1.2 (September 10th, 2023)</item>
+    </string-array>
 
-    <string name="v101_title">"Version 1.0.1 (July 2nd, 2018)"</string>
-    <string name="v101_text">" - The text field for the username can\'t be left empty now\n"
+    <string-array name="changelog_text">
+        <item>" - Initial release\n"
+        "\n "</item>
+
+        <item>" - The text field for the username can\'t be left empty now\n"
         "- The activity won\'t be reloaded if the user presses \"Create Room\" after not having entered a roomname\n"
         "- After creating a room the user will now be notified with a toast \"Room created\" that the action was successful\n"
         "- The application now uses its own icon\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v102_title">"Version 1.0.2 (July 2nd, 2018)"</string>
-    <string name="v102_text">" - Messages are now displayed in colored textboxes\n"
+        <item>" - Messages are now displayed in colored textboxes\n"
         "- A profile picture is now being shown next to the message of other users. Currently it just displays the first letter of the username\n"
         "- The time a message was sent is now being shown next to the message\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v103_title">"Version 1.0.3 (July 5th, 2018)"</string>
-    <string name="v103_text">" - A Menu is now available in the room selection. The own name is being displayed there and a variety of other functions are accessible\n"
+        <item>" - A Menu is now available in the room selection. The own name is being displayed there and a variety of other functions are accessible\n"
         "- The Changelog and a "About us" section can be accessed from there\n"
         "- The own profile can now be viewed\n"
         "- The application's icon has been redesigned to better fit to the colors being used in the chatrooms\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v104_title">"Version 1.0.4 (August 13th, 2018)"</string>
-    <string name="v104_text">" - Messages in a chat can now be copied by pressing\n"
+        <item>" - Messages in a chat can now be copied by pressing\n"
         "- When creating a room, a category and a password must now be entered\n"
         "- The password will be saved on the device after being entered correctly for the first time. It will be entered automatically in the future, so the user can switch between rooms faster\n"
 		"- The category of a room is displayed in the room selection beneath the room name\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v105_title">"Version 1.0.5 (August 26th, 2018)"</string>
-    <string name="v105_text">" - The position of the button to add a room has been changed\n"
+        <item>" - The position of the button to add a room has been changed\n"
         "- If a entry in the database is being altered or deleted, the chatroom will now be updated in real time\n"
         "- The creator of a room is now longer being asked to enter the room's password\n"
         "- New categories for rooms have been added\n"
@@ -230,10 +241,9 @@
         "- The user can now change the corners of the textboxes in the \"Design\" submenu\n"
         "- At the start of a room, it is now displayed when and by whom the room was created\n"
         "- Between messages of different days, the date of the new day is now being shown\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v106_title">"Version 1.0.6 (October 27th, 2018)"</string>
-    <string name="v106_text">" - Images from the gallery can now be posted\n"
+        <item>" - Images from the gallery can now be posted\n"
         "- Images can also be taken with the camera and posted directly from the app\n"
         "- Images can be downloaded to the device by pressing on it\n"
         "- The background can be changed in the \"Design\" submenu\n"
@@ -256,10 +266,9 @@
         "- The user is now being notified if no database connection can be established\n"
         "- A serious bug was fixed that caused a immediate crash after restarting\n"
         "- Android versions below 4.4 are no longer supported\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v107_title">"Version 1.0.7 (March 1st, 2019)"</string>
-    <string name="v107_text">" - User profiles now have a bio, a date of birth and a location\n"
+        <item>" - User profiles now have a bio, a date of birth and a location\n"
         "- The own profile can now be edited\n"
         "- Every user has a own unique ID\n"
         "- The user's favorite color is being displayed as background of the user's profile picture\n"
@@ -299,10 +308,9 @@
         "- A bug was fixed that allowed the user to send empty messages\n"
         "- A bug was fixed that caused the keyboard to not close properly when the user clicks on \"Cancel\"\n"
         "- A bug was fixed that was triggered when the user tried to create a room with the name of an already existing room\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v108_title">"Version 1.0.8 (June 2nd, 2019)"</string>
-    <string name="v108_text">"- Push notifications can now be received\n"
+        <item>"- Push notifications can now be received\n"
         "- User profiles now have a banner\n"
         "- Banners and profile images can now be edited\n"
         "- Messages can now be pinned\n"
@@ -346,10 +354,9 @@
         "- A bug leading to crashes when using overlapping formatting with \* and \_ was fixed\n"
         "- Device information and crash reports are now submitted to the developer\n"
         "- Android versions below 5.0 are no longer supported\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v109_title">"Version 1.0.9 (November 14th, 2019)"</string>
-    <string name="v109_text">"- The account system has been optimized. Using the app is now only possible when authenticated\n"
+        <item>"- The account system has been optimized. Using the app is now only possible when authenticated\n"
         "- Push notifications now have a "Reply" and "Mark as read" function\n"
         "- The admin can now set a room image\n"
         "- The user can now slide through the image list when an image is opened in fullscreen\n"
@@ -360,21 +367,18 @@
         "- When quoting an image, the image to be quoted is now previewed\n"
         "- When uploading a profile image or banner, a progress dialog is now shown\n"
         "- A bug not showing the profile banner button in the \"Edit profile\" menu when the user has no own banner was fixed\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v110_title">"Version 1.1.0 (August 20th, 2023)"</string>
-    <string name="v110_text">"- Many dependencies have been updated\n"
+        <item>"- Many dependencies have been updated\n"
         "- Android versions below Android 8.0 Oreo are no longer supported\n"
         "- Many code improvements\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v111_title">"Version 1.1.1 (September 2nd, 2023)"</string>
-    <string name="v111_text">"- Login screen now uses correct theme for buttons\n"
+        <item>"- Login screen now uses correct theme for buttons\n"
         "- Many code improvements\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v112_title">"Version 1.1.2 (September 10th, 2023)"</string>
-    <string name="v112_text">"- A crash that occurred when the creator of a message had no valid user ID has been fixed\n"
+        <item>"- A crash that occurred when the creator of a message had no valid user ID has been fixed\n"
         "- A bug that text sizes were not properly adapted to the system settings has been fixed\n"
         "- A bug that the search text for forwarded messages was not highlighted has been fixed\n"
         "- A bug that profile images and banners could not be opened in fullscreen inside a chat room has been fixed\n"
@@ -386,7 +390,8 @@
         "- A crash that occurred under certain conditions when searching a room has been fixed\n"
         "- A bug that the chosen theme was not properly applied to the dialog windows on the login screen has been fixed\n"
         "- Many code improvements\n"
-        "\n "</string>
+        "\n "</item>
+    </string-array>
 
     <string name="copyright">"Yannick Adler, 2018–2023\nVersion %s\n\n"
         "Used libraries:\n"

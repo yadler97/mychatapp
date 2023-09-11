@@ -190,39 +190,50 @@
         <item>Super Smash Bros. Ultimate</item>
     </string-array>
 
-    <string name="v100_title">"Version 1.0.0 (01.07.2018)"</string>
-    <string name="v100_text">" - erste Veröffentlichung\n"
-        "\n "</string>
+    <string-array name="changelog_titles">
+        <item>Version 1.0.0 (01.07.2018)</item>
+        <item>Version 1.0.1 (02.07.2018)</item>
+        <item>Version 1.0.2 (02.07.2018)</item>
+        <item>Version 1.0.3 (05.07.2018)</item>
+        <item>Version 1.0.4 (13.08.2018)</item>
+        <item>Version 1.0.5 (26.08.2018)</item>
+        <item>Version 1.0.6 (27.10.2018)</item>
+        <item>Version 1.0.7 (01.03.2019)</item>
+        <item>Version 1.0.8 (02.06.2019)</item>
+        <item>Version 1.0.9 (14.11.2019)</item>
+        <item>Version 1.1.0 (20.08.2023)</item>
+        <item>Version 1.1.1 (02.09.2023)</item>
+        <item>Version 1.1.2 (10.09.2023)</item>
+    </string-array>
 
-    <string name="v101_title">"Version 1.0.1 (02.07.2018)"</string>
-    <string name="v101_text">" - Das Textfeld für den Nutzernamen kann jetzt nicht mehr unausgefüllt bestätigt werden\n"
+    <string-array name="changelog_text">
+        <item>" - erste Veröffentlichung\n"
+        "\n "</item>
+
+        <item>" - Das Textfeld für den Nutzernamen kann jetzt nicht mehr unausgefüllt bestätigt werden\n"
         "- Wird kein Raumname eingegeben, wird nach einem Klick auf \"Raum Erstellen\" die Seite auch nicht mehr neugeladen\n"
         "- Nach dem Erstellen eines neuen Raums wird der Nutzer jetzt mit einem Toast \"Raum erstellt\" über den erfolgreichen Abschluss der Aktion informiert\n"
         "- Die App verfügt jetzt über ein eigenes Icon\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v102_title">"Version 1.0.2 (02.07.2018)"</string>
-    <string name="v102_text">" - Das Design des Chatraums wurde überarbeitet. Nachrichten werden jetzt in farbigen Kästen dargestellt\n"
+        <item>" - Das Design des Chatraums wurde überarbeitet. Nachrichten werden jetzt in farbigen Kästen dargestellt\n"
         "- Neben den Nachrichten anderer Personen wird jetzt ein Feld für ein Profilbild dargestellt. Dieses wird aktuell mit dem Anfangsbuchstaben der Person gefüllt\n"
         "- Die Absendezeit einer Nachricht wird jetzt neben der Nachricht angezeigt\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v103_title">"Version 1.0.3 (05.07.2018)"</string>
-    <string name="v103_text">" - Ein Menü ist jetzt in der Raumauswahl verfügbar. Dort wird der eigene Name angezeigt und ein Zugriff auf verschiedene andere Funktionen ermöglicht\n"
+        <item>" - Ein Menü ist jetzt in der Raumauswahl verfügbar. Dort wird der eigene Name angezeigt und ein Zugriff auf verschiedene andere Funktionen ermöglicht\n"
         "- Der Changelog und das Impressum sind jetzt über das Menü einsehbar\n"
         "- Das eigene Profil lässt sich jetzt betrachten\n"
         "- Das Icon der App wurde farblich an die Farben im Chatraum angepasst\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v104_title">"Version 1.0.4 (13.08.2018)"</string>
-    <string name="v104_text">" - Nachrichten in einem Chat lassen sich jetzt durch Gedrückthalten auf die Nachricht kopieren\n"
+        <item>" - Nachrichten in einem Chat lassen sich jetzt durch Gedrückthalten auf die Nachricht kopieren\n"
         "- Beim Erstellen eines Raumes muss jetzt eine Kategorie und ein Passwort angegeben werden\n"
         "- Wenn ein Passwort das erste Mal korrekt eingegeben wurde, wird es auf dem Gerät gespeichert und ab dem zweiten Öffnen des Raums automatisch eingegeben, damit der Nutzer schneller zwischen Räumen wechseln kann\n"
         "- Die Kategorie des Raums wird in der Übersicht unter dem Raum angezeigt\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v105_title">"Version 1.0.5 (26.08.2018)"</string>
-    <string name="v105_text">" - Die Position des Buttons, um einen Raum hinzuzufügen, wurde angepasst\n"
+        <item>" - Die Position des Buttons, um einen Raum hinzuzufügen, wurde angepasst\n"
         "- Wird ein Eintrag in der Datenbank geändert oder gelöscht, wird nun auch der Chat-Raum live aktualisiert\n"
         "- Der Ersteller eines Raums wird jetzt nicht mehr dazu aufgefordert, das Passwort einzugeben\n"
         "- Neue Raumkategorien wurden hinzugefügt\n"
@@ -230,10 +241,9 @@
         "- Im Menü kann der Nutzer unter \"Design\" jetzt die Abrundung der Ecken im Chatraum einstellen\n"
         "- Am Beginn eines Raums wird jetzt angezeigt, wann und von wem der Raum erstellt wurde\n"
         "- Zwischen Nachrichten von unterschiedlichen Tagen wird jetzt das Datum des neuen Tages angezeigt\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v106_title">"Version 1.0.6 (27.10.2018)"</string>
-    <string name="v106_text">" - Bilder aus der Galerie lassen sich jetzt im Chat posten\n"
+        <item>" - Bilder aus der Galerie lassen sich jetzt im Chat posten\n"
         "- Bilder lassen sich jetzt mit der Kamera direkt in der App aufnehmen und anschließend im Chat posten\n"
         "- Bilder im Chat lassen sich per Gedrückthalten auf ein Bild auf das eigene Gerät herunterladen\n"
         "- Das Hintergrundbild lässt sich jetzt unter \"Design\" ändern\n"
@@ -256,10 +266,9 @@
         "- Der Nutzer wird jetzt benachrichtigt, wenn keine Datenbankverbindung hergestellt werden konnte\n"
         "- Ein gravierender Fehler wurde behoben, der die App bei einem Neustart zum sofortigen Absturz brachte\n"
         "- Android-Versionen unter 4.4 werden jetzt nicht mehr unterstützt\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v107_title">"Version 1.0.7 (01.03.2019)"</string>
-    <string name="v107_text">" - Unter \"Mein Profil\" werden jetzt die Profilbio, der Wohnort und das Geburtsdatum angezeigt\n"
+        <item>" - Unter \"Mein Profil\" werden jetzt die Profilbio, der Wohnort und das Geburtsdatum angezeigt\n"
         "- Das eigene Profil lässt sich nun editieren\n"
         "- Jeder Nutzer hat jetzt eine eindeutige ID\n"
         "- Die Lieblingsfarbe des Users wird als Hintergrund im Profilbild angezeigt\n"
@@ -299,10 +308,9 @@
         "- Ein Bug wurde behoben, der es erlaubte eine leere Nachricht abzuschicken\n"
         "- Ein Bug wurde behoben, dass die Tastatur nicht geschlossen wird, wenn der User auf \"Abbrechen\" klickt\n"
         "- Ein Bug wurde behoben, der auftrat, wenn der User einen Raum erstellt, der denselben Namen trägt wie ein bereits existierender Raum\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v108_title">"Version 1.0.8 (02.06.2019)"</string>
-    <string name="v108_text">"- Push-Nachrichten können jetzt erhalten werden\n"
+        <item>"- Push-Nachrichten können jetzt erhalten werden\n"
         "- Profile haben jetzt einen Profilbanner\n"
         "- Banner und Profilbild lassen sich jetzt bearbeiten\n"
         "- Nachrichten können jetzt angepinnt werden\n"
@@ -346,10 +354,9 @@
         "- Ein Bug wurde behoben, der die App beim Nutzen von ineinander verschachtelten Formatierungen mithilfe von \* und \_ zum Absturz brachte\n"
         "- Geräteinformationen und Absturzberichte werden jetzt an den Entwickler übertragen\n"
         "- Android-Versionen unter 5.0 werden jetzt nicht mehr unterstützt\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v109_title">"Version 1.0.9 (14.11.2019)"</string>
-    <string name="v109_text">"- Das Accountsystem wurde verbessert. Die Benutzung der App ist jetzt nur noch für authentifizierte User möglich\n"
+        <item>"- Das Accountsystem wurde verbessert. Die Benutzung der App ist jetzt nur noch für authentifizierte User möglich\n"
         "- Push-Nachrichten haben jetzt eine \"Antworten\"- und \"Als gelesen markieren\"-Funktion\n"
         "- Der Admin kann jetzt ein Raumbild hochladen\n"
         "- Man kann jetzt durch die Bilderliste durchsliden, wenn ein Bild im Vollbild geöffnet ist\n"
@@ -360,21 +367,18 @@
         "- Beim Zitieren eines Bildes wird jetzt eine Vorschau des zu zitierenden Bildes angezeigt\n"
         "- Eine ProgressDialog wird jetzt angezeigt, wenn man ein Profilbild oder einen Banner hochlädt\n"
         "- Ein Bug wurde behoben, der dafür sorgte, dass der Profilbanner-Button unter \"Profil bearbeiten\" nicht angezeigt wurde, wenn der User keinen eigenen Banner hat\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v110_title">"Version 1.1.0 (20.08.2023)"</string>
-    <string name="v110_text">"- Zahlreiche Dependencies wurden geupdatet\n"
+        <item>"- Zahlreiche Dependencies wurden geupdatet\n"
         "- Android-Versionen unter Android 8.0 Oreo werden jetzt nicht mehr unterstützt\n"
         "- Zahlreiche Verbesserungen am Code\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v111_title">"Version 1.1.1 (02.09.2023)"</string>
-    <string name="v111_text">"- Der Anmeldebildschirm verwendet jetzt das korrekte Theme für die Buttons\n"
+        <item>"- Der Anmeldebildschirm verwendet jetzt das korrekte Theme für die Buttons\n"
         "- Zahlreiche Verbesserungen am Code\n"
-        "\n "</string>
+        "\n "</item>
 
-    <string name="v112_title">"Version 1.1.2 (10.09.2023)"</string>
-    <string name="v112_text">"- Ein Absturz wurde behoben, wenn der Ersteller einer Nachricht keine gültige Nutzer-ID hat\n"
+        <item>"- Ein Absturz wurde behoben, wenn der Ersteller einer Nachricht keine gültige Nutzer-ID hat\n"
         "- Ein Fehler wurde behoben, dass die Schriftgröße bei vielen Texten nicht entsprechend der Systemeinstellungen angepasst wurde\n"
         "- Ein Fehler wurde behoben, dass der Suchtext in weitergeleiteten Nachrichten nicht korrekt markiert wurde\n"
         "- Ein Fehler wurde behoben, dass Profilbilder und Profilbanner in einem Chatraum sich nicht im Vollbild öffnen liesen\n"
@@ -386,7 +390,8 @@
         "- Ein Absturz wurde behoben, der unter bestimmten Umständen bei der Raumsuche auftreten konnte\n"
         "- Ein Fehler wurde behoben, dass das gewählte Theme nicht korrekt bei den Dialogen des Anmeldebirdschirms genutzt wurde\n"
         "- Zahlreiche Verbesserungen am Code\n"
-        "\n "</string>
+        "\n "</item>
+    </string-array>
 
     <string name="copyright">"Yannick Adler, 2018–2023\nVersion %s\n\n"
         "Genutzte Libraries:\n"

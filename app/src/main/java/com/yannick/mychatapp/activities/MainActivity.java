@@ -34,6 +34,7 @@ import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -109,6 +110,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import hakobastvatsatryan.DropdownTextView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
@@ -492,6 +494,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void showChangelog() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.changelog, null);
+
+        String[] versions = getResources().getStringArray(R.array.changelog_titles);
+        String[] texts = getResources().getStringArray(R.array.changelog_text);
+
+        LinearLayout linearLayout = view.findViewById(R.id.linearLayout);
+
+        for (int i = 0; i < versions.length; i++) {
+            View inflatedView = inflater.inflate(R.layout.changelog_item, null);
+            DropdownTextView dropdownTextView = inflatedView.findViewById(R.id.dropdownTextView);
+            dropdownTextView.setTitleText(versions[i]);
+            dropdownTextView.setContentText(texts[i]);
+            linearLayout.addView(inflatedView, i);
+        }
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
