@@ -19,14 +19,15 @@
     <color name="iconGrey">#9E9E9E</color>
     <color name="standardTextColor">#757575</color>
 
-    <color name="logo_background">#8EC54F</color>
+    <color name="light_background">#8EC54F</color>
+    <color name="light_background_nav">#5E8135</color>
 
     <color name="dark_background">#36393E</color>
-    <color name="dark_top">#202225</color>
+    <color name="dark_background_nav">#202225</color>
     <color name="dark_actionbar">#2F3136</color>
     <color name="dark_divider">#4A4C52</color>
     <color name="dark_button">#7289DA</color>
-    <color name="dark_button_pressed">#997289DA</color>
+    <color name="dark_button_pressed">#55659F</color>
 
     <array name="favcolors">
         <item name="red">@color/red</item>
