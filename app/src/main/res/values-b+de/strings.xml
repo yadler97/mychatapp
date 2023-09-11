@@ -158,18 +158,18 @@
 
     <string-array name="categories">
         <item>Kategorie auswählen</item>
-        <item>Gaming</item>
+        <item>Studium &amp; Arbeit</item>
+        <item>Videospiele</item>
         <item>Politik</item>
         <item>Geographie</item>
-        <item>Dialekte</item>
-        <item>Anime</item>
-        <item>Schule und Beruf</item>
+        <item>Sprachen</item>
+        <item>Literatur</item>
         <item>Technik</item>
-        <item>Fernsehen</item>
+        <item>Film &amp; Fernsehen</item>
         <item>Sport</item>
-        <item>Kultur</item>
+        <item>Kultur &amp; Kunst</item>
+        <item>Musik</item>
         <item>Diverses</item>
-        <item>Geshitposte</item>
     </string-array>
 
     <string-array name="themes">

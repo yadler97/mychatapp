@@ -158,18 +158,18 @@
 
     <string-array name="categories">
         <item>Select category</item>
+        <item>Study &amp; Work</item>
         <item>Gaming</item>
         <item>Politics</item>
         <item>Geography</item>
-        <item>Dialects</item>
-        <item>Anime</item>
-        <item>School and work</item>
+        <item>Languages</item>
+        <item>Literature</item>
         <item>Technics</item>
         <item>TV</item>
         <item>Sports</item>
-        <item>Culture</item>
+        <item>Culture &amp; Art</item>
+        <item>Music</item>
         <item>Misc</item>
-        <item>Shitposting</item>
     </string-array>
 
     <string-array name="themes">
