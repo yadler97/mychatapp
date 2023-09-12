@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.notifications;
 
 import android.app.ActivityManager;
 import android.app.PendingIntent;
@@ -20,6 +20,8 @@ import androidx.preference.PreferenceManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.activities.ChatActivity;
 import com.yannick.mychatapp.activities.MainActivity;
 

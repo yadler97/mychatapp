@@ -63,7 +63,7 @@
             android:name=".activities.LoginActivity" >
         </activity>
         <service
-            android:name=".PushService"
+            android:name=".notifications.PushService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
@@ -71,11 +71,11 @@
             </intent-filter>
         </service>
         <receiver
-            android:name=".ReplyReceiver"
+            android:name=".notifications.ReplyReceiver"
             android:enabled="true"
             android:exported="false" />
         <receiver
-            android:name=".MarkAsReadReceiver"
+            android:name=".notifications.MarkAsReadReceiver"
             android:enabled="true"
             android:exported="false" />
     </application>

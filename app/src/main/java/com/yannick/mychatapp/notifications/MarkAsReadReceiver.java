@@ -1,9 +1,11 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.notifications;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import androidx.core.app.NotificationManagerCompat;
+
+import com.yannick.mychatapp.FileOperations;
 
 public class MarkAsReadReceiver extends BroadcastReceiver {
 

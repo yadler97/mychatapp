@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.notifications;
 
 import android.app.RemoteInput;
 import android.content.BroadcastReceiver;
@@ -10,6 +10,9 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.yannick.mychatapp.Constants;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
