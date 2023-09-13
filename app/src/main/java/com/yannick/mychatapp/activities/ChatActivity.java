@@ -490,11 +490,13 @@ public class ChatActivity extends AppCompatActivity {
 
     private void getRoomData(DataSnapshot dataSnapshot) {
         room = dataSnapshot.getValue(Room.class);
-        room.setKey(dataSnapshot.getRef().getParent().getKey());
-        User user = getUser(room.getAdmin());
+        if (room != null) {
+            room.setKey(dataSnapshot.getRef().getParent().getKey());
+            User user = getUser(room.getAdmin());
 
-        if (!memberList.contains(user)) {
-            memberList.add(user);
+            if (!memberList.contains(user)) {
+                memberList.add(user);
+            }
         }
     }
 
@@ -1310,6 +1312,7 @@ public class ChatActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.close, null);
         if (room.getAdmin().equals(userID)) {
             builder.setNegativeButton(R.string.editroom, (dialogInterface, i) -> editRoom());
+            builder.setNeutralButton(R.string.delete_room, (dialogInterface, i) -> deleteRoom());
         }
         AlertDialog alert = builder.create();
         alert.show();
@@ -2009,7 +2012,6 @@ public class ChatActivity extends AppCompatActivity {
         });
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
-
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view12 -> {
                 final String roomName = roomNameEditText.getText().toString().trim();
@@ -2058,6 +2060,37 @@ public class ChatActivity extends AppCompatActivity {
             });
         });
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        alert.show();
+    }
+
+    private void deleteRoom() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.delete_room, null);
+
+        AlertDialog.Builder builder;
+        if (theme == Theme.DARK) {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
+        } else {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
+        }
+        builder.setCustomTitle(setupHeader(getResources().getString(R.string.delete_room)));
+        builder.setView(view);
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.close, null);
+        AlertDialog alert = builder.create();
+        alert.setOnShowListener(dialogInterface -> {
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view12 -> {
+                if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().getUid().equals(room.getAdmin())) {
+                    roomRoot.child(roomKey).removeValue((error, ref) -> {
+                        Intent homeIntent = new Intent(ChatActivity.this, MainActivity.class);
+                        startActivity(homeIntent);
+                        finish();
+                        Toast.makeText(ChatActivity.this, R.string.room_successfully_deleted, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        });
         alert.show();
     }
 

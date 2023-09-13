@@ -1297,7 +1297,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     Intent homeIntent = new Intent(MainActivity.this, LoginActivity.class);
                     startActivity(homeIntent);
                     finish();
-                    Toast.makeText(MainActivity.this, R.string.account_successfully_deleted, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, R.string.room_successfully_deleted, Toast.LENGTH_SHORT).show();
                 }
             }));
         }

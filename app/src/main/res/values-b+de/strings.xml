@@ -155,6 +155,9 @@
     <string name="account_successfully_deleted">Account erfolgreich gelöscht</string>
     <string name="account_deletion_info">ACHTUNG: Du bist kurz davor, deinen Account zu löschen. Diese Aktion kann nicht rückgängig gemacht werden! Wenn du wirklich deinen Account löschen möchtest, dann gib bitte dein Passwort ein, um fortzufahren.</string>
     <string name="email_verification_info">Du musst deine Mail-Adresse bestätigen, bevor du deinen Account nutzen kannst. Wenn du keine Mail erhalten hast, klicke bitte den \"Erneut Versenden\"-Button. Wenn du deine Mail-Adresse bestätigt hast, kannst du dieses Fenster schließen und mit dem Login fortfahren.</string>
+    <string name="delete_room">Raum löschen</string>
+    <string name="room_successfully_deleted">Raum erfolgreich gelöscht</string>
+    <string name="room_deletion_info">Möchtest du diesen Raum wirklich löschen?</string>
 
     <string name="hint_email">E-Mail-Adresse <font color='#FF0000'>*</font></string>
     <string name="hint_name">Name <font color='#FF0000'>*</font></string>
