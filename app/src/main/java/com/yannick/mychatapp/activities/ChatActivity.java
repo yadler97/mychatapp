@@ -510,7 +510,7 @@ public class ChatActivity extends AppCompatActivity {
         User user = getUser(room.getAdmin());
         String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
         String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
-        Message m = new Message(user, text, creationTime, false, room.getKey(), Message.Type.HEADER, "", "", "", false);
+        Message m = new Message(user, text, creationTime, false, room.getKey(), Message.Type.HEADER, null, false);
 
         messageList.add(m);
         mAdapter.notifyDataSetChanged();
@@ -533,14 +533,14 @@ public class ChatActivity extends AppCompatActivity {
             Log.e("ParseException", e.toString());
         }
         if (lastReadMessage.equals(lastKey) && !lastReadMessageReached) {
-            Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, false, "-", Message.Type.HEADER, "", "", "", false);
+            Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, false, "-", Message.Type.HEADER, null, false);
             messageList.add(m);
         }
         lastKey = key;
 
         if (index == -1 && !messageList.get(messageList.size() - 1).getTime().substring(0, 8).equals(time.substring(0, 8))) {
             String text = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
-            Message m = new Message(user, text, time, false, "-", Message.Type.HEADER, "", "", "", false);
+            Message m = new Message(user, text, time, false, "-", Message.Type.HEADER, null, false);
             messageList.add(m);
         }
 
@@ -557,45 +557,43 @@ public class ChatActivity extends AppCompatActivity {
             if (!message.equals("")) {
                 if (message.length() > 11 && message.substring(0, 12).equals("(Forwarded) ")) {
                     if (message.length() > 2000 + 12) {
-                        m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedExpandableMessageType(sender, con), "", "", "", pinned);
+                        m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedExpandableMessageType(sender, con), null, pinned);
                     } else {
-                        m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedMessageType(sender, con), "", "", "", pinned);
+                        m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedMessageType(sender, con), null, pinned);
                     }
                 } else {
                     if (message.length() > 2000) {
-                        m = new Message(user, message, time, sender, key, Message.getFittingExpandableMessageType(sender, con), "", "", "", pinned);
+                        m = new Message(user, message, time, sender, key, Message.getFittingExpandableMessageType(sender, con), null, pinned);
                     } else {
-                        m = new Message(user, message, time, sender, key, Message.getFittingBasicMessageType(sender, con), "", "", "", pinned);
+                        m = new Message(user, message, time, sender, key, Message.getFittingBasicMessageType(sender, con), null, pinned);
                     }
                 }
             } else {
                 if (!imageList.contains(img)) {
                     imageList.add(img);
                 }
-                m = new Message(user, img, time, sender, key, Message.getFittingImageMessageType(sender, con), "", "", "", pinned);
+                m = new Message(user, img, time, sender, key, Message.getFittingImageMessageType(sender, con), null, pinned);
             }
         } else {
-            Message.Type quoteType = Message.Type.HEADER;
-            String quoteMessage = getResources().getString(R.string.quotedmessagenolongeravailable);
-            String quoteName = "";
-            String quoteKey = "";
+            Message quotedMessage = null;
             for (Message quoteMsg : messageList) {
                 if (quoteMsg.getKey().equals(quote)) {
-                    quoteMessage = quoteMsg.getMsg();
-                    quoteName = quoteMsg.getUser().getName();
-                    quoteKey = quoteMsg.getKey();
-                    quoteType = quoteMsg.getType();
+                    quotedMessage = quoteMsg;
                     break;
                 }
             }
-            if (!Message.isImage(quoteType)) {
-                if (!quoteMessage.equals(getResources().getString(R.string.quotedmessagenolongeravailable))) {
-                    m = new Message(user, message, time, sender, key, Message.getFittingQuoteMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
+
+            if (quotedMessage != null) {
+                if (!Message.isImage(quotedMessage.getType())) {
+                    m = new Message(user, message, time, sender, key, Message.getFittingQuoteMessageType(sender, con), quotedMessage, pinned);
                 } else {
-                    m = new Message(user, message, time, sender, key, Message.getFittingQuoteDeletedMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
+                    m = new Message(user, message, time, sender, key, Message.getFittingQuoteImageMessageType(sender, con), quotedMessage, pinned);
                 }
             } else {
-                m = new Message(user, message, time, sender, key, Message.getFittingQuoteImageMessageType(sender, con), quoteName, quoteMessage, quoteKey, pinned);
+                quotedMessage = new Message();
+                quotedMessage.setMsg(getResources().getString(R.string.quotedmessagenolongeravailable));
+                quotedMessage.setKey(quote);
+                m = new Message(user, message, time, sender, key, Message.getFittingQuoteDeletedMessageType(sender, con), quotedMessage, pinned);
             }
         }
         if (index != -1 && messageList.get(ind).getTime().equals("")) {
@@ -651,14 +649,12 @@ public class ChatActivity extends AppCompatActivity {
 
         messageList.clear();
         for (Message m : tempMessageList) {
-            if (m.getQuoteKey().equals(key)) {
-                if (img.equals("")) {
-                    m.setQuoteMessage(getResources().getString(R.string.quotedmessagenolongeravailable));
-                } else {
-                    m.setQuoteMessage(img);
+            if (m.getQuotedMessage() != null) {
+                if (m.getQuotedMessage().getKey().equals(key)) {
+                    m.getQuotedMessage().setMsg(getResources().getString(R.string.quotedmessagenolongeravailable));
+                    m.getQuotedMessage().setUser(null);
+                    m.setType(Message.getQuoteDeletedTypeForQuoteType(m.getType()));
                 }
-                m.setQuoteName("");
-                m.setType(Message.getQuoteDeletedTypeForQuoteType(m.getType()));
             }
             messageList.add(m);
         }
@@ -687,13 +683,13 @@ public class ChatActivity extends AppCompatActivity {
         }
         for (Message m : messageList) {
             if (m.getType() != Message.Type.HEADER) {
-                if (m.getQuoteKey().equals(key)) {
+                if (m.getQuotedMessage().getKey().equals(key)) {
                     if (img.equals("")) {
-                        m.setQuoteMessage(chatMsg);
+                        m.getQuotedMessage().setMsg(chatMsg);
                     } else {
-                        m.setQuoteMessage(img);
+                        m.getQuotedMessage().setMsg(img);
                     }
-                    m.setQuoteName(getUser(chatUserId).getName());
+                    m.getQuotedMessage().setUser(getUser(chatUserId));
                 }
             }
         }
@@ -1380,14 +1376,14 @@ public class ChatActivity extends AppCompatActivity {
         if (m.getMsg().toLowerCase().contains(text.toLowerCase()) && m.getType() != Message.Type.HEADER && !Message.isImage(m.getType())) {
             if (searchedMessageList.isEmpty() || !searchedMessageList.get(searchedMessageList.size() - 1).getTime().substring(0, 8).equals(m.getTime().substring(0, 8))) {
                 String time = m.getTime().substring(6, 8) + "." + m.getTime().substring(4, 6) + "." + m.getTime().substring(0, 4);
-                Message m2 = new Message(m.getUser(), time, m.getTime(), false, "-", Message.Type.HEADER, "", "", "", m.isPinned());
+                Message m2 = new Message(m.getUser(), time, m.getTime(), false, "-", Message.Type.HEADER, null, m.isPinned());
                 searchedMessageList.add(m2);
             }
             Message m2;
             if (Message.isConMessage(m.getType())) {
-                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuoteName(), m.getQuoteMessage(), m.getQuoteKey(), m.isPinned());
+                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuotedMessage(), m.isPinned());
             } else {
-                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), m.getType(), m.getQuoteName(), m.getQuoteMessage(), m.getQuoteKey(), m.isPinned());
+                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), m.getType(), m.getQuotedMessage(), m.isPinned());
             }
             m2.setSearchString(text);
             searchedMessageList.add(m2);
@@ -1412,11 +1408,11 @@ public class ChatActivity extends AppCompatActivity {
                     backup += "\n" + btimeDay + "\n";
                 }
                 if (Message.isQuote(m.getType()) || m.getType() == Message.Type.QUOTE_IMAGE_RECEIVED_CON || m.getType() == Message.Type.QUOTE_IMAGE_SENT_CON) {
-                    String quote = m.getQuoteMessage();
+                    String quote = m.getQuotedMessage().getMsg();
                     if (quote.length() > 40) {
                         quote = quote.substring(0, 40) + "...";
                     }
-                    backup += btime + " - [" + m.getQuoteName() + ": " + quote + "] - "  + m.getUser().getName() + ": " + m.getMsg() + "\n";
+                    backup += btime + " - [" + m.getQuotedMessage().getUser().getName() + ": " + quote + "] - "  + m.getUser().getName() + ": " + m.getMsg() + "\n";
                 } else {
                     backup += btime + " - " + m.getUser().getName() + ": " + m.getMsg() + "\n";
                 }

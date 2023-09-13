@@ -238,7 +238,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.jump) {
                 Intent intent = new Intent("quotedMessage");
-                intent.putExtra("quoteID", message.getQuoteKey());
+                intent.putExtra("quoteID", message.getQuotedMessage().getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.quote) {
                 Intent intent = new Intent("quote");
@@ -250,7 +250,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.download && Message.isQuoteImage(type)) {
                 Intent intent = new Intent("permission");
-                intent.putExtra("imgurl", message.getQuoteMessage());
+                intent.putExtra("imgurl", message.getQuotedMessage().getMsg());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         }
@@ -309,11 +309,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 } else if (Message.isQuoteImage(type)) {
                     Intent intent = new Intent("fullscreenimage");
-                    intent.putExtra("image", clickedDataItem.getQuoteMessage());
+                    intent.putExtra("image", clickedDataItem.getQuotedMessage().getMsg());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 } else if (Message.isQuote(type)) {
                     Intent intent = new Intent("quotedMessage");
-                    intent.putExtra("quoteID", clickedDataItem.getQuoteKey());
+                    intent.putExtra("quoteID", clickedDataItem.getQuotedMessage().getKey());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
             }
@@ -465,7 +465,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             if (!Message.isDeletedQuote(type)) {
                 String tempUserId = "";
                 for (Message m2 : messageList) {
-                    if (m2.getKey().equals(m.getQuoteKey())) {
+                    if (m2.getKey().equals(m.getQuotedMessage().getKey())) {
                         tempUserId = m2.getUser().getUserID();
                         break;
                     }
@@ -473,13 +473,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 if (mAuth.getCurrentUser().getUid().equals(tempUserId)) {
                     holder.quoteName.setText(R.string.you);
                 } else {
-                    holder.quoteName.setText(m.getQuoteName());
+                    holder.quoteName.setText(m.getQuotedMessage().getUser().getName());
                 }
             }
             if (!Message.isQuoteImage(type)) {
-                holder.quoteMessage.setText(m.getQuoteMessage());
+                holder.quoteMessage.setText(m.getQuotedMessage().getMsg());
             } else {
-                String imageURL = m.getQuoteMessage();
+                String imageURL = m.getQuotedMessage().getMsg();
                 StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
                 StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 

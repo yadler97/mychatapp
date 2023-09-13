@@ -7,26 +7,22 @@ public class Message {
     private boolean sender;
     private String key;
     private Type type;
-    private String quoteName;
-    private String quoteMessage;
-    private String quoteKey;
+    private Message quotedMessage;
     private String searchString;
     private boolean pinned;
 
     public Message() {
-
+        this.type = Type.HEADER;
     }
 
-    public Message(User user, String msg, String time, boolean sender, String id, Type type, String quoteName, String quoteMessage, String quoteKey, boolean pinned) {
+    public Message(User user, String msg, String time, boolean sender, String id, Type type, Message quotedMessage, boolean pinned) {
         this.user = user;
         this.msg = msg;
         this.time = time;
         this.sender = sender;
         this.key = id;
         this.type = type;
-        this.quoteMessage = quoteMessage;
-        this.quoteName = quoteName;
-        this.quoteKey = quoteKey;
+        this.quotedMessage = quotedMessage;
         this.searchString = "";
         this.pinned = pinned;
     }
@@ -337,6 +333,10 @@ public class Message {
         return key;
     }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     public Type getType() {
         return type;
     }
@@ -353,24 +353,12 @@ public class Message {
         this.sender = sender;
     }
 
-    public String getQuoteName() {
-        return quoteName;
+    public Message getQuotedMessage() {
+        return quotedMessage;
     }
 
-    public void setQuoteName(String quoteName) {
-        this.quoteName = quoteName;
-    }
-
-    public String getQuoteMessage() {
-        return quoteMessage;
-    }
-
-    public void setQuoteMessage(String quoteMessage) {
-        this.quoteMessage = quoteMessage;
-    }
-
-    public String getQuoteKey() {
-        return quoteKey;
+    public void setQuotedMessage(Message quotedMessage) {
+        this.quotedMessage = quotedMessage;
     }
 
     public void setType(Type type) {

@@ -144,14 +144,13 @@ public class RoomListFragmentFavorites extends Fragment {
                             String image = child.child("img").getValue().toString();
                             String userid = child.child("name").getValue().toString();
                             boolean pinned = (boolean) child.child("pinned").getValue();
-                            String quote = child.child("quote").getValue().toString();
                             String time = child.child("time").getValue().toString();
 
                             Message newestMessage;
                             if (!image.isEmpty()) {
-                                newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, "", "", quote, pinned);
+                                newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, null, pinned);
                             } else {
-                                newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
+                                newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, null, pinned);
                             }
                             room.setNewestMessage(newestMessage);
 
@@ -298,7 +297,7 @@ public class RoomListFragmentFavorites extends Fragment {
                 User user = new User();
                 user.setUserID(userid);
                 user.setName(username);
-                Message newestMessage = new Message(user, nmMsg, nmTime, false, nmKey, nmType, "", "", "", false);
+                Message newestMessage = new Message(user, nmMsg, nmTime, false, nmKey, nmType, null, false);
                 room.setNewestMessage(newestMessage);
             }
 
