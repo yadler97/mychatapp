@@ -13,6 +13,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.data.Message;
 import com.yannick.mychatapp.R;
@@ -67,7 +68,7 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
         if (Message.isImage(type)) {
             String imageURL = pinnedList.get(position).getMsg();
             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
-            StorageReference pathReference = storageRef.child("images/" + imageURL);
+            StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 
             GlideApp.with(context)
                     //.using(new FirebaseImageLoader())

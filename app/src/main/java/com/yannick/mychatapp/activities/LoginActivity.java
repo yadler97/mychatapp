@@ -1,5 +1,6 @@
 package com.yannick.mychatapp.activities;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -25,6 +26,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -63,7 +66,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String DEFAULT_BIRTHDAY = "01.01.2000";
     private static boolean ownProfileImage = false;
     private static int colour = 0;
-    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersKey);
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
 
     private String img = "";
     private String banner = "";
@@ -347,7 +350,6 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), R.string.profilecreated, Toast.LENGTH_SHORT).show();
 
                         if (!ownProfileImage) {
-                            StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
                             TextDrawable drawable = TextDrawable.builder()
                                     .beginConfig()
                                     .bold()
@@ -359,7 +361,7 @@ public class LoginActivity extends AppCompatActivity {
                             drawable.draw(canvas);
 
                             byte[] byteArray;
-                            final StorageReference refProfileImage = storageRef.child("profile_images/" + img);
+                            final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + img);
                             ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                             byteArray = stream.toByteArray();
@@ -451,9 +453,8 @@ public class LoginActivity extends AppCompatActivity {
         profileImageButton = view.findViewById(R.id.user_profile_image);
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refProfileImage = storageRef.child("profile_images/" + img);
-        final StorageReference refProfileBanner = storageRef.child("profile_banners/" + banner);
+        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + img);
+        final StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
 
         birthdayEdit.setText(DEFAULT_BIRTHDAY);
 
@@ -495,14 +496,14 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_IMAGE_REQUEST);
+            pickProfileImageLauncher.launch(intent);
         });
 
         profileBannerButton.setOnClickListener(view16 -> {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_BANNER_REQUEST);
+            pickProfileBannerLauncher.launch(intent);
         });
 
         GradientDrawable shape = new GradientDrawable();
@@ -637,17 +638,6 @@ public class LoginActivity extends AppCompatActivity {
         return header;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && data != null) {
-            Uri filePath = data.getData();
-            if (filePath != null) {
-                uploadImage(filePath, requestCode);
-            }
-        }
-    }
-
     private void uploadImage(Uri filePath, final int type) {
         final ProgressDialog progressDialog;
         if (theme == Theme.DARK) {
@@ -658,14 +648,13 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setTitle(R.string.upload);
         progressDialog.show();
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference ref;
         if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
             img = UUID.randomUUID().toString();
-            ref = storageRef.child("profile_images/" + img);
+            ref = storage.getReference().child(Constants.profileImagesStorageKey + img);
         } else {
             banner = UUID.randomUUID().toString();
-            ref = storageRef.child("profile_banners/" + banner);
+            ref = storage.getReference().child(Constants.profileBannersStorageKey + banner);
         }
 
         ImageOperations imageOperations = new ImageOperations(getContentResolver());
@@ -676,10 +665,6 @@ public class LoginActivity extends AppCompatActivity {
             progressDialog.dismiss();
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
                 ownProfileImage = true;
-                DatabaseReference newUserRoot = userRoot.child(userID);
-                Map<String, Object> map = new HashMap<>();
-                map.put("ownProfileImage", ownProfileImage);
-                newUserRoot.updateChildren(map);
             }
             updateEditProfileImages();
             Toast.makeText(LoginActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
@@ -695,9 +680,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateEditProfileImages() {
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-
-        StorageReference refProfileImage = storageRef.child("profile_images/" + img);
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + img);
         refProfileImage.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
@@ -705,7 +688,7 @@ public class LoginActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(profileImageButton));
 
-        StorageReference refProfileBanner = storageRef.child("profile_banners/" + banner);
+        StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
         refProfileBanner.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refProfileBanner)
@@ -714,4 +697,28 @@ public class LoginActivity extends AppCompatActivity {
                 .thumbnail(0.05f)
                 .into(profileBannerButton));
     }
+
+    ActivityResultLauncher<Intent> pickProfileImageLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Uri filePath = data.getData();
+                    if (filePath != null) {
+                        uploadImage(filePath, ImageOperations.PICK_PROFILE_IMAGE_REQUEST);
+                    }
+                }
+            });
+
+    ActivityResultLauncher<Intent> pickProfileBannerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Uri filePath = data.getData();
+                    if (filePath != null) {
+                        uploadImage(filePath, ImageOperations.PICK_PROFILE_BANNER_REQUEST);
+                    }
+                }
+            });
 }

@@ -47,7 +47,7 @@ public class RoomListFragmentMore extends Fragment {
     private ListView listView;
     private Theme theme;
     private RoomAdapter adapter, searchAdapter;
-    private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsKey);
+    private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsDatabaseKey);
     private final ArrayList<Room> roomList = new ArrayList<>();
     private final ArrayList<Room> searchRoomList = new ArrayList<>();
     private TextView noRoomFound;
@@ -132,7 +132,7 @@ public class RoomListFragmentMore extends Fragment {
 
     private void addRoom(DataSnapshot dataSnapshot) {
         final String roomKey = dataSnapshot.getKey();
-        final Room room = dataSnapshot.child(Constants.roomDataKey).getValue(Room.class);
+        final Room room = dataSnapshot.child(Constants.roomDataDatabaseKey).getValue(Room.class);
         room.setKey(roomKey);
 
         if (!room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {

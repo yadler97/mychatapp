@@ -11,6 +11,7 @@ import androidx.preference.PreferenceManager;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.SquareImageView;
@@ -46,7 +47,7 @@ public class ImageAdapter extends BaseAdapter {
 
         String imageURL = imageList.get(position);
         StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        StorageReference pathReference = storageRef.child("images/" + imageURL);
+        StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
         if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {

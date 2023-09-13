@@ -21,6 +21,7 @@ import androidx.core.content.res.ResourcesCompat;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.data.Message;
@@ -163,7 +164,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         }
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refImage = storageRef.child("room_images/" + r.getImg());
+        final StorageReference refImage = storageRef.child(Constants.roomImagesStorageKey + r.getImg());
         GlideApp.with(context)
                 .load(refImage)
                 .centerCrop()
@@ -186,7 +187,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         }
     }
 
-    private static SpannableStringBuilder highlightSearchedText(String text, String textToBold) {
+    private SpannableStringBuilder highlightSearchedText(String text, String textToBold) {
         SpannableStringBuilder builder = new SpannableStringBuilder();
 
         if (textToBold.length() > 0 && !textToBold.trim().equals("")) {
@@ -194,7 +195,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
             int endingIndex = startingIndex + textToBold.length();
             builder.append(text);
             builder.setSpan(new StyleSpan(Typeface.BOLD), startingIndex, endingIndex, 0);
-            builder.setSpan(new ForegroundColorSpan(Color.RED), startingIndex, endingIndex, 0);
+            builder.setSpan(new ForegroundColorSpan(this.context.getResources().getColor(R.color.text_highlight)), startingIndex, endingIndex, 0);
             return builder;
         } else {
             return builder.append(text);

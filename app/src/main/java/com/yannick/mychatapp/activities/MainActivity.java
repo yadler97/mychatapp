@@ -1,5 +1,6 @@
 package com.yannick.mychatapp.activities;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -39,8 +40,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
@@ -58,8 +59,6 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
@@ -114,14 +113,14 @@ import hakobastvatsatryan.DropdownTextView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
-    private String imgRoom, imgUser, imgBanner;
+    private String imgRoom;
 
     private Theme theme;
 
     private Background background;
     private User currentUser;
-    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsKey);
-    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersKey);
+    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsDatabaseKey);
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private int categoryIndex = 0;
     private static int color = 0;
@@ -350,8 +349,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        StorageReference refRoomImage = storageRef.child("room_images/" + "0");
+        StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + "0");
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
@@ -373,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_ROOM_IMAGE_REQUEST);
+            pickRoomImageLauncher.launch(intent);
         });
 
         AlertDialog.Builder builder;
@@ -422,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                             @Override
                                             public void onDataChange(DataSnapshot snapshot) {
                                                 if (!snapshot.exists()) {
-                                                    DatabaseReference messageRoot = root.child(Constants.roomDataKey);
+                                                    DatabaseReference messageRoot = root.child(Constants.roomDataDatabaseKey);
                                                     Map<String, Object> map = new HashMap<>();
                                                     String currentDateAndTime = sdf.format(new Date());
                                                     map.put("admin", currentUser.getUserID());
@@ -434,7 +432,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                     map.put("img", imgRoom);
                                                     messageRoot.updateChildren(map);
                                                     fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
-                                                    fileOperations.writeToFile(Constants.roomDataKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
+                                                    fileOperations.writeToFile(Constants.roomDataDatabaseKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
                                                     FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                                                     Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
                                                     alert.cancel();
@@ -541,15 +539,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             banner.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar, null));
         }
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        final StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
                 .load(refProfileBanner)
                 .centerCrop()
                 .thumbnail(0.05f)
                 .into(banner);
 
-        final StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
+        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
         GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
@@ -646,9 +643,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profileImageButton = view.findViewById(R.id.user_profile_image);
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
-        StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
+        StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
@@ -688,14 +684,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_IMAGE_REQUEST);
+            pickProfileImageLauncher.launch(intent);
         });
 
         profileBannerButton.setOnClickListener(v -> {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_BANNER_REQUEST);
+            pickProfileBannerLauncher.launch(intent);
         });
 
         username.setText(currentUser.getName());
@@ -789,8 +785,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 map.put("location", currentUser.getLocation());
                                 map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
                                 map.put("favColour", color);
+                                String imgUser = UUID.randomUUID().toString();
                                 if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
-                                    imgUser = UUID.randomUUID().toString();
                                     map.put("img", imgUser);
                                 }
                                 currentUserRoot.updateChildren(map);
@@ -812,7 +808,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                     drawable.draw(canvas);
 
                                     byte[] byteArray;
-                                    final StorageReference refNewProfileImage = storageRef.child("profile_images/" + imgUser);
+                                    final StorageReference refNewProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + imgUser);
                                     ByteArrayOutputStream stream = new ByteArrayOutputStream();
                                     bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                                     byteArray = stream.toByteArray();
@@ -1111,15 +1107,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateNavigationDrawerIcon() {
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
         GlideApp.with(getApplicationContext())
                 .load(refProfileImage)
                 .centerCrop()
                 .into(profileImageImageView);
 
         profileBannerImageView.setImageDrawable(null);
-        StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
                 .load(refProfileBanner)
                 .centerCrop()
@@ -1128,14 +1123,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateProfileImages() {
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
         GlideApp.with(getApplicationContext())
                 .load(refProfileImage)
                 .centerCrop()
                 .into(profileImage);
 
-        StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
                 .load(refProfileBanner)
                 .centerCrop()
@@ -1144,14 +1138,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateEditProfileImages() {
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        StorageReference refProfileImage = storageRef.child("profile_images/" + currentUser.getImg());
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
         GlideApp.with(getApplicationContext())
                 .load(refProfileImage)
                 .centerCrop()
                 .into(profileImageButton);
 
-        StorageReference refProfileBanner = storageRef.child("profile_banners/" + currentUser.getBanner());
+        StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
         GlideApp.with(getApplicationContext())
                 .load(refProfileBanner)
                 .centerCrop()
@@ -1229,17 +1222,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         handler.postDelayed(() -> readUserData(userID), 100);
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && data != null) {
-            Uri filePath = data.getData();
-            if (filePath != null) {
-                uploadImage(filePath, requestCode);
-            }
-        }
-    }
-
     private void uploadImage(Uri filePath, final int type) {
         final ProgressDialog progressDialog;
         if (theme == Theme.DARK) {
@@ -1250,17 +1232,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         progressDialog.setTitle(R.string.upload);
         progressDialog.show();
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
+        String imageName = UUID.randomUUID().toString();
         StorageReference ref;
         if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
-            imgUser = UUID.randomUUID().toString();
-            ref = storageRef.child("profile_images/" + imgUser);
+            ref = storage.getReference().child(Constants.profileImagesStorageKey + imageName);
         } else if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
-            imgBanner = UUID.randomUUID().toString();
-            ref = storageRef.child("profile_banners/" + imgBanner);
+            ref = storage.getReference().child(Constants.profileBannersStorageKey + imageName);
         } else {
-            imgRoom = UUID.randomUUID().toString();
-            ref = storageRef.child("room_images/" + imgRoom);
+            ref = storage.getReference().child(Constants.roomImagesStorageKey + imageName);
         }
 
         ImageOperations imageOperations = new ImageOperations(getContentResolver());
@@ -1269,30 +1248,33 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         UploadTask uploadTask = ref.putBytes(byteArray);
         uploadTask.addOnSuccessListener(taskSnapshot -> {
             progressDialog.dismiss();
+            Toast.makeText(MainActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
+
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
                 currentUser.setOwnProfileImage(true);
-                currentUser.setImg(imgUser);
+                currentUser.setImg(imageName);
                 DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
                 map.put("ownProfileImage", true);
-                map.put("img", imgUser);
+                map.put("img", imageName);
                 currentUserRoot.updateChildren(map);
-            }
-            if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
-                currentUser.setBanner(imgBanner);
+            } else if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
+                currentUser.setBanner(imageName);
                 DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
-                map.put("banner", imgBanner);
+                map.put("banner", imageName);
                 currentUserRoot.updateChildren(map);
             }
+
             if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
                 updateNavigationDrawerIcon();
                 updateProfileImages();
                 updateEditProfileImages();
             }
-            Toast.makeText(MainActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
+
             if (type == ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
-                StorageReference refRoomImage = storageRef.child("room_images/" + imgRoom);
+                imgRoom = imageName;
+                StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + imageName);
                 GlideApp.with(getApplicationContext())
                         .load(refRoomImage)
                         .centerCrop()
@@ -1381,4 +1363,40 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         return header;
     }
+
+    ActivityResultLauncher<Intent> pickProfileImageLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Uri filePath = data.getData();
+                    if (filePath != null) {
+                        uploadImage(filePath, ImageOperations.PICK_PROFILE_IMAGE_REQUEST);
+                    }
+                }
+            });
+
+    ActivityResultLauncher<Intent> pickProfileBannerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Uri filePath = data.getData();
+                    if (filePath != null) {
+                        uploadImage(filePath, ImageOperations.PICK_PROFILE_BANNER_REQUEST);
+                    }
+                }
+            });
+
+    ActivityResultLauncher<Intent> pickRoomImageLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Uri filePath = data.getData();
+                    if (filePath != null) {
+                        uploadImage(filePath, ImageOperations.PICK_ROOM_IMAGE_REQUEST);
+                    }
+                }
+            });
 }

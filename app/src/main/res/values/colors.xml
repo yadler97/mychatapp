@@ -29,6 +29,8 @@
     <color name="dark_button">#7289DA</color>
     <color name="dark_button_pressed">#55659F</color>
 
+    <color name="text_highlight">#FF0000</color>
+
     <array name="favcolors">
         <item name="red">@color/red</item>
         <item name="blue">#0099FF</item>

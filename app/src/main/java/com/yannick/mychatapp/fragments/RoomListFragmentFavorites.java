@@ -41,7 +41,7 @@ public class RoomListFragmentFavorites extends Fragment {
 
     private ListView listView;
     private RoomAdapter adapter, searchAdapter;
-    private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsKey);
+    private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsDatabaseKey);
     private final ArrayList<Room> roomList = new ArrayList<>();
     private final ArrayList<Room> searchRoomList = new ArrayList<>();
     private TextView noRoomFound;
@@ -127,13 +127,13 @@ public class RoomListFragmentFavorites extends Fragment {
 
     private void addRoom(DataSnapshot dataSnapshot) {
         final String roomKey = dataSnapshot.getKey();
-        final Room room = dataSnapshot.child(Constants.roomDataKey).getValue(Room.class);
+        final Room room = dataSnapshot.child(Constants.roomDataDatabaseKey).getValue(Room.class);
         room.setKey(roomKey);
         room.setMuted(fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1"));
 
         if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
-            if (dataSnapshot.child(Constants.messagesKey).getChildrenCount() > 0) {
-                DatabaseReference newestMessageRoot = root.child(roomKey).child(Constants.messagesKey);
+            if (dataSnapshot.child(Constants.messagesDatabaseKey).getChildrenCount() > 0) {
+                DatabaseReference newestMessageRoot = root.child(roomKey).child(Constants.messagesDatabaseKey);
                 Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
                 lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -185,7 +185,7 @@ public class RoomListFragmentFavorites extends Fragment {
     }
 
     private void sortByTime(final Room room, String userid) {
-        DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersKey).child(userid);
+        DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey).child(userid);
         userRoot.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

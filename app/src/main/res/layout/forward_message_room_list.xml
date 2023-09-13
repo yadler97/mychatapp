@@ -6,6 +6,8 @@
     android:layout_height="wrap_content"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:orientation="horizontal">
 
     <de.hdodenhof.circleimageview.CircleImageView
@@ -13,7 +15,6 @@
         android:layout_width="@dimen/member_list_profile_image_size"
         android:layout_height="@dimen/member_list_profile_image_size"
         android:gravity="center"
-        android:layout_marginLeft="10dp"
         android:layout_marginRight="10dp"
         android:src="@color/lightGrey" />
 

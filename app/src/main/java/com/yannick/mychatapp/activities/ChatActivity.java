@@ -2,6 +2,7 @@ package com.yannick.mychatapp.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.app.ProgressDialog;
@@ -47,6 +48,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.coordinatorlayout.widget.CoordinatorLayout;
@@ -137,8 +140,8 @@ public class ChatActivity extends AppCompatActivity {
     private String lastReadMessage;
     private String lastKey;
     private String lastSearch = "";
-    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersKey);
-    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsKey);
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
+    private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsDatabaseKey);
     private FirebaseStorage storage;
     private StorageReference storageReference;
     private Uri photoURI;
@@ -303,7 +306,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     String currentDateAndTime = sdf.format(new Date());
 
-                    DatabaseReference messageRoot = root.child(Constants.messagesKey).child(newMessageKey);
+                    DatabaseReference messageRoot = root.child(Constants.messagesDatabaseKey).child(newMessageKey);
                     Map<String, Object> map = new HashMap<String, Object>();
                     map.put("name", userID);
                     map.put("msg", messageInput.getText().toString().trim());
@@ -416,7 +419,7 @@ public class ChatActivity extends AppCompatActivity {
                 if (!userListCreated) {
                     handler.postDelayed(this, 1000);
                 } else {
-                    root.child(Constants.roomDataKey).addValueEventListener(new ValueEventListener() {
+                    root.child(Constants.roomDataDatabaseKey).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
                             getRoomData(snapshot);
@@ -431,7 +434,7 @@ public class ChatActivity extends AppCompatActivity {
                         }
                     });
 
-                    root.child(Constants.messagesKey).addChildEventListener(new ChildEventListener() {
+                    root.child(Constants.messagesDatabaseKey).addChildEventListener(new ChildEventListener() {
                         @Override
                         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                             addMessage(dataSnapshot, -1);
@@ -467,10 +470,10 @@ public class ChatActivity extends AppCompatActivity {
                 for (DataSnapshot uniqueKeySnapshot : dataSnapshot.getChildren()) {
                     String roomKey = uniqueKeySnapshot.getKey();
                     if (roomKey.equals(ChatActivity.this.roomKey)) {
-                        messageCount = (int)uniqueKeySnapshot.child(Constants.messagesKey).getChildrenCount();
+                        messageCount = (int)uniqueKeySnapshot.child(Constants.messagesDatabaseKey).getChildrenCount();
                     }
 
-                    Room room = uniqueKeySnapshot.child(Constants.roomDataKey).getValue(Room.class);
+                    Room room = uniqueKeySnapshot.child(Constants.roomDataDatabaseKey).getValue(Room.class);
                     room.setKey(roomKey);
                     if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && !roomKey.equals(ChatActivity.this.roomKey)) {
                         roomList.add(room);
@@ -623,8 +626,7 @@ public class ChatActivity extends AppCompatActivity {
         String img = dataSnapshot.child("img").getValue().toString();
 
         if (!img.equals("")) {
-            StorageReference storageRef = storage.getReferenceFromUrl(storageReference.toString());
-            StorageReference pathReference = storageRef.child("images/" + img);
+            StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + img);
             imageList.remove(img);
             pathReference.delete();
         }
@@ -804,6 +806,7 @@ public class ChatActivity extends AppCompatActivity {
             searchView.setIconified(true);
             searchView.setIconified(true);
         }
+
         final ProgressDialog progressDialog;
         if (theme == Theme.DARK) {
             progressDialog = new ProgressDialog(new ContextThemeWrapper(this, R.style.AlertDialogDark));
@@ -813,12 +816,12 @@ public class ChatActivity extends AppCompatActivity {
         progressDialog.setTitle(R.string.upload);
         progressDialog.show();
 
-        String imgName = UUID.randomUUID().toString();
+        String imageName = UUID.randomUUID().toString();
         StorageReference ref;
         if (type == ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
-            ref = storageReference.child("room_images/" + imgName);
+            ref = storageReference.child(Constants.roomImagesStorageKey + imageName);
         } else {
-            ref = storageReference.child("images/" + imgName);
+            ref = storageReference.child(Constants.imagesStorageKey + imageName);
         }
 
         ImageOperations imageOperations = new ImageOperations(getContentResolver());
@@ -830,15 +833,15 @@ public class ChatActivity extends AppCompatActivity {
             Toast.makeText(ChatActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
 
             if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
-                String newMessageKey = roomRoot.child(roomKey).child(Constants.messagesKey).push().getKey();
+                String newMessageKey = roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).push().getKey();
 
                 String currentDateAndTime = sdf.format(new Date());
 
-                DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesKey).child(newMessageKey);
+                DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).child(newMessageKey);
                 Map<String, Object> map = new HashMap<String, Object>();
                 map.put("name", userID);
                 map.put("msg", "");
-                map.put("img", imgName);
+                map.put("img", imageName);
                 map.put("pinned", false);
                 map.put("quote", "");
                 map.put("time", currentDateAndTime);
@@ -848,18 +851,17 @@ public class ChatActivity extends AppCompatActivity {
                 quoteStatus = "";
 
                 if (type == ImageOperations.CAPTURE_IMAGE_REQUEST && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
-                    downloadImage(imgName, type);
+                    downloadImage(imageName, type);
                 }
             } else {
-                DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataKey);
+                DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
                 Map<String, Object> map = new HashMap<>();
-                map.put("img", imgName);
+                map.put("img", imageName);
                 messageRoot.updateChildren(map);
 
-                room.setImg(imgName);
+                room.setImg(imageName);
 
-                StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                StorageReference pathReference = storageRef.child("room_images/" + imgName);
+                StorageReference pathReference = storage.getReference().child(Constants.roomImagesStorageKey + imageName);
                 GlideApp.with(getApplicationContext())
                         .load(pathReference)
                         .centerCrop()
@@ -877,11 +879,45 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    ActivityResultLauncher<Intent> pickImageLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Uri filePath = data.getData();
+                    if (filePath != null) {
+                        uploadImage(filePath, ImageOperations.PICK_IMAGE_REQUEST);
+                    }
+                }
+            });
+
+    ActivityResultLauncher<Intent> pickRoomImageLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Uri filePath = data.getData();
+                    if (filePath != null) {
+                        uploadImage(filePath, ImageOperations.PICK_ROOM_IMAGE_REQUEST);
+                    }
+                }
+            });
+
+    ActivityResultLauncher<Intent> takePhotoLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    if (photoURI != null) {
+                        uploadImage(photoURI, ImageOperations.CAPTURE_IMAGE_REQUEST);
+                    }
+                }
+            });
+
     private void chooseImage() {
         Intent intent = new Intent();
         intent.setType("image/*");
         intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_IMAGE_REQUEST);
+        pickImageLauncher.launch(intent);
     }
 
     private void takePicture() {
@@ -897,7 +933,7 @@ public class ChatActivity extends AppCompatActivity {
                 photoURI = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID+".fileprovider", photoFile);
                 if (isStoragePermissionGranted(1)) {
                     takePictureIntent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, photoURI);
-                    startActivityForResult(takePictureIntent, ImageOperations.CAPTURE_IMAGE_REQUEST);
+                    takePhotoLauncher.launch(takePictureIntent);
                 }
             }
         }
@@ -908,21 +944,6 @@ public class ChatActivity extends AppCompatActivity {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         return File.createTempFile(imageFileName, ".jpeg", storageDir);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == ImageOperations.CAPTURE_IMAGE_REQUEST && resultCode == RESULT_OK) {
-            if (photoURI != null) {
-                uploadImage(photoURI, requestCode);
-            }
-        } else if (resultCode == RESULT_OK && data != null) {
-            Uri filePath = data.getData();
-            if (filePath != null) {
-                uploadImage(filePath, requestCode);
-            }
-        }
     }
 
     public BroadcastReceiver quoteReceiver = new BroadcastReceiver() {
@@ -948,8 +969,7 @@ public class ChatActivity extends AppCompatActivity {
                         SpannableStringBuilder str = new SpannableStringBuilder(user);
                         str.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, user.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                         String imageURL = m.getMsg();
-                        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                        StorageReference pathReference = storageRef.child("images/" + imageURL);
+                        StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + imageURL);
                         GlideApp.with(context)
                                 .load(pathReference)
                                 .placeholder(R.color.grey)
@@ -1098,8 +1118,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private void downloadImage(String imageURL, final int type) {
-        StorageReference storageRef = storage.getReferenceFromUrl(storageReference.toString());
-        final StorageReference pathReference = storageRef.child("images/" + imageURL);
+        final StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + imageURL);
 
         final Context context = getApplicationContext();
         final File rootPath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).getAbsolutePath()+ "/" + appName);
@@ -1275,9 +1294,7 @@ public class ChatActivity extends AppCompatActivity {
         roomCreationDateText.setText(time);
         roomMessageCountText.setText(String.valueOf(messageCount));
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-
-        final StorageReference refRoomImage = storageRef.child("room_images/" + room.getImg());
+        final StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImg());
         GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refRoomImage)
@@ -1576,15 +1593,14 @@ public class ChatActivity extends AppCompatActivity {
             banner.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.side_nav_bar, null));
         }
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refProfileBanner = storageRef.child("profile_banners/" + user.getBanner());
+        final StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + user.getBanner());
         GlideApp.with(getApplicationContext())
                 .load(refProfileBanner)
                 .centerCrop()
                 .thumbnail(0.05f)
                 .into(banner);
 
-        final StorageReference refProfileImage = storageRef.child("profile_images/" + user.getImg());
+        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + user.getImg());
         GlideApp.with(getApplicationContext())
                 .load(refProfileImage)
                 .centerCrop()
@@ -1633,11 +1649,11 @@ public class ChatActivity extends AppCompatActivity {
                     break;
                 }
             }
-            String newMessageKey = roomRoot.child(roomKey).child(Constants.messagesKey).push().getKey();
+            String newMessageKey = roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).push().getKey();
 
             String currentDateAndTime = sdf.format(new Date());
 
-            DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesKey).child(newMessageKey);
+            DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).child(newMessageKey);
             Map<String, Object> map = new HashMap<>();
             map.put("name", userID);
             if (Message.isImage(fMessage.getType())) {
@@ -1772,7 +1788,7 @@ public class ChatActivity extends AppCompatActivity {
                         pinnedList.remove(m2);
 
                         Map<String, Object> map = new HashMap<String, Object>();
-                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesKey).child(m.getKey());
+                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).child(m.getKey());
                         map.put("pinned", false);
                         messageRoot.updateChildren(map);
 
@@ -1799,7 +1815,7 @@ public class ChatActivity extends AppCompatActivity {
                     }
 
                     Map<String, Object> map = new HashMap<String, Object>();
-                    DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesKey).child(m.getKey());
+                    DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).child(m.getKey());
                     map.put("pinned", true);
                     messageRoot.updateChildren(map);
 
@@ -1968,8 +1984,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refImage = storageRef.child("room_images/" + room.getImg());
+        final StorageReference refImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImg());
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
@@ -1991,7 +2006,7 @@ public class ChatActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_ROOM_IMAGE_REQUEST);
+            pickRoomImageLauncher.launch(intent);
         });
 
         AlertDialog.Builder builder;
@@ -2032,7 +2047,7 @@ public class ChatActivity extends AppCompatActivity {
                                             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
                                             imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                                         }
-                                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataKey);
+                                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
                                         Map<String, Object> map = new HashMap<>();
                                         map.put("name", roomName);
                                         map.put("passwd", roomPassword);

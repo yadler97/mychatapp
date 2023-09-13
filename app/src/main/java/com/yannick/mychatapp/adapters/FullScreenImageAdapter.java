@@ -13,6 +13,7 @@ import android.widget.LinearLayout;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.data.Image;
@@ -54,13 +55,13 @@ public class FullScreenImageAdapter extends PagerAdapter {
         StorageReference pathReference;
 
         if (type == Image.PROFILE_IMAGE) {
-            pathReference = storageRef.child("profile_images/" + imageURL);
+            pathReference = storageRef.child(Constants.profileImagesStorageKey + imageURL);
         } else if (type == Image.PROFILE_BANNER) {
-            pathReference = storageRef.child("profile_banners/" + imageURL);
+            pathReference = storageRef.child(Constants.profileBannersStorageKey + imageURL);
         } else if (type == Image.ROOM_IMAGE) {
-            pathReference = storageRef.child("room_images/" + imageURL);
+            pathReference = storageRef.child(Constants.roomImagesStorageKey + imageURL);
         } else {
-            pathReference = storageRef.child("images/" + imageURL);
+            pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
         }
 
         if (type == Image.PROFILE_IMAGE || type == Image.PROFILE_BANNER || type == Image.ROOM_IMAGE) {

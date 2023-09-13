@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.activities.MainActivity;
 import com.yannick.mychatapp.data.Message;
@@ -411,7 +412,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         } else if (Message.isImage(type)) {
             String imageURL = m.getMsg();
             StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-            StorageReference pathReference = storageRef.child("images/" + imageURL);
+            StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
             if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {
@@ -444,7 +445,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     holder.name.setText(m.getUser().getName());
 
                     StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                    final StorageReference refImage = storageRef.child("profile_images/" + m.getUser().getImg());
+                    final StorageReference refImage = storageRef.child(Constants.profileImagesStorageKey + m.getUser().getImg());
                     try {
                         GlideApp.with(context)
                                 .load(refImage)
@@ -480,7 +481,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             } else {
                 String imageURL = m.getQuoteMessage();
                 StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                StorageReference pathReference = storageRef.child("images/" + imageURL);
+                StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 
                 GlideApp.with(context)
                         //.using(new FirebaseImageLoader())
@@ -554,7 +555,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         return builder;
     }
 
-    private static SpannableStringBuilder highlightSearchedText(String text, String textToBold) {
+    private SpannableStringBuilder highlightSearchedText(String text, String textToBold) {
         SpannableStringBuilder builder = new SpannableStringBuilder();
 
         if (textToBold.length() > 0 && !textToBold.trim().equals("")) {
@@ -562,7 +563,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             int endingIndex = startingIndex + textToBold.length();
             builder.append(text);
             builder.setSpan(new StyleSpan(Typeface.BOLD), startingIndex, endingIndex, 0);
-            builder.setSpan(new ForegroundColorSpan(Color.RED), startingIndex, endingIndex, 0);
+            builder.setSpan(new ForegroundColorSpan(this.context.getResources().getColor(R.color.text_highlight)), startingIndex, endingIndex, 0);
             return builder;
         } else {
             return builder.append(text);

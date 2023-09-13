@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.data.Room;
@@ -54,7 +55,7 @@ public class ForwardMessageAdapter extends ArrayAdapter<Room> {
         viewHolder.roomNameText.setText(roomList.get(position).getName());
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refImage = storageRef.child("room_images/" + roomList.get(position).getImg());
+        final StorageReference refImage = storageRef.child(Constants.roomImagesStorageKey + roomList.get(position).getImg());
         GlideApp.with(context)
                 .load(refImage)
                 .centerCrop()
