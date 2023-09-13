@@ -96,7 +96,6 @@ import com.yannick.mychatapp.adapters.MemberListAdapter;
 import com.yannick.mychatapp.data.Image;
 import com.yannick.mychatapp.data.Message;
 import com.yannick.mychatapp.adapters.MessageAdapter;
-import com.yannick.mychatapp.MyCallback;
 import com.yannick.mychatapp.adapters.PinboardAdapter;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.data.Room;
@@ -1552,23 +1551,6 @@ public class ChatActivity extends AppCompatActivity {
         userList.add(user);
 
         userListCreated = true;
-    }
-
-    public void addUser(final String key, final String userId, final String message, final String img, final String pin, final String quote, final String time, final MyCallback myCallback) {
-        userRoot.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                user.setUserID(userId);
-                userList.add(user);
-                myCallback.onCallback(key, user, time, message, img, pin, quote);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
     }
 
     private void showProfile(final String userId) {
