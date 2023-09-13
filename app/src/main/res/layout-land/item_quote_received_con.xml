@@ -12,53 +12,71 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxWidth="480dp"
-        android:padding="4dp"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginLeft="48dp" >
 
         <LinearLayout
-            android:id="@+id/quotebox_content"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp" >
+            android:padding="8dp" >
 
-            <TextView
-                android:id="@+id/quote_name"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxWidth="448dp"
-                android:textColor="@color/black"
-                android:layout_marginTop="4dp" />
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/quote_profile_image"
+                android:layout_width="@dimen/message_profile_image_size"
+                android:layout_height="@dimen/message_profile_image_size"
+                android:src="@color/lightGrey" />
 
-            <TextView
-                android:id="@+id/quote_message"
-                android:textStyle="italic"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:id="@+id/quotebox_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:maxWidth="456dp"
-                android:maxLines="2"
-                android:minLines="1"
-                android:ellipsize="end"
-                android:textColorLink="@color/black"
-                android:textColor="@color/black"
-                android:layout_marginBottom="4dp" />
+                android:layout_marginLeft="10dp"
+                android:minWidth="100dp"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/quote_name"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="448dp"
+                    android:textColor="@color/white"
+                    android:layout_marginTop="4dp" />
+
+                <TextView
+                    android:id="@+id/quote_message"
+                    android:textStyle="italic"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="456dp"
+                    android:maxLines="3"
+                    android:minLines="1"
+                    android:ellipsize="end"
+                    android:textColorLink="@color/white"
+                    android:textColor="@color/white"
+                    android:layout_marginBottom="4dp" />
+
+            </LinearLayout>
 
         </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="4dp"
+            android:background="@color/white" />
 
         <TextView
             android:id="@+id/text_message_body"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:padding="8dp"
             android:maxWidth="456dp"
             android:autoLink="all"
             android:textColorLink="@color/white"
-            android:textColor="@color/white"
-            android:padding="4dp" />
+            android:textColor="@color/white" />
 
     </LinearLayout>
 

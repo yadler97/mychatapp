@@ -80,7 +80,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         private final Theme theme;
         private int pos;
         private final GestureDetector gestureDetector;
-        private final CircleImageView profileImage;
+        private final CircleImageView profileImage, quoteProfileImage;
 
         @SuppressLint("ClickableViewAccessibility")
         private MyViewHolder(View view) {
@@ -92,6 +92,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             img = view.findViewById(R.id.image);
             quoteMessage = view.findViewById(R.id.quote_message);
             quoteName = view.findViewById(R.id.quote_name);
+            quoteProfileImage = view.findViewById(R.id.quote_profile_image);
             quoteBox = view.findViewById(R.id.quotebox);
             quoteBoxContent = view.findViewById(R.id.quotebox_content);
             messageBox = view.findViewById(R.id.messagebox);
@@ -411,8 +412,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             }
         } else if (Message.isImage(type)) {
             String imageURL = m.getMsg();
-            StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-            StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
+            StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + imageURL);
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
             if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {
@@ -444,8 +444,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 if (!Message.isConMessage(type)) {
                     holder.name.setText(m.getUser().getName());
 
-                    StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                    final StorageReference refImage = storageRef.child(Constants.profileImagesStorageKey + m.getUser().getImg());
+                    StorageReference refImage = storage.getReference().child(Constants.profileImagesStorageKey + m.getUser().getImg());
                     try {
                         GlideApp.with(context)
                                 .load(refImage)
@@ -475,13 +474,22 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 } else {
                     holder.quoteName.setText(m.getQuotedMessage().getUser().getName());
                 }
+
+                String imageURL = m.getQuotedMessage().getUser().getImg();
+                StorageReference pathReference = storage.getReference().child(Constants.profileImagesStorageKey + imageURL);
+
+                GlideApp.with(context)
+                        //.using(new FirebaseImageLoader())
+                        .load(pathReference)
+                        .centerCrop()
+                        .thumbnail(0.05f)
+                        .into(holder.quoteProfileImage);
             }
             if (!Message.isQuoteImage(type)) {
                 holder.quoteMessage.setText(m.getQuotedMessage().getMsg());
             } else {
                 String imageURL = m.getQuotedMessage().getMsg();
-                StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
+                StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + imageURL);
 
                 GlideApp.with(context)
                         //.using(new FirebaseImageLoader())
@@ -490,11 +498,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                         .thumbnail(0.05f)
                         .into(holder.img);
             }
-            GradientDrawable shapeQuote = new GradientDrawable();
-            shapeQuote.setShape(GradientDrawable.RECTANGLE);
-            shapeQuote.setCornerRadii(corners);
-            shapeQuote.setColor(ContextCompat.getColor(context, R.color.textbox_time));
-            holder.quoteBoxContent.setBackground(shapeQuote);
+
             holder.quoteBox.setBackground(shape);
         }
 
