@@ -391,7 +391,6 @@ public class LoginActivity extends AppCompatActivity {
         final EditText locationEdit = view.findViewById(R.id.user_location);
 
         final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
-        final TextInputLayout profileDescriptionLayout = view.findViewById(R.id.user_bio_layout);
         final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
         usernameEdit.addTextChangedListener(new TextWatcher() {
@@ -412,24 +411,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
-        profileDescriptionEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    profileDescriptionLayout.setError(null);
-                }
-            }
-        });
         locationEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -577,30 +559,26 @@ public class LoginActivity extends AppCompatActivity {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view12 -> {
                 if (!usernameEdit.getText().toString().isEmpty()) {
-                    if (!profileDescriptionEdit.getText().toString().isEmpty()) {
-                        if (!locationEdit.getText().toString().isEmpty()) {
-                            if (!birthdayEdit.getText().toString().isEmpty()) {
-                                String username = usernameEdit.getText().toString();
-                                String profileDescription = profileDescriptionEdit.getText().toString();
-                                String location = locationEdit.getText().toString();
-                                String birthday = birthdayEdit.getText().toString();
+                    if (!locationEdit.getText().toString().isEmpty()) {
+                        if (!birthdayEdit.getText().toString().isEmpty()) {
+                            String username = usernameEdit.getText().toString();
+                            String profileDescription = profileDescriptionEdit.getText().toString();
+                            String location = locationEdit.getText().toString();
+                            String birthday = birthdayEdit.getText().toString();
 
-                                createAccountAuth(email, password, username, profileDescription, location, birthday);
+                            createAccountAuth(email, password, username, profileDescription, location, birthday);
 
-                                if (view12 != null) {
-                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                    imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
-                                }
-
-                                alert.cancel();
-                            } else {
-                                Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
+                            if (view12 != null) {
+                                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                             }
+
+                            alert.cancel();
                         } else {
-                            locationLayout.setError(getResources().getString(R.string.enterlocation));
+                            Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
+                        locationLayout.setError(getResources().getString(R.string.enterlocation));
                     }
                 } else {
                     usernameLayout.setError(getResources().getString(R.string.entername));

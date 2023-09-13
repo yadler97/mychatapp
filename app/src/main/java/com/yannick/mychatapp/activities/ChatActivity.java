@@ -1877,7 +1877,6 @@ public class ChatActivity extends AppCompatActivity {
         final EditText roomPasswordRepeatEditText = view.findViewById(R.id.room_password_repeat);
 
         final TextInputLayout roomNameLayout = view.findViewById(R.id.room_name_layout);
-        final TextInputLayout roomDescriptionLayout = view.findViewById(R.id.room_description_layout);
         final TextInputLayout roomPasswordLayout = view.findViewById(R.id.room_password_layout);
         final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
 
@@ -1925,24 +1924,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
-        roomDescriptionEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomDescriptionLayout.setError(null);
-                }
-            }
-        });
         roomPasswordEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -1961,6 +1943,7 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         });
+
         roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -2034,44 +2017,40 @@ public class ChatActivity extends AppCompatActivity {
                 final String roomPasswordRepeat = roomPasswordRepeatEditText.getText().toString().trim();
                 final String roomDescription = roomDescriptionEditText.getText().toString().trim();
                 if (!roomName.isEmpty()) {
-                    if (!roomDescription.isEmpty()) {
-                        if (categoryIndex != 0) {
-                            if (!roomPassword.isEmpty()) {
-                                if (!roomPasswordRepeat.isEmpty()) {
-                                    if (roomPassword.equals(roomPasswordRepeat)) {
-                                        if (view12 != null) {
-                                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                            imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
-                                        }
-                                        DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
-                                        Map<String, Object> map = new HashMap<>();
-                                        map.put("name", roomName);
-                                        map.put("passwd", roomPassword);
-                                        map.put("desc", roomDescription);
-                                        map.put("category", categoryIndex);
-                                        messageRoot.updateChildren(map);
-                                        fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
-                                        setTitle(roomName);
-                                        Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();
-                                        room.setDesc(roomDescription);
-                                        room.setCategory(categoryIndex);
-                                        room.setPasswd(roomPassword);
-                                        alert.cancel();
-                                        openInfo();
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
+                    if (categoryIndex != 0) {
+                        if (!roomPassword.isEmpty()) {
+                            if (!roomPasswordRepeat.isEmpty()) {
+                                if (roomPassword.equals(roomPasswordRepeat)) {
+                                    if (view12 != null) {
+                                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                        imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                                     }
+                                    DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
+                                    Map<String, Object> map = new HashMap<>();
+                                    map.put("name", roomName);
+                                    map.put("passwd", roomPassword);
+                                    map.put("desc", roomDescription);
+                                    map.put("category", categoryIndex);
+                                    messageRoot.updateChildren(map);
+                                    fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
+                                    setTitle(roomName);
+                                    Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();
+                                    room.setDesc(roomDescription);
+                                    room.setCategory(categoryIndex);
+                                    room.setPasswd(roomPassword);
+                                    alert.cancel();
+                                    openInfo();
                                 } else {
-                                    roomPasswordRepeatLayout.setError(getResources().getString(R.string.repeatpassword));
+                                    Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                roomPasswordLayout.setError(getResources().getString(R.string.enterpassword));
+                                roomPasswordRepeatLayout.setError(getResources().getString(R.string.repeatpassword));
                             }
                         } else {
-                            Toast.makeText(getApplicationContext(), R.string.selectcategory, Toast.LENGTH_SHORT).show();
+                            roomPasswordLayout.setError(getResources().getString(R.string.enterpassword));
                         }
                     } else {
-                        roomDescriptionLayout.setError(getResources().getString(R.string.enterroomdesc));
+                        Toast.makeText(getApplicationContext(), R.string.selectcategory, Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     roomNameLayout.setError(getResources().getString(R.string.enterroomname));

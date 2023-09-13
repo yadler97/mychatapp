@@ -250,7 +250,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final EditText roomPasswordRepeatEditText = view.findViewById(R.id.room_password_repeat);
 
         final TextInputLayout roomNameLayout = view.findViewById(R.id.room_name_layout);
-        final TextInputLayout roomDescriptionLayout = view.findViewById(R.id.room_description_layout);
         final TextInputLayout roomPasswordLayout = view.findViewById(R.id.room_password_layout);
         final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
 
@@ -294,24 +293,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
-        roomDescriptionEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomDescriptionLayout.setError(null);
-                }
-            }
-        });
         roomPasswordEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -330,6 +312,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
+
         roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -401,64 +384,60 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 final String roomPasswordRepeat = roomPasswordRepeatEditText.getText().toString().trim();
                 final String roomDescription = roomDescriptionEditText.getText().toString().trim();
                 if (!roomName.isEmpty()) {
-                    if (!roomDescription.isEmpty()) {
-                        if (categoryIndex != 0) {
-                            if (!roomPassword.isEmpty()) {
-                                if (!roomPasswordRepeat.isEmpty()) {
-                                    if (roomPassword.equals(roomPasswordRepeat)) {
-                                        if (view12 != null) {
-                                            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                            imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
-                                        }
-                                        if (!searchView.isIconified()) {
-                                            searchView.setIconified(true);
-                                            searchView.setIconified(true);
-                                        }
-                                        final String roomKey = roomRoot.push().getKey();
-                                        DatabaseReference root = roomRoot.child(roomKey);
-                                        root.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(DataSnapshot snapshot) {
-                                                if (!snapshot.exists()) {
-                                                    DatabaseReference messageRoot = root.child(Constants.roomDataDatabaseKey);
-                                                    Map<String, Object> map = new HashMap<>();
-                                                    String currentDateAndTime = sdf.format(new Date());
-                                                    map.put("admin", currentUser.getUserID());
-                                                    map.put("name", roomName);
-                                                    map.put("time", currentDateAndTime);
-                                                    map.put("passwd", roomPassword);
-                                                    map.put("desc", roomDescription);
-                                                    map.put("category", categoryIndex);
-                                                    map.put("img", imgRoom);
-                                                    messageRoot.updateChildren(map);
-                                                    fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
-                                                    fileOperations.writeToFile(Constants.roomDataDatabaseKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
-                                                    FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
-                                                    Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
-                                                    alert.cancel();
-                                                } else {
-                                                    Toast.makeText(getApplicationContext(), R.string.roomalreadyexists, Toast.LENGTH_SHORT).show();
-                                                }
-                                            }
-
-                                            public void onCancelled(DatabaseError error) {
-
-                                            }
-                                        });
-                                    } else {
-                                        Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
+                    if (categoryIndex != 0) {
+                        if (!roomPassword.isEmpty()) {
+                            if (!roomPasswordRepeat.isEmpty()) {
+                                if (roomPassword.equals(roomPasswordRepeat)) {
+                                    if (view12 != null) {
+                                        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                        imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                                     }
+                                    if (!searchView.isIconified()) {
+                                        searchView.setIconified(true);
+                                        searchView.setIconified(true);
+                                    }
+                                    final String roomKey = roomRoot.push().getKey();
+                                    DatabaseReference root = roomRoot.child(roomKey);
+                                    root.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot snapshot) {
+                                            if (!snapshot.exists()) {
+                                                DatabaseReference messageRoot = root.child(Constants.roomDataDatabaseKey);
+                                                Map<String, Object> map = new HashMap<>();
+                                                String currentDateAndTime = sdf.format(new Date());
+                                                map.put("admin", currentUser.getUserID());
+                                                map.put("name", roomName);
+                                                map.put("time", currentDateAndTime);
+                                                map.put("passwd", roomPassword);
+                                                map.put("desc", roomDescription);
+                                                map.put("category", categoryIndex);
+                                                map.put("img", imgRoom);
+                                                messageRoot.updateChildren(map);
+                                                fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
+                                                fileOperations.writeToFile(Constants.roomDataDatabaseKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
+                                                FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
+                                                Toast.makeText(getApplicationContext(), R.string.roomcreated, Toast.LENGTH_SHORT).show();
+                                                alert.cancel();
+                                            } else {
+                                                Toast.makeText(getApplicationContext(), R.string.roomalreadyexists, Toast.LENGTH_SHORT).show();
+                                            }
+                                        }
+
+                                        public void onCancelled(DatabaseError error) {
+
+                                        }
+                                    });
                                 } else {
-                                    roomPasswordRepeatLayout.setError(getResources().getString(R.string.repeatpassword));
+                                    Toast.makeText(getApplicationContext(), R.string.passwordsdontmatch, Toast.LENGTH_SHORT).show();
                                 }
                             } else {
-                                roomPasswordLayout.setError(getResources().getString(R.string.enterpassword));
+                                roomPasswordRepeatLayout.setError(getResources().getString(R.string.repeatpassword));
                             }
                         } else {
-                            Toast.makeText(getApplicationContext(), R.string.selectcategory, Toast.LENGTH_SHORT).show();
+                            roomPasswordLayout.setError(getResources().getString(R.string.enterpassword));
                         }
                     } else {
-                        roomDescriptionLayout.setError(getResources().getString(R.string.enterroomdesc));
+                        Toast.makeText(getApplicationContext(), R.string.selectcategory, Toast.LENGTH_SHORT).show();
                     }
                 } else {
                     roomNameLayout.setError(getResources().getString(R.string.enterroomname));
@@ -581,7 +560,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final EditText location = view.findViewById(R.id.user_location);
 
         final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
-        final TextInputLayout profileDescriptionLayout = view.findViewById(R.id.user_bio_layout);
         final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
         username.addTextChangedListener(new TextWatcher() {
@@ -602,24 +580,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         });
-        profileDescription.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    profileDescriptionLayout.setError(null);
-                }
-            }
-        });
         location.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -766,69 +727,65 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view1 -> {
                 if (!username.getText().toString().isEmpty()) {
-                    if (!profileDescription.getText().toString().isEmpty()) {
-                        if (!location.getText().toString().isEmpty()) {
-                            if (!birthday.getText().toString().isEmpty()) {
-                                String oldUserName = currentUser.getName();
-                                int oldColor = color;
-                                currentUser.setName(username.getText().toString());
-                                currentUser.setProfileDescription(profileDescription.getText().toString());
-                                currentUser.setLocation(location.getText().toString());
-                                currentUser.setBirthday(birthday.getText().toString());
-                                if (tmpcolor >= 0) {
-                                    color = tmpcolor;
-                                }
-                                DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
-                                Map<String, Object> map = new HashMap<>();
-                                map.put("name", currentUser.getName());
-                                map.put("profileDescription", currentUser.getProfileDescription());
-                                map.put("location", currentUser.getLocation());
-                                map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
-                                map.put("favColour", color);
-                                String imgUser = UUID.randomUUID().toString();
-                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
-                                    map.put("img", imgUser);
-                                }
-                                currentUserRoot.updateChildren(map);
-                                profileNameText.setText(currentUser.getName());
-                                Toast.makeText(getApplicationContext(), R.string.profileedited, Toast.LENGTH_SHORT).show();
-                                if (view1 != null) {
-                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                    imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
-                                }
-                                if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
-                                    TextDrawable drawable = TextDrawable.builder()
-                                            .beginConfig()
-                                            .bold()
-                                            .endConfig()
-                                            .buildRect(currentUser.getName().substring(0, 1), getResources().getIntArray(R.array.favcolors)[color]);
-                                    Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-                                    Canvas canvas = new Canvas(bitmap);
-                                    drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                                    drawable.draw(canvas);
-
-                                    byte[] byteArray;
-                                    final StorageReference refNewProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + imgUser);
-                                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                                    byteArray = stream.toByteArray();
-                                    try {
-                                        stream.close();
-                                    } catch (IOException ioe) {
-                                        ioe.printStackTrace();
-                                    }
-                                    refNewProfileImage.putBytes(byteArray);
-                                }
-                                showProfile();
-                                alert.cancel();
-                            } else {
-                                Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
+                    if (!location.getText().toString().isEmpty()) {
+                        if (!birthday.getText().toString().isEmpty()) {
+                            String oldUserName = currentUser.getName();
+                            int oldColor = color;
+                            currentUser.setName(username.getText().toString());
+                            currentUser.setProfileDescription(profileDescription.getText().toString());
+                            currentUser.setLocation(location.getText().toString());
+                            currentUser.setBirthday(birthday.getText().toString());
+                            if (tmpcolor >= 0) {
+                                color = tmpcolor;
                             }
+                            DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("name", currentUser.getName());
+                            map.put("profileDescription", currentUser.getProfileDescription());
+                            map.put("location", currentUser.getLocation());
+                            map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
+                            map.put("favColour", color);
+                            String imgUser = UUID.randomUUID().toString();
+                            if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
+                                map.put("img", imgUser);
+                            }
+                            currentUserRoot.updateChildren(map);
+                            profileNameText.setText(currentUser.getName());
+                            Toast.makeText(getApplicationContext(), R.string.profileedited, Toast.LENGTH_SHORT).show();
+                            if (view1 != null) {
+                                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                            }
+                            if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
+                                TextDrawable drawable = TextDrawable.builder()
+                                        .beginConfig()
+                                        .bold()
+                                        .endConfig()
+                                        .buildRect(currentUser.getName().substring(0, 1), getResources().getIntArray(R.array.favcolors)[color]);
+                                Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+                                Canvas canvas = new Canvas(bitmap);
+                                drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                                drawable.draw(canvas);
+
+                                byte[] byteArray;
+                                final StorageReference refNewProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + imgUser);
+                                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                                byteArray = stream.toByteArray();
+                                try {
+                                    stream.close();
+                                } catch (IOException ioe) {
+                                    ioe.printStackTrace();
+                                }
+                                refNewProfileImage.putBytes(byteArray);
+                            }
+                            showProfile();
+                            alert.cancel();
                         } else {
-                            locationLayout.setError(getResources().getString(R.string.enterlocation));
+                            Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
+                        locationLayout.setError(getResources().getString(R.string.enterlocation));
                     }
                 } else {
                     usernameLayout.setError(getResources().getString(R.string.entername));

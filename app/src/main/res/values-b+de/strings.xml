@@ -156,6 +156,14 @@
     <string name="account_deletion_info">ACHTUNG: Du bist kurz davor, deinen Account zu löschen. Diese Aktion kann nicht rückgängig gemacht werden! Wenn du wirklich deinen Account löschen möchtest, dann gib bitte dein Passwort ein, um fortzufahren.</string>
     <string name="email_verification_info">Du musst deine Mail-Adresse bestätigen, bevor du deinen Account nutzen kannst. Wenn du keine Mail erhalten hast, klicke bitte den \"Erneut Versenden\"-Button. Wenn du deine Mail-Adresse bestätigt hast, kannst du dieses Fenster schließen und mit dem Login fortfahren.</string>
 
+    <string name="hint_email">E-Mail-Adresse <font color='#FF0000'>*</font></string>
+    <string name="hint_name">Name <font color='#FF0000'>*</font></string>
+    <string name="hint_location">Wohnort <font color='#FF0000'>*</font></string>
+    <string name="hint_birthday">Geburtstag <font color='#FF0000'>*</font></string>
+    <string name="hint_room_name">Raumnname <font color='#FF0000'>*</font></string>
+    <string name="hint_password">Passwort <font color='#FF0000'>*</font></string>
+    <string name="hint_confirm_password">Passwort wiederholen <font color='#FF0000'>*</font></string>
+
     <string-array name="categories">
         <item>Kategorie auswählen</item>
         <item>Studium &amp; Arbeit</item>
