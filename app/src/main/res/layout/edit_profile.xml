@@ -29,14 +29,13 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/edit_text_padding_top"
                 android:inputType="text|textCapSentences"
-                android:hint="@string/name"
+                android:hint="@string/hint_name"
                 android:maxLength="15"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/user_bio_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
@@ -66,7 +65,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/edit_text_padding_top"
-                android:hint="@string/birth"
+                android:hint="@string/hint_birthday"
                 android:focusable="false"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -86,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/edit_text_padding_top"
                 android:inputType="text|textCapSentences"
-                android:hint="@string/location"
+                android:hint="@string/hint_location"
                 android:maxLength="25"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 

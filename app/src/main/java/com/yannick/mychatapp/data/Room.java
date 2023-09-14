@@ -11,25 +11,27 @@ public class Room {
     private String admin;
     private int category;
     private String time;
-    private String passwd;
-    private String desc;
+    private String password;
+    private String description;
     private Message newestMessage;
     private String username;
-    private String img;
+    private String image;
     private boolean muted;
+    private String searchString;
 
     public Room() {
-
+        this.searchString = "";
     }
 
-    public Room(String key, String name, int category, String time, String passwd, String admin) {
+    public Room(String key, String name, int category, String time, String password, String admin) {
         this.key = key;
         this.name = name;
         this.category = category;
         this.time = time;
-        this.passwd = passwd;
+        this.password = password;
         this.admin = admin;
-        this.desc = "";
+        this.description = "";
+        this.searchString = "";
     }
 
     public String getName() {
@@ -48,12 +50,12 @@ public class Room {
         return time;
     }
 
-    public String getPasswd() {
-        return passwd;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPasswd(String passwd) {
-        this.passwd = passwd;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public String getKey() {
@@ -64,12 +66,12 @@ public class Room {
         this.key = key;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getAdmin() {
@@ -92,12 +94,12 @@ public class Room {
         this.newestMessage = newestMessage;
     }
 
-    public String getImg() {
-        return img;
+    public String getImage() {
+        return image;
     }
 
-    public void setImg(String img) {
-        this.img = img;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public boolean isMuted() {
@@ -106,6 +108,14 @@ public class Room {
 
     public void setMuted(boolean muted) {
         this.muted = muted;
+    }
+
+    public String getSearchString() {
+        return searchString;
+    }
+
+    public void setSearchString(String searchString) {
+        this.searchString = searchString;
     }
 
     public boolean isNewer(Room comparedRoom) {

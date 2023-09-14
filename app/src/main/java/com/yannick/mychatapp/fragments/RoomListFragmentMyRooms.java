@@ -41,7 +41,7 @@ public class RoomListFragmentMyRooms extends Fragment {
 
     private ListView listView;
     private RoomAdapter adapter, searchAdapter;
-    private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms");
+    private final DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsDatabaseKey);
     private final ArrayList<Room> roomList = new ArrayList<>();
     private final ArrayList<Room> searchRoomList = new ArrayList<>();
     private TextView noRoomFound;
@@ -127,31 +127,30 @@ public class RoomListFragmentMyRooms extends Fragment {
 
     private void addRoom(DataSnapshot dataSnapshot) {
         final String roomKey = dataSnapshot.getKey();
-        final Room room = dataSnapshot.child(Constants.roomDataKey).getValue(Room.class);
+        final Room room = dataSnapshot.child(Constants.roomDataDatabaseKey).getValue(Room.class);
         room.setKey(roomKey);
         room.setMuted(fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1"));
 
-        if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
-            if (dataSnapshot.child(Constants.messagesKey).getChildrenCount() > 0) {
-                DatabaseReference newestMessageRoot = root.child(roomKey).child(Constants.messagesKey);
+        if (room.getPassword().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
+            if (dataSnapshot.child(Constants.messagesDatabaseKey).getChildrenCount() > 0) {
+                DatabaseReference newestMessageRoot = root.child(roomKey).child(Constants.messagesDatabaseKey);
                 Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
                 lastQuery.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot child: dataSnapshot.getChildren()) {
                             String key = child.getKey();
-                            String message = child.child("msg").getValue().toString();
-                            String image = child.child("img").getValue().toString();
-                            String userid = child.child("name").getValue().toString();
+                            String message = child.child("text").getValue().toString();
+                            String image = child.child("image").getValue().toString();
+                            String userid = child.child("sender").getValue().toString();
                             boolean pinned = (boolean) child.child("pinned").getValue();
-                            String quote = child.child("quote").getValue().toString();
                             String time = child.child("time").getValue().toString();
 
                             Message newestMessage;
                             if (!image.isEmpty()) {
-                                newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, "", "", quote, pinned);
+                                newestMessage = new Message(null, image, time, key, Message.Type.IMAGE_RECEIVED, null, pinned);
                             } else {
-                                newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, "", "", quote, pinned);
+                                newestMessage = new Message(null, message, time, key, Message.Type.MESSAGE_RECEIVED, null, pinned);
                             }
                             room.setNewestMessage(newestMessage);
 
@@ -185,13 +184,19 @@ public class RoomListFragmentMyRooms extends Fragment {
     }
 
     private void sortByTime(final Room room, String userid) {
-        DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users").child(userid);
+        DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey).child(userid);
         userRoot.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String key = dataSnapshot.getKey();
-                User u = dataSnapshot.getValue(User.class);
-                u.setUserID(key);
+                User u;
+                if (dataSnapshot.getValue() == null) {
+                    u = new User(key, getResources().getString(R.string.unknownuser), "19700101", "", getResources().getString(R.string.unknown), 0, "unknown_user", "");
+                } else {
+                    u = dataSnapshot.getValue(User.class);
+                    u.setUserID(key);
+                }
+
                 if (room.getNewestMessage() != null) {
                     room.getNewestMessage().setUser(u);
                 } else {
@@ -235,7 +240,7 @@ public class RoomListFragmentMyRooms extends Fragment {
     private void requestPassword(final Room room) {
         String roomKey = room.getKey();
 
-        if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
+        if (room.getPassword().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
             Intent intent = new Intent(getContext(), ChatActivity.class);
             intent.putExtra("room_name", room.getName());
             intent.putExtra("room_key", roomKey);
@@ -305,7 +310,11 @@ public class RoomListFragmentMyRooms extends Fragment {
         searchRoomList.clear();
         for (Room r : roomList) {
             if (r.getName().toLowerCase().contains(text.toLowerCase())) {
-                searchRoomList.add(r);
+                Room r2 = new Room(r.getKey(), r.getName(), r.getCategory(), r.getTime(), r.getPassword(), r.getAdmin());
+                r2.setImage(r.getImage());
+                r2.setNewestMessage(r.getNewestMessage());
+                r2.setSearchString(text);
+                searchRoomList.add(r2);
             }
         }
     }

@@ -2,31 +2,26 @@ package com.yannick.mychatapp.data;
 
 public class Message {
     private User user;
-    private String msg;
+    private String text;
     private String time;
     private boolean sender;
     private String key;
     private Type type;
-    private String quoteName;
-    private String quoteMessage;
-    private String quoteKey;
+    private Message quotedMessage;
     private String searchString;
     private boolean pinned;
 
     public Message() {
-
+        this.type = Type.HEADER;
     }
 
-    public Message(User user, String msg, String time, boolean sender, String id, Type type, String quoteName, String quoteMessage, String quoteKey, boolean pinned) {
+    public Message(User user, String text, String time, String id, Type type, Message quotedMessage, boolean pinned) {
         this.user = user;
-        this.msg = msg;
+        this.text = text;
         this.time = time;
-        this.sender = sender;
         this.key = id;
         this.type = type;
-        this.quoteMessage = quoteMessage;
-        this.quoteName = quoteName;
-        this.quoteKey = quoteKey;
+        this.quotedMessage = quotedMessage;
         this.searchString = "";
         this.pinned = pinned;
     }
@@ -321,56 +316,44 @@ public class Message {
         }
     }
 
-    public String getMsg() {
-        return msg;
+    public String getText() {
+        return text;
     }
 
     public String getTime() {
         return time;
     }
 
-    public boolean isSender() {
-        return sender;
+    public boolean isSender(String userID) {
+        return userID.equals(this.getUser().getUserID());
     }
 
     public String getKey() {
         return key;
     }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
+
     public Type getType() {
         return type;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setText(String text) {
+        this.text = text;
     }
 
     public void setTime(String time) {
         this.time = time;
     }
 
-    public void setSender(boolean sender) {
-        this.sender = sender;
+    public Message getQuotedMessage() {
+        return quotedMessage;
     }
 
-    public String getQuoteName() {
-        return quoteName;
-    }
-
-    public void setQuoteName(String quoteName) {
-        this.quoteName = quoteName;
-    }
-
-    public String getQuoteMessage() {
-        return quoteMessage;
-    }
-
-    public void setQuoteMessage(String quoteMessage) {
-        this.quoteMessage = quoteMessage;
-    }
-
-    public String getQuoteKey() {
-        return quoteKey;
+    public void setQuotedMessage(Message quotedMessage) {
+        this.quotedMessage = quotedMessage;
     }
 
     public void setType(Type type) {

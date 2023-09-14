@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.notifications;
 
 import android.app.RemoteInput;
 import android.content.BroadcastReceiver;
@@ -10,6 +10,9 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.yannick.mychatapp.Constants;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.R;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,7 +33,7 @@ public class ReplyReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         CharSequence message = getReplyMessage(intent);
 
-        DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child("rooms").child(intent.getStringExtra("room_key"));
+        DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsDatabaseKey).child(intent.getStringExtra("room_key")).child(Constants.messagesDatabaseKey);
         String tempKey = root.push().getKey();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
@@ -38,9 +41,9 @@ public class ReplyReceiver extends BroadcastReceiver {
 
         DatabaseReference messageRoot = root.child(tempKey);
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("name", intent.getStringExtra("user_id"));
-        map.put("msg", message.toString());
-        map.put("img", "");
+        map.put("sender", intent.getStringExtra("user_id"));
+        map.put("text", message.toString());
+        map.put("image", "");
         map.put("pinned", false);
         map.put("quote", "");
         map.put("time", currentDateAndTime);

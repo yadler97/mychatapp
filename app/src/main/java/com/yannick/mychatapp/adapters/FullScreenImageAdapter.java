@@ -1,9 +1,9 @@
 package com.yannick.mychatapp.adapters;
 
-import android.content.Context;
-import android.content.Intent;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.PagerAdapter;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,8 +13,10 @@ import android.widget.LinearLayout;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.data.Image;
 
 import java.util.ArrayList;
 
@@ -23,9 +25,9 @@ public class FullScreenImageAdapter extends PagerAdapter {
     private final Context context;
     private final ArrayList<String> imageList;
     private final LayoutInflater layoutInflater;
-    private final int type;
+    private final Image type;
 
-    public FullScreenImageAdapter(Context context, ArrayList<String> imageList, int type) {
+    public FullScreenImageAdapter(Context context, ArrayList<String> imageList, Image type) {
         this.context = context;
         this.imageList = imageList;
         this.type = type;
@@ -42,25 +44,28 @@ public class FullScreenImageAdapter extends PagerAdapter {
         return view == ((LinearLayout) object);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         View itemView = layoutInflater.inflate(R.layout.pager_item, container, false);
 
         ImageView imageView = itemView.findViewById(R.id.imageView);
 
-        String imgurl = imageList.get(position);
+        String imageURL = imageList.get(position);
         StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference pathReference;
 
-        if (type == 0) {
-            pathReference = storageRef.child("profile_images/" + imgurl);
-        } else if (type == 1) {
-            pathReference = storageRef.child("profile_banners/" + imgurl);
+        if (type == Image.PROFILE_IMAGE) {
+            pathReference = storageRef.child(Constants.profileImagesStorageKey + imageURL);
+        } else if (type == Image.PROFILE_BANNER) {
+            pathReference = storageRef.child(Constants.profileBannersStorageKey + imageURL);
+        } else if (type == Image.ROOM_IMAGE) {
+            pathReference = storageRef.child(Constants.roomImagesStorageKey + imageURL);
         } else {
-            pathReference = storageRef.child("images/" + imgurl);
+            pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
         }
 
-        if (type == 0 || type == 1) {
+        if (type == Image.PROFILE_IMAGE || type == Image.PROFILE_BANNER || type == Image.ROOM_IMAGE) {
             GlideApp.with(context)
                     .load(pathReference)
                     .placeholder(R.color.black)
@@ -74,11 +79,6 @@ public class FullScreenImageAdapter extends PagerAdapter {
         }
 
         container.addView(itemView);
-
-        imageView.setOnClickListener(view -> {
-            Intent intent = new Intent("closefullscreen");
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-        });
 
         return itemView;
     }

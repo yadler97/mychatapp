@@ -12,6 +12,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.data.User;
@@ -61,7 +62,7 @@ public class MemberListAdapter extends ArrayAdapter<User> {
         viewHolder.userText.setText(memberList.get(position).getName());
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refImage = storageRef.child("profile_images/" + memberList.get(position).getImg());
+        final StorageReference refImage = storageRef.child(Constants.profileImagesStorageKey + memberList.get(position).getImage());
         GlideApp.with(context)
                 .load(refImage)
                 .centerCrop()

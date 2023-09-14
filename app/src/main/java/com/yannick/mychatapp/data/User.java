@@ -4,25 +4,25 @@ public class User {
     private String userID;
     private String name;
     private String birthday;
-    private String profileDescription;
+    private String description;
     private String location;
     private int favColour;
     private boolean ownProfileImage;
-    private String img;
+    private String image;
     private String banner;
 
     public User() {
 
     }
 
-    public User(String userid, String name, String birthday, String profileDescription, String location, int favColour, String img, String banner) {
+    public User(String userid, String name, String birthday, String description, String location, int favColour, String image, String banner) {
         this.userID = userid;
         this.name = name;
         this.birthday = birthday;
-        this.profileDescription = profileDescription;
+        this.description = description;
         this.location = location;
         this.favColour = favColour;
-        this.img = img;
+        this.image = image;
         this.banner = banner;
     }
 
@@ -42,8 +42,8 @@ public class User {
         return birthday;
     }
 
-    public String getProfileDescription() {
-        return profileDescription;
+    public String getDescription() {
+        return description;
     }
 
     public String getLocation() {
@@ -58,8 +58,8 @@ public class User {
         return ownProfileImage;
     }
 
-    public String getImg() {
-        return img;
+    public String getImage() {
+        return image;
     }
 
     public String getBanner() {
@@ -74,8 +74,8 @@ public class User {
         this.birthday = birthday;
     }
 
-    public void setProfileDescription(String profileDescription) {
-        this.profileDescription = profileDescription;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setLocation(String location) {
@@ -86,8 +86,8 @@ public class User {
         this.ownProfileImage = ownProfileImage;
     }
 
-    public void setImg(String img) {
-        this.img = img;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public void setBanner(String banner) {

@@ -1,5 +1,6 @@
 package com.yannick.mychatapp.activities;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -25,6 +26,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -40,6 +43,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.ImageOperations;
 import com.yannick.mychatapp.R;
@@ -62,9 +66,9 @@ public class LoginActivity extends AppCompatActivity {
     private static final String DEFAULT_BIRTHDAY = "01.01.2000";
     private static boolean ownProfileImage = false;
     private static int colour = 0;
-    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child("users");
+    private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
 
-    private String img = "";
+    private String image = "";
     private String banner = "";
 
     private ImageButton profileImageButton;
@@ -184,7 +188,7 @@ public class LoginActivity extends AppCompatActivity {
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.pleaseverifyemail)));
         builder.setCancelable(false);
         builder.setView(view);
-        builder.setPositiveButton(R.string.cancel, (dialogInterface, i) -> mAuth.signOut());
+        builder.setPositiveButton(R.string.close, (dialogInterface, i) -> mAuth.signOut());
 
         final AlertDialog alert = builder.create();
 
@@ -264,7 +268,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        img = "";
+        image = "";
         banner = "";
         ownProfileImage = false;
 
@@ -329,24 +333,23 @@ public class LoginActivity extends AppCompatActivity {
                         userID = user.getUid();
 
                         if (!ownProfileImage) {
-                            img = UUID.randomUUID().toString();
+                            image = UUID.randomUUID().toString();
                         }
 
                         DatabaseReference newUserRoot = userRoot.child(userID);
                         Map<String, Object> map = new HashMap<>();
                         map.put("name", name);
-                        map.put("profileDescription", description);
+                        map.put("description", description);
                         map.put("location", location);
                         map.put("birthday", birthday.substring(6, 10) + birthday.substring(3, 5) + birthday.substring(0, 2));
                         map.put("favColour", colour);
-                        map.put("img", img);
+                        map.put("image", image);
                         map.put("banner", banner);
                         map.put("ownProfileImage", ownProfileImage);
                         newUserRoot.updateChildren(map);
                         Toast.makeText(getApplicationContext(), R.string.profilecreated, Toast.LENGTH_SHORT).show();
 
                         if (!ownProfileImage) {
-                            StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
                             TextDrawable drawable = TextDrawable.builder()
                                     .beginConfig()
                                     .bold()
@@ -358,7 +361,7 @@ public class LoginActivity extends AppCompatActivity {
                             drawable.draw(canvas);
 
                             byte[] byteArray;
-                            final StorageReference refProfileImage = storageRef.child("profile_images/" + img);
+                            final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
                             ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                             byteArray = stream.toByteArray();
@@ -388,7 +391,6 @@ public class LoginActivity extends AppCompatActivity {
         final EditText locationEdit = view.findViewById(R.id.user_location);
 
         final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
-        final TextInputLayout profileDescriptionLayout = view.findViewById(R.id.user_bio_layout);
         final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
         usernameEdit.addTextChangedListener(new TextWatcher() {
@@ -409,24 +411,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         });
-        profileDescriptionEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    profileDescriptionLayout.setError(null);
-                }
-            }
-        });
         locationEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -450,9 +435,8 @@ public class LoginActivity extends AppCompatActivity {
         profileImageButton = view.findViewById(R.id.user_profile_image);
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refProfileImage = storageRef.child("profile_images/" + img);
-        final StorageReference refProfileBanner = storageRef.child("profile_banners/" + banner);
+        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
+        final StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
 
         birthdayEdit.setText(DEFAULT_BIRTHDAY);
 
@@ -494,14 +478,14 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_IMAGE_REQUEST);
+            pickProfileImageLauncher.launch(intent);
         });
 
         profileBannerButton.setOnClickListener(view16 -> {
             Intent intent = new Intent();
             intent.setType("image/*");
             intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Select Image"), ImageOperations.PICK_PROFILE_BANNER_REQUEST);
+            pickProfileBannerLauncher.launch(intent);
         });
 
         GradientDrawable shape = new GradientDrawable();
@@ -575,30 +559,26 @@ public class LoginActivity extends AppCompatActivity {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view12 -> {
                 if (!usernameEdit.getText().toString().isEmpty()) {
-                    if (!profileDescriptionEdit.getText().toString().isEmpty()) {
-                        if (!locationEdit.getText().toString().isEmpty()) {
-                            if (!birthdayEdit.getText().toString().isEmpty()) {
-                                String username = usernameEdit.getText().toString();
-                                String profileDescription = profileDescriptionEdit.getText().toString();
-                                String location = locationEdit.getText().toString();
-                                String birthday = birthdayEdit.getText().toString();
+                    if (!locationEdit.getText().toString().isEmpty()) {
+                        if (!birthdayEdit.getText().toString().isEmpty()) {
+                            String username = usernameEdit.getText().toString();
+                            String description = profileDescriptionEdit.getText().toString();
+                            String location = locationEdit.getText().toString();
+                            String birthday = birthdayEdit.getText().toString();
 
-                                createAccountAuth(email, password, username, profileDescription, location, birthday);
+                            createAccountAuth(email, password, username, description, location, birthday);
 
-                                if (view12 != null) {
-                                    InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                    imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
-                                }
-
-                                alert.cancel();
-                            } else {
-                                Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
+                            if (view12 != null) {
+                                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
                             }
+
+                            alert.cancel();
                         } else {
-                            locationLayout.setError(getResources().getString(R.string.enterlocation));
+                            Toast.makeText(getApplicationContext(), R.string.incompletedata, Toast.LENGTH_SHORT).show();
                         }
                     } else {
-                        profileDescriptionLayout.setError(getResources().getString(R.string.enterbio));
+                        locationLayout.setError(getResources().getString(R.string.enterlocation));
                     }
                 } else {
                     usernameLayout.setError(getResources().getString(R.string.entername));
@@ -636,17 +616,6 @@ public class LoginActivity extends AppCompatActivity {
         return header;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (resultCode == RESULT_OK && data != null) {
-            Uri filePath = data.getData();
-            if (filePath != null) {
-                uploadImage(filePath, requestCode);
-            }
-        }
-    }
-
     private void uploadImage(Uri filePath, final int type) {
         final ProgressDialog progressDialog;
         if (theme == Theme.DARK) {
@@ -657,14 +626,13 @@ public class LoginActivity extends AppCompatActivity {
         progressDialog.setTitle(R.string.upload);
         progressDialog.show();
 
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
         StorageReference ref;
         if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
-            img = UUID.randomUUID().toString();
-            ref = storageRef.child("profile_images/" + img);
+            image = UUID.randomUUID().toString();
+            ref = storage.getReference().child(Constants.profileImagesStorageKey + image);
         } else {
             banner = UUID.randomUUID().toString();
-            ref = storageRef.child("profile_banners/" + banner);
+            ref = storage.getReference().child(Constants.profileBannersStorageKey + banner);
         }
 
         ImageOperations imageOperations = new ImageOperations(getContentResolver());
@@ -675,10 +643,6 @@ public class LoginActivity extends AppCompatActivity {
             progressDialog.dismiss();
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
                 ownProfileImage = true;
-                DatabaseReference newUserRoot = userRoot.child(userID);
-                Map<String, Object> map = new HashMap<>();
-                map.put("ownProfileImage", ownProfileImage);
-                newUserRoot.updateChildren(map);
             }
             updateEditProfileImages();
             Toast.makeText(LoginActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
@@ -694,9 +658,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateEditProfileImages() {
-        StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-
-        StorageReference refProfileImage = storageRef.child("profile_images/" + img);
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
         refProfileImage.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
@@ -704,7 +666,7 @@ public class LoginActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(profileImageButton));
 
-        StorageReference refProfileBanner = storageRef.child("profile_banners/" + banner);
+        StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
         refProfileBanner.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refProfileBanner)
@@ -713,4 +675,28 @@ public class LoginActivity extends AppCompatActivity {
                 .thumbnail(0.05f)
                 .into(profileBannerButton));
     }
+
+    ActivityResultLauncher<Intent> pickProfileImageLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Uri filePath = data.getData();
+                    if (filePath != null) {
+                        uploadImage(filePath, ImageOperations.PICK_PROFILE_IMAGE_REQUEST);
+                    }
+                }
+            });
+
+    ActivityResultLauncher<Intent> pickProfileBannerLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    Intent data = result.getData();
+                    Uri filePath = data.getData();
+                    if (filePath != null) {
+                        uploadImage(filePath, ImageOperations.PICK_PROFILE_BANNER_REQUEST);
+                    }
+                }
+            });
 }

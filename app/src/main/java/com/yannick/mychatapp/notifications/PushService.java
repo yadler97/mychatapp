@@ -1,4 +1,4 @@
-package com.yannick.mychatapp;
+package com.yannick.mychatapp.notifications;
 
 import android.app.ActivityManager;
 import android.app.PendingIntent;
@@ -20,6 +20,8 @@ import androidx.preference.PreferenceManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.yannick.mychatapp.FileOperations;
+import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.activities.ChatActivity;
 import com.yannick.mychatapp.activities.MainActivity;
 
@@ -42,16 +44,16 @@ public class PushService extends FirebaseMessagingService {
         FileOperations fileOperations = new FileOperations(this);
         if (!appInForeground(this) || (appInForeground(this) && !fileOperations.readFromFile(FileOperations.currentRoomFile).equals(remoteMessage.getData().get("roomid")))) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            if (settings.getBoolean(MainActivity.settingsPushNotificationsKey, true) && !remoteMessage.getData().get("userid").equals(mAuth.getCurrentUser().getUid())) {
+            if (settings.getBoolean(MainActivity.settingsPushNotificationsKey, true) && !remoteMessage.getData().get("sender").equals(mAuth.getCurrentUser().getUid())) {
                 int pushID = 0;
                 for (int i = 0; i < remoteMessage.getData().get("roomid").length(); ++i) {
                     pushID += (int) remoteMessage.getData().get("roomid").charAt(i);
                 }
                 String pushText;
-                if (!remoteMessage.getData().get("img").isEmpty()) {
+                if (!remoteMessage.getData().get("image").isEmpty()) {
                     pushText = remoteMessage.getData().get("name") + " " + getResources().getString(R.string.sharedapicture);
                 } else {
-                    pushText = remoteMessage.getData().get("name") + ": " + remoteMessage.getData().get("msg");
+                    pushText = remoteMessage.getData().get("name") + ": " + remoteMessage.getData().get("text");
                 }
 
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
@@ -106,20 +108,19 @@ public class PushService extends FirebaseMessagingService {
         }
     }
 
-    private PendingIntent getReplyPendingIntent(String roomid, int pushid) {
+    private PendingIntent getReplyPendingIntent(String roomKey, int pushID) {
         Intent intent = new Intent(getApplicationContext(), ReplyReceiver.class);
-        intent.putExtra("room_key", roomid);
+        intent.putExtra("room_key", roomKey);
         intent.putExtra("user_id", mAuth.getCurrentUser().getUid());
-        intent.putExtra("push_id", pushid);
+        intent.putExtra("push_id", pushID);
         return PendingIntent.getBroadcast(getApplicationContext(), 100, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    private PendingIntent getMarkAsReadPendingIntent(String roomid, int pushid, String messageid) {
+    private PendingIntent getMarkAsReadPendingIntent(String roomKey, int pushID, String messageKey) {
         Intent intent = new Intent(getApplicationContext(), MarkAsReadReceiver.class);
-        intent.putExtra("room_key", roomid);
-        intent.putExtra("user_id", mAuth.getCurrentUser().getUid());
-        intent.putExtra("push_id", pushid);
-        intent.putExtra("message_id", messageid);
+        intent.putExtra("room_key", roomKey);
+        intent.putExtra("push_id", pushID);
+        intent.putExtra("message_key", messageKey);
         return PendingIntent.getBroadcast(getApplicationContext(), 100, intent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 

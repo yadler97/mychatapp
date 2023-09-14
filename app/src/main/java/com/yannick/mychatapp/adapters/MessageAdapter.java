@@ -37,6 +37,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.activities.MainActivity;
 import com.yannick.mychatapp.data.Message;
@@ -71,31 +72,31 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     private final FirebaseAuth mAuth;
 
     public class MyViewHolder extends RecyclerView.ViewHolder{
-        private final TextView name, msg, time, quoteName, quoteMessage;
-        private final LinearLayout quoteBox, quoteBoxContent, messageBox;
+        private final TextView name, message, time, quoteName, quoteMessage;
+        private final LinearLayout quoteBox, messageBox;
         private final Button messagebutton;
-        private final ExpandableTextView msgExpandable;
-        private final ImageView img;
+        private final ExpandableTextView messageExpandable;
+        private final ImageView image;
         private final Theme theme;
         private int pos;
         private final GestureDetector gestureDetector;
-        private final CircleImageView profileImage;
+        private final CircleImageView profileImage, quoteProfileImage;
 
         @SuppressLint("ClickableViewAccessibility")
         private MyViewHolder(View view) {
             super(view);
             name = view.findViewById(R.id.text_message_name);
-            msg = view.findViewById(R.id.text_message_body);
+            message = view.findViewById(R.id.text_message_body);
             time = view.findViewById(R.id.text_message_time);
             profileImage = view.findViewById(R.id.image_message_profile);
-            img = view.findViewById(R.id.image);
+            image = view.findViewById(R.id.image);
             quoteMessage = view.findViewById(R.id.quote_message);
             quoteName = view.findViewById(R.id.quote_name);
+            quoteProfileImage = view.findViewById(R.id.quote_profile_image);
             quoteBox = view.findViewById(R.id.quotebox);
-            quoteBoxContent = view.findViewById(R.id.quotebox_content);
             messageBox = view.findViewById(R.id.messagebox);
             messagebutton = view.findViewById(R.id.messagebutton);
-            msgExpandable = view.findViewById(R.id.text_message_body_expandable);
+            messageExpandable = view.findViewById(R.id.text_message_body_expandable);
 
             gestureDetector = new GestureDetector(context, new SingleTapConfirm());
 
@@ -114,7 +115,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             });
 
             try {
-                msg.setOnTouchListener((view13, event) -> {
+                message.setOnTouchListener((view13, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         int action = event.getActionMasked();
@@ -124,13 +125,13 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                             float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
                             shape.setCornerRadii(corners);
                             if (action == MotionEvent.ACTION_DOWN) {
-                                if (messageList.get(pos).isSender()) {
+                                if (messageList.get(pos).isSender(mAuth.getCurrentUser().getUid())) {
                                     shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent_clicked));
                                 } else {
                                     shape.setColor(ContextCompat.getColor(context, R.color.textbox_received_clicked));
                                 }
                             } else {
-                                if (messageList.get(pos).isSender()) {
+                                if (messageList.get(pos).isSender(mAuth.getCurrentUser().getUid())) {
                                     shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent));
                                 } else {
                                     shape.setColor(ContextCompat.getColor(context, R.color.textbox_received));
@@ -148,7 +149,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                                     || Message.isForwardedExpandable(type)) {
                                 messageBox.setBackground(shape);
                             } else if (Message.isBasicMessage(type)) {
-                                msg.setBackground(shape);
+                                message.setBackground(shape);
                             }
                         }
 
@@ -161,7 +162,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             }
 
             try {
-                msgExpandable.setOnTouchListener((view12, event) -> {
+                messageExpandable.setOnTouchListener((view12, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         int action = event.getActionMasked();
@@ -170,7 +171,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                             shape.setShape(GradientDrawable.RECTANGLE);
                             float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
                             shape.setCornerRadii(corners);
-                            if (messageList.get(pos).isSender()) {
+                            if (messageList.get(pos).isSender(mAuth.getCurrentUser().getUid())) {
                                 shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent_clicked));
                             } else {
                                 shape.setColor(ContextCompat.getColor(context, R.color.textbox_received_clicked));
@@ -182,7 +183,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                             shape.setShape(GradientDrawable.RECTANGLE);
                             float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
                             shape.setCornerRadii(corners);
-                            if (messageList.get(pos).isSender()) {
+                            if (messageList.get(pos).isSender(mAuth.getCurrentUser().getUid())) {
                                 shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent));
                             } else {
                                 shape.setColor(ContextCompat.getColor(context, R.color.textbox_received));
@@ -198,15 +199,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             }
 
             try {
-                img.setOnTouchListener((view1, event) -> {
+                image.setOnTouchListener((view1, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         int action = event.getActionMasked();
                         if (action == MotionEvent.ACTION_DOWN) {
-                            img.setForeground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.image_overlay, null));
+                            image.setForeground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.image_overlay, null));
                         }
                         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                            img.setForeground(null);
+                            image.setForeground(null);
                         }
                         return gestureDetector.onTouchEvent(event);
                     }
@@ -220,7 +221,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         public void runSelectedMenuOption(Message.Type type, MenuItem item, Message message) {
             if (item.getItemId() == R.id.copy) {
                 ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText("", message.getMsg());
+                ClipData clip = ClipData.newPlainText("", message.getText());
                 clipboard.setPrimaryClip(clip);
                 Toast.makeText(context, R.string.messagecopied, Toast.LENGTH_SHORT).show();
             } else if (item.getItemId() == R.id.openprofile) {
@@ -237,7 +238,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.jump) {
                 Intent intent = new Intent("quotedMessage");
-                intent.putExtra("quoteID", message.getQuoteKey());
+                intent.putExtra("quoteID", message.getQuotedMessage().getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.quote) {
                 Intent intent = new Intent("quote");
@@ -245,11 +246,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.download && Message.isImage(type)) {
                 Intent intent = new Intent("permission");
-                intent.putExtra("imgurl", message.getMsg());
+                intent.putExtra("imageURL", message.getText());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             } else if (item.getItemId() == R.id.download && Message.isQuoteImage(type)) {
                 Intent intent = new Intent("permission");
-                intent.putExtra("imgurl", message.getQuoteMessage());
+                intent.putExtra("imageURL", message.getQuotedMessage().getText());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         }
@@ -304,15 +305,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 Message.Type type = clickedDataItem.getType();
                 if (Message.isImage(type)) {
                     Intent intent = new Intent("fullscreenimage");
-                    intent.putExtra("image", clickedDataItem.getMsg());
+                    intent.putExtra("image", clickedDataItem.getText());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 } else if (Message.isQuoteImage(type)) {
                     Intent intent = new Intent("fullscreenimage");
-                    intent.putExtra("image", clickedDataItem.getQuoteMessage());
+                    intent.putExtra("image", clickedDataItem.getQuotedMessage().getText());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 } else if (Message.isQuote(type)) {
                     Intent intent = new Intent("quotedMessage");
-                    intent.putExtra("quoteID", clickedDataItem.getQuoteKey());
+                    intent.putExtra("quoteID", clickedDataItem.getQuotedMessage().getKey());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 }
             }
@@ -368,50 +369,49 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         shape.setCornerRadii(corners);
         if (!Message.isImage(type) && !Message.isLinkPreview(type)) {
             if (!m.getSearchString().isEmpty()) {
-                SpannableStringBuilder sbuilder = highlightSearchedText(m.getMsg(), m.getSearchString());
+                SpannableStringBuilder sbuilder = highlightSearchedText(m.getText(), m.getSearchString());
                 if (!Message.isExpandable(type) && !Message.isForwardedExpandable(type)) {
-                    holder.msg.setText(sbuilder);
+                    holder.message.setText(sbuilder);
                 } else {
-                    holder.msgExpandable.setText(sbuilder);
-                    holder.msgExpandable.setInterpolator(new LinearInterpolator());
+                    holder.messageExpandable.setText(sbuilder);
+                    holder.messageExpandable.setInterpolator(new LinearInterpolator());
                     holder.messagebutton.setOnClickListener(view -> {
-                        holder.messagebutton.setText(holder.msgExpandable.isExpanded() ? R.string.showmore : R.string.showless);
-                        holder.msgExpandable.toggle();
+                        holder.messagebutton.setText(holder.messageExpandable.isExpanded() ? R.string.showmore : R.string.showless);
+                        holder.messageExpandable.toggle();
                     });
                 }
             } else {
                 if (type != Message.Type.HEADER && !Message.isExpandable(type) && !Message.isForwardedExpandable(type)) {
                     try {
-                        SpannableStringBuilder newBuilder = styleText(m.getMsg());
-                        holder.msg.setText(newBuilder);
+                        SpannableStringBuilder newBuilder = styleText(m.getText());
+                        holder.message.setText(newBuilder);
                     } catch (IndexOutOfBoundsException ioobe) {
-                        holder.msg.setText(m.getMsg());
+                        holder.message.setText(m.getText());
                     }
 
-                    if (!m.isSender()) {
+                    if (!m.isSender(mAuth.getCurrentUser().getUid())) {
                         new PatternEditableBuilder().
                                 addPattern(Pattern.compile("\\@(\\w+)"), Color.BLUE,
-                                        text -> {}).into(holder.msg);
+                                        text -> {}).into(holder.message);
                     } else {
                         new PatternEditableBuilder().
                                 addPattern(Pattern.compile("\\@(\\w+)"), Color.RED,
-                                        text -> {}).into(holder.msg);
+                                        text -> {}).into(holder.message);
                     }
                 } else if (Message.isExpandable(type) || Message.isForwardedExpandable(type)) {
-                    holder.msgExpandable.setText(m.getMsg());
-                    holder.msgExpandable.setInterpolator(new LinearInterpolator());
+                    holder.messageExpandable.setText(m.getText());
+                    holder.messageExpandable.setInterpolator(new LinearInterpolator());
                     holder.messagebutton.setOnClickListener(view -> {
-                        holder.messagebutton.setText(holder.msgExpandable.isExpanded() ? R.string.showmore : R.string.showless);
-                        holder.msgExpandable.toggle();
+                        holder.messagebutton.setText(holder.messageExpandable.isExpanded() ? R.string.showmore : R.string.showless);
+                        holder.messageExpandable.toggle();
                     });
                 } else {
-                    holder.msg.setText(m.getMsg());
+                    holder.message.setText(m.getText());
                 }
             }
         } else if (Message.isImage(type)) {
-            String imgurl = m.getMsg();
-            StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-            StorageReference pathReference = storageRef.child("images/" + imgurl);
+            String imageURL = m.getText();
+            StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + imageURL);
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
             if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {
@@ -420,17 +420,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                         .onlyRetrieveFromCache(true)
                         .centerCrop()
                         .thumbnail(0.05f)
-                        .into(holder.img);
+                        .into(holder.image);
             } else {
                 GlideApp.with(context)
                         .load(pathReference)
                         .centerCrop()
                         .thumbnail(0.05f)
-                        .into(holder.img);
+                        .into(holder.image);
             }
         } else  {
             JsoupAsyncTask jsoupAsyncTask = new JsoupAsyncTask();
-            jsoupAsyncTask.execute(m.getMsg(), String.valueOf(position));
+            jsoupAsyncTask.execute(m.getText(), String.valueOf(position));
         }
         if (type != Message.Type.HEADER) {
             String time = m.getTime();
@@ -439,12 +439,11 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             } else {
                 holder.time.setText("");
             }
-            if (!m.isSender()) {
+            if (!m.isSender(mAuth.getCurrentUser().getUid())) {
                 if (!Message.isConMessage(type)) {
                     holder.name.setText(m.getUser().getName());
 
-                    StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                    final StorageReference refImage = storageRef.child("profile_images/" + m.getUser().getImg());
+                    StorageReference refImage = storage.getReference().child(Constants.profileImagesStorageKey + m.getUser().getImage());
                     try {
                         GlideApp.with(context)
                                 .load(refImage)
@@ -464,7 +463,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             if (!Message.isDeletedQuote(type)) {
                 String tempUserId = "";
                 for (Message m2 : messageList) {
-                    if (m2.getKey().equals(m.getQuoteKey())) {
+                    if (m2.getKey().equals(m.getQuotedMessage().getKey())) {
                         tempUserId = m2.getUser().getUserID();
                         break;
                     }
@@ -472,33 +471,38 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 if (mAuth.getCurrentUser().getUid().equals(tempUserId)) {
                     holder.quoteName.setText(R.string.you);
                 } else {
-                    holder.quoteName.setText(m.getQuoteName());
+                    holder.quoteName.setText(m.getQuotedMessage().getUser().getName());
                 }
-            }
-            if (!Message.isQuoteImage(type)) {
-                holder.quoteMessage.setText(m.getQuoteMessage());
-            } else {
-                String imgurl = m.getQuoteMessage();
-                StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-                StorageReference pathReference = storageRef.child("images/" + imgurl);
+
+                String imageURL = m.getQuotedMessage().getUser().getImage();
+                StorageReference pathReference = storage.getReference().child(Constants.profileImagesStorageKey + imageURL);
 
                 GlideApp.with(context)
                         //.using(new FirebaseImageLoader())
                         .load(pathReference)
                         .centerCrop()
                         .thumbnail(0.05f)
-                        .into(holder.img);
+                        .into(holder.quoteProfileImage);
             }
-            GradientDrawable shapeQuote = new GradientDrawable();
-            shapeQuote.setShape(GradientDrawable.RECTANGLE);
-            shapeQuote.setCornerRadii(corners);
-            shapeQuote.setColor(ContextCompat.getColor(context, R.color.textbox_time));
-            holder.quoteBoxContent.setBackground(shapeQuote);
+            if (!Message.isQuoteImage(type)) {
+                holder.quoteMessage.setText(m.getQuotedMessage().getText());
+            } else {
+                String imageURL = m.getQuotedMessage().getText();
+                StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + imageURL);
+
+                GlideApp.with(context)
+                        //.using(new FirebaseImageLoader())
+                        .load(pathReference)
+                        .centerCrop()
+                        .thumbnail(0.05f)
+                        .into(holder.image);
+            }
+
             holder.quoteBox.setBackground(shape);
         }
 
         if (type == Message.Type.HEADER || Message.isBasicMessage(type)) {
-            holder.msg.setBackground(shape);
+            holder.message.setBackground(shape);
         } else if (Message.isForwardedMessage(type) || Message.isLinkPreview(type) || Message.isExpandable(type) || Message.isForwardedExpandable(type)) {
             holder.messageBox.setBackground(shape);
         }
@@ -554,7 +558,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         return builder;
     }
 
-    private static SpannableStringBuilder highlightSearchedText(String text, String textToBold) {
+    private SpannableStringBuilder highlightSearchedText(String text, String textToBold) {
         SpannableStringBuilder builder = new SpannableStringBuilder();
 
         if (textToBold.length() > 0 && !textToBold.trim().equals("")) {
@@ -562,7 +566,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             int endingIndex = startingIndex + textToBold.length();
             builder.append(text);
             builder.setSpan(new StyleSpan(Typeface.BOLD), startingIndex, endingIndex, 0);
-            builder.setSpan(new ForegroundColorSpan(Color.RED), startingIndex, endingIndex, 0);
+            builder.setSpan(new ForegroundColorSpan(this.context.getResources().getColor(R.color.text_highlight)), startingIndex, endingIndex, 0);
             return builder;
         } else {
             return builder.append(text);
@@ -619,7 +623,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 Log.d("HEYHY", "Seite: " + htmlContentInStringFormat2);
                 Log.d("HEYHY", "Teaser: " + htmlContentInStringFormat3);
                 Log.d("HEYHY", "Bild: " + htmlContentInStringFormat4);
-                holderList.get(position).msg.setText(htmlContentInStringFormat3);
+                holderList.get(position).message.setText(htmlContentInStringFormat3);
             }
         }
     }

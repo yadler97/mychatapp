@@ -22,7 +22,8 @@
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/icon_profile"
             android:layout_width="64dp"
-            android:layout_height="64dp" />
+            android:layout_height="64dp"
+            android:src="@color/lightGrey" />
 
         <TextView
             android:id="@+id/name_profile"

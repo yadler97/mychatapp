@@ -13,6 +13,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.data.Message;
 import com.yannick.mychatapp.R;
@@ -65,17 +66,18 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
         viewHolder.userText.setText(pinnedList.get(position).getUser().getName());
         viewHolder.timeText.setText(parsedTime);
         if (Message.isImage(type)) {
-            String imgurl = pinnedList.get(position).getMsg();
-            StorageReference storageRef = FirebaseStorage.getInstance().getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-            StorageReference pathReference = storageRef.child("images/" + imgurl);
+            String imageURL = pinnedList.get(position).getText();
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+            StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 
             GlideApp.with(context)
                     //.using(new FirebaseImageLoader())
                     .load(pathReference)
-                    .placeholder(R.color.black)
+                    .centerCrop()
+                    .thumbnail(0.05f)
                     .into(viewHolder.image);
         } else {
-            viewHolder.messageText.setText(pinnedList.get(position).getMsg());
+            viewHolder.messageText.setText(pinnedList.get(position).getText());
         }
 
         rowView.setOnClickListener(view1 -> {
