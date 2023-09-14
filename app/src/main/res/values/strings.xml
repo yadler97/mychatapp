@@ -214,6 +214,7 @@
         <item>Version 1.1.0 (August 20th, 2023)</item>
         <item>Version 1.1.1 (September 2nd, 2023)</item>
         <item>Version 1.1.2 (September 10th, 2023)</item>
+        <item>Version 1.2.0 (September 14th, 2023)</item>
     </string-array>
 
     <string-array name="changelog_text">
@@ -399,6 +400,26 @@
         "- A bug that allowed users to send de facto empty messages with the help of formatting characters has been fixed\n"
         "- A crash that occurred under certain conditions when searching a room has been fixed\n"
         "- A bug that the chosen theme was not properly applied to the dialog windows on the login screen has been fixed\n"
+        "- Many code improvements\n"
+        "\n "</item>
+
+        <item>"- Users can now delete their own account\n"
+        "- Admins can now delete a room\n"
+        "- The room image is now displayed on the forward message screen\n"
+        "- The action bar is now green in light mode\n"
+        "- The search string in room search is now highlighted red just like when searching a message\n"
+        "- The profile screen has been redesigned\n"
+        "- The room info screen now contains the room image and the room name\n"
+        "- The list of available room categories has been updated\n"
+        "- Quotes now use a new layout that includes the profile image of the sender of the quoted message\n"
+        "- Mandatory fields are now marked with an asterisk\n"
+        "- Room and profile descriptions are no longer mandatory fields\n"
+        "- The resend e-mail screen now contains an additional note\n"
+        "- Fullscreen images can now be closed by swiping\n"
+        "- A crash that occurred when the user of the newest message of a room no longer exists has been fixed\n"
+        "- A bug that images were not properly displayed on the pinboard has been fixed\n"
+        "- A bug that the \"Reply\" and \"Mark as read\" receivers for push notifications were not working has been fixed\n"
+        "- A bug that unknown users appeared multiple times on the member list has been fixed\n"
         "- Many code improvements\n"
         "\n "</item>
     </string-array>

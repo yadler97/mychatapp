@@ -214,6 +214,7 @@
         <item>Version 1.1.0 (20.08.2023)</item>
         <item>Version 1.1.1 (02.09.2023)</item>
         <item>Version 1.1.2 (10.09.2023)</item>
+        <item>Version 1.2.0 (14.09.2023)</item>
     </string-array>
 
     <string-array name="changelog_text">
@@ -399,6 +400,26 @@
         "- Ein Fehler wurde behoben, der es erlaubte mit Hilfe von Formatierungszeichen faktisch leere Nachrichten zu verschicken\n"
         "- Ein Absturz wurde behoben, der unter bestimmten Umständen bei der Raumsuche auftreten konnte\n"
         "- Ein Fehler wurde behoben, dass das gewählte Theme nicht korrekt bei den Dialogen des Anmeldebirdschirms genutzt wurde\n"
+        "- Zahlreiche Verbesserungen am Code\n"
+        "\n "</item>
+
+        <item>"- Nutzer können jetzt ihren eigenen Account löschen\n"
+        "- Admins können jetzt einen Raum löschen\n"
+        "- Das Raumbild wird jetzt auf dem \"Weiterleiten\"-Dialog angezeigt\n"
+        "- Die Action Bar ist jetzt im hellen Design grün\n"
+        "- Der Suchtext bei der Raumsuche wird jetzt wie bei der Nachrichtensuche rot markiert\n"
+        "- Der Profil-Bildschirm wurde neu gestaltet\n"
+        "- Der Rauminfo-Dialog beinhaltet jetzt das Raumbild und den Raumnamen\n"
+        "- Die Liste der verfügbaren Raumkategorien wurde aktualisiert\n"
+        "- Zitate nutzen jetzt ein neues Layout, auf dem auch das Profilbild des Absenders der zitierten Nachricht zu sehen ist\n"
+        "- Verpflichtende Felder werden jetzt mit einem Stern markiert\n"
+        "- Raum- und Profilbeschreibungen sind keine verpflichtenden Felder mehr\n"
+        "- Der \"E-Mail erneut versenden\"-Dialog verfügt jetzt über zusätzliche Informationen\n"
+        "- Bilder im Vollbildmodus können jetzt per Wischen geschlossen werden\n"
+        "- Ein Absturz wurde behoben, der auftrat, wenn der Absender der neuesten Nachricht eines Raums nicht mehr existierte\n"
+        "- Ein Fehler wurde behoben, dass Bilder auf der Pinnwand nicht dargestellt wurden\n"
+        "- Ein Fehler wurde behoben, dass die Receiver \"Antworten\" und \"Als gelesen markieren\" bei Push-Nachrichten nicht funktionierten\n"
+        "- Ein Fehler wurde behoben, dass unbekannte Nutzer mehrmals in der Mitgliederliste auftauchten\n"
         "- Zahlreiche Verbesserungen am Code\n"
         "\n "</item>
     </string-array>
