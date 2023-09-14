@@ -682,18 +682,22 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         }
+
         for (Message m : messageList) {
             if (m.getType() != Message.Type.HEADER) {
-                if (m.getQuotedMessage().getKey().equals(key)) {
-                    if (image.equals("")) {
-                        m.getQuotedMessage().setText(text);
-                    } else {
-                        m.getQuotedMessage().setText(image);
+                if (m.getQuotedMessage() != null) {
+                    if (m.getQuotedMessage().getKey().equals(key)) {
+                        if (image.equals("")) {
+                            m.getQuotedMessage().setText(text);
+                        } else {
+                            m.getQuotedMessage().setText(image);
+                        }
+                        m.getQuotedMessage().setUser(getUser(userID));
                     }
-                    m.getQuotedMessage().setUser(getUser(userID));
                 }
             }
         }
+
         mAdapter.notifyDataSetChanged();
     }
 
