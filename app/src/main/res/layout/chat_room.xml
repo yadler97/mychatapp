@@ -116,7 +116,7 @@
                 android:layout_marginBottom="9dp" />
 
             <org.droidparts.widget.ClearableEditText
-                android:id="@+id/msg_input"
+                android:id="@+id/message_input"
                 android:inputType="textMultiLine|textCapSentences"
                 android:hint="@string/sendmessage"
                 android:background="@android:color/transparent"

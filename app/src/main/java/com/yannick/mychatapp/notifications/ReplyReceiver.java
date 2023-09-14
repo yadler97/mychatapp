@@ -41,9 +41,9 @@ public class ReplyReceiver extends BroadcastReceiver {
 
         DatabaseReference messageRoot = root.child(tempKey);
         Map<String, Object> map = new HashMap<String, Object>();
-        map.put("name", intent.getStringExtra("user_id"));
-        map.put("msg", message.toString());
-        map.put("img", "");
+        map.put("sender", intent.getStringExtra("user_id"));
+        map.put("text", message.toString());
+        map.put("image", "");
         map.put("pinned", false);
         map.put("quote", "");
         map.put("time", currentDateAndTime);

@@ -1,7 +1,6 @@
 package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
@@ -105,9 +104,9 @@ public class RoomAdapter extends ArrayAdapter<Room> {
             if (r.getNewestMessage() != null) {
                 if (r.getNewestMessage().getType() == Message.Type.MESSAGE_RECEIVED) {
                     if (r.getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
-                        viewHolder.categoryText.setText(context.getResources().getString(R.string.you) + ": " + r.getNewestMessage().getMsg());
+                        viewHolder.categoryText.setText(context.getResources().getString(R.string.you) + ": " + r.getNewestMessage().getText());
                     } else {
-                        viewHolder.categoryText.setText(r.getNewestMessage().getUser().getName() + ": " + r.getNewestMessage().getMsg());
+                        viewHolder.categoryText.setText(r.getNewestMessage().getUser().getName() + ": " + r.getNewestMessage().getText());
                     }
                 } else if (r.getNewestMessage().getType() == Message.Type.IMAGE_RECEIVED) {
                     if (r.getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
@@ -164,7 +163,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         }
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refImage = storageRef.child(Constants.roomImagesStorageKey + r.getImg());
+        final StorageReference refImage = storageRef.child(Constants.roomImagesStorageKey + r.getImage());
         GlideApp.with(context)
                 .load(refImage)
                 .centerCrop()

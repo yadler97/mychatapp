@@ -66,7 +66,7 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
         viewHolder.userText.setText(pinnedList.get(position).getUser().getName());
         viewHolder.timeText.setText(parsedTime);
         if (Message.isImage(type)) {
-            String imageURL = pinnedList.get(position).getMsg();
+            String imageURL = pinnedList.get(position).getText();
             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
             StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 
@@ -77,7 +77,7 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
                     .thumbnail(0.05f)
                     .into(viewHolder.image);
         } else {
-            viewHolder.messageText.setText(pinnedList.get(position).getMsg());
+            viewHolder.messageText.setText(pinnedList.get(position).getText());
         }
 
         rowView.setOnClickListener(view1 -> {

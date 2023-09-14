@@ -253,7 +253,7 @@ public class ChatActivity extends AppCompatActivity {
         storageReference = storage.getReference();
 
         Button sendMessageButton = findViewById(R.id.btn_send);
-        messageInput = findViewById(R.id.msg_input);
+        messageInput = findViewById(R.id.message_input);
         ImageButton cameraButton = findViewById(R.id.btn_camera);
         ImageButton imageButton = findViewById(R.id.btn_image);
 
@@ -307,9 +307,9 @@ public class ChatActivity extends AppCompatActivity {
 
                     DatabaseReference messageRoot = root.child(Constants.messagesDatabaseKey).child(newMessageKey);
                     Map<String, Object> map = new HashMap<String, Object>();
-                    map.put("name", userID);
-                    map.put("msg", messageInput.getText().toString().trim());
-                    map.put("img", "");
+                    map.put("sender", userID);
+                    map.put("text", messageInput.getText().toString().trim());
+                    map.put("image", "");
                     map.put("pinned", false);
                     map.put("quote", quoteStatus);
                     map.put("time", currentDateAndTime);
@@ -474,7 +474,7 @@ public class ChatActivity extends AppCompatActivity {
 
                     Room room = uniqueKeySnapshot.child(Constants.roomDataDatabaseKey).getValue(Room.class);
                     room.setKey(roomKey);
-                    if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && !roomKey.equals(ChatActivity.this.roomKey)) {
+                    if (room.getPassword().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey))) && !roomKey.equals(ChatActivity.this.roomKey)) {
                         roomList.add(room);
                     }
                 }
@@ -511,7 +511,7 @@ public class ChatActivity extends AppCompatActivity {
         User user = getUser(room.getAdmin());
         String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
         String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
-        Message m = new Message(user, text, creationTime, false, room.getKey(), Message.Type.HEADER, null, false);
+        Message m = new Message(user, text, creationTime, room.getKey(), Message.Type.HEADER, null, false);
 
         messageList.add(m);
         mAdapter.notifyDataSetChanged();
@@ -519,9 +519,9 @@ public class ChatActivity extends AppCompatActivity {
 
     private void addMessage(DataSnapshot dataSnapshot, int index) {
         String key = dataSnapshot.getKey();
-        String message = dataSnapshot.child("msg").getValue().toString();
-        String img = dataSnapshot.child("img").getValue().toString();
-        String userId = dataSnapshot.child("name").getValue().toString();
+        String text = dataSnapshot.child("text").getValue().toString();
+        String image = dataSnapshot.child("image").getValue().toString();
+        String userId = dataSnapshot.child("sender").getValue().toString();
         boolean pinned = (boolean) dataSnapshot.child("pinned").getValue();
         String quote = dataSnapshot.child("quote").getValue().toString();
         String time = dataSnapshot.child("time").getValue().toString();
@@ -534,14 +534,14 @@ public class ChatActivity extends AppCompatActivity {
             Log.e("ParseException", e.toString());
         }
         if (lastReadMessage.equals(lastKey) && !lastReadMessageReached) {
-            Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, false, "-", Message.Type.HEADER, null, false);
+            Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, "-", Message.Type.HEADER, null, false);
             messageList.add(m);
         }
         lastKey = key;
 
         if (index == -1 && !messageList.get(messageList.size() - 1).getTime().substring(0, 8).equals(time.substring(0, 8))) {
-            String text = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
-            Message m = new Message(user, text, time, false, "-", Message.Type.HEADER, null, false);
+            String timeText = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
+            Message m = new Message(user, timeText, time, "-", Message.Type.HEADER, null, false);
             messageList.add(m);
         }
 
@@ -555,25 +555,25 @@ public class ChatActivity extends AppCompatActivity {
 
         Message m;
         if (quote.equals("")) {
-            if (!message.equals("")) {
-                if (message.length() > 11 && message.substring(0, 12).equals("(Forwarded) ")) {
-                    if (message.length() > 2000 + 12) {
-                        m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedExpandableMessageType(sender, con), null, pinned);
+            if (!text.equals("")) {
+                if (text.length() > 11 && text.substring(0, 12).equals("(Forwarded) ")) {
+                    if (text.length() > 2000 + 12) {
+                        m = new Message(user, text.substring(12), time, key, Message.getFittingForwardedExpandableMessageType(sender, con), null, pinned);
                     } else {
-                        m = new Message(user, message.substring(12), time, sender, key, Message.getFittingForwardedMessageType(sender, con), null, pinned);
+                        m = new Message(user, text.substring(12), time, key, Message.getFittingForwardedMessageType(sender, con), null, pinned);
                     }
                 } else {
-                    if (message.length() > 2000) {
-                        m = new Message(user, message, time, sender, key, Message.getFittingExpandableMessageType(sender, con), null, pinned);
+                    if (text.length() > 2000) {
+                        m = new Message(user, text, time, key, Message.getFittingExpandableMessageType(sender, con), null, pinned);
                     } else {
-                        m = new Message(user, message, time, sender, key, Message.getFittingBasicMessageType(sender, con), null, pinned);
+                        m = new Message(user, text, time, key, Message.getFittingBasicMessageType(sender, con), null, pinned);
                     }
                 }
             } else {
-                if (!imageList.contains(img)) {
-                    imageList.add(img);
+                if (!imageList.contains(image)) {
+                    imageList.add(image);
                 }
-                m = new Message(user, img, time, sender, key, Message.getFittingImageMessageType(sender, con), null, pinned);
+                m = new Message(user, image, time, key, Message.getFittingImageMessageType(sender, con), null, pinned);
             }
         } else {
             Message quotedMessage = null;
@@ -586,15 +586,15 @@ public class ChatActivity extends AppCompatActivity {
 
             if (quotedMessage != null) {
                 if (!Message.isImage(quotedMessage.getType())) {
-                    m = new Message(user, message, time, sender, key, Message.getFittingQuoteMessageType(sender, con), quotedMessage, pinned);
+                    m = new Message(user, text, time, key, Message.getFittingQuoteMessageType(sender, con), quotedMessage, pinned);
                 } else {
-                    m = new Message(user, message, time, sender, key, Message.getFittingQuoteImageMessageType(sender, con), quotedMessage, pinned);
+                    m = new Message(user, text, time, key, Message.getFittingQuoteImageMessageType(sender, con), quotedMessage, pinned);
                 }
             } else {
                 quotedMessage = new Message();
-                quotedMessage.setMsg(getResources().getString(R.string.quotedmessagenolongeravailable));
+                quotedMessage.setText(getResources().getString(R.string.quotedmessagenolongeravailable));
                 quotedMessage.setKey(quote);
-                m = new Message(user, message, time, sender, key, Message.getFittingQuoteDeletedMessageType(sender, con), quotedMessage, pinned);
+                m = new Message(user, text, time, key, Message.getFittingQuoteDeletedMessageType(sender, con), quotedMessage, pinned);
             }
         }
         if (index != -1 && messageList.get(ind).getTime().equals("")) {
@@ -622,11 +622,11 @@ public class ChatActivity extends AppCompatActivity {
 
     private void removeMessage(DataSnapshot dataSnapshot) {
         String key = dataSnapshot.getKey();
-        String img = dataSnapshot.child("img").getValue().toString();
+        String image = dataSnapshot.child("image").getValue().toString();
 
-        if (!img.equals("")) {
-            StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + img);
-            imageList.remove(img);
+        if (!image.equals("")) {
+            StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + image);
+            imageList.remove(image);
             pathReference.delete();
         }
 
@@ -652,7 +652,7 @@ public class ChatActivity extends AppCompatActivity {
         for (Message m : tempMessageList) {
             if (m.getQuotedMessage() != null) {
                 if (m.getQuotedMessage().getKey().equals(key)) {
-                    m.getQuotedMessage().setMsg(getResources().getString(R.string.quotedmessagenolongeravailable));
+                    m.getQuotedMessage().setText(getResources().getString(R.string.quotedmessagenolongeravailable));
                     m.getQuotedMessage().setUser(null);
                     m.setType(Message.getQuoteDeletedTypeForQuoteType(m.getType()));
                 }
@@ -665,9 +665,9 @@ public class ChatActivity extends AppCompatActivity {
 
     private void changeMessage(DataSnapshot dataSnapshot) {
         String key = dataSnapshot.getKey();
-        String img = dataSnapshot.child("img").getValue().toString();
-        String chatMsg = dataSnapshot.child("msg").getValue().toString();
-        String chatUserId = dataSnapshot.child("name").getValue().toString();
+        String image = dataSnapshot.child("image").getValue().toString();
+        String text = dataSnapshot.child("text").getValue().toString();
+        String userID = dataSnapshot.child("sender").getValue().toString();
 
         for (Message m : messageList) {
             if (m.getType() != Message.Type.HEADER) {
@@ -685,12 +685,12 @@ public class ChatActivity extends AppCompatActivity {
         for (Message m : messageList) {
             if (m.getType() != Message.Type.HEADER) {
                 if (m.getQuotedMessage().getKey().equals(key)) {
-                    if (img.equals("")) {
-                        m.getQuotedMessage().setMsg(chatMsg);
+                    if (image.equals("")) {
+                        m.getQuotedMessage().setText(text);
                     } else {
-                        m.getQuotedMessage().setMsg(img);
+                        m.getQuotedMessage().setText(image);
                     }
-                    m.getQuotedMessage().setUser(getUser(chatUserId));
+                    m.getQuotedMessage().setUser(getUser(userID));
                 }
             }
         }
@@ -836,9 +836,9 @@ public class ChatActivity extends AppCompatActivity {
 
                 DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).child(newMessageKey);
                 Map<String, Object> map = new HashMap<String, Object>();
-                map.put("name", userID);
-                map.put("msg", "");
-                map.put("img", imageName);
+                map.put("sender", userID);
+                map.put("text", "");
+                map.put("image", imageName);
                 map.put("pinned", false);
                 map.put("quote", "");
                 map.put("time", currentDateAndTime);
@@ -853,10 +853,10 @@ public class ChatActivity extends AppCompatActivity {
             } else {
                 DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
                 Map<String, Object> map = new HashMap<>();
-                map.put("img", imageName);
+                map.put("image", imageName);
                 messageRoot.updateChildren(map);
 
-                room.setImg(imageName);
+                room.setImage(imageName);
 
                 StorageReference pathReference = storage.getReference().child(Constants.roomImagesStorageKey + imageName);
                 GlideApp.with(getApplicationContext())
@@ -956,7 +956,7 @@ public class ChatActivity extends AppCompatActivity {
                         user = m.getUser().getName();
                     }
                     if (!Message.isImage(m.getType())) {
-                        String text = user + " " + m.getMsg();
+                        String text = user + " " + m.getText();
                         SpannableStringBuilder str = new SpannableStringBuilder(text);
                         str.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, user.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                         str.setSpan(new android.text.style.StyleSpan(Typeface.ITALIC), user.length()+1, text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -965,7 +965,7 @@ public class ChatActivity extends AppCompatActivity {
                     } else {
                         SpannableStringBuilder str = new SpannableStringBuilder(user);
                         str.setSpan(new android.text.style.StyleSpan(android.graphics.Typeface.BOLD), 0, user.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-                        String imageURL = m.getMsg();
+                        String imageURL = m.getText();
                         StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + imageURL);
                         GlideApp.with(context)
                                 .load(pathReference)
@@ -1008,7 +1008,7 @@ public class ChatActivity extends AppCompatActivity {
     public BroadcastReceiver permissionReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            imageURL = intent.getStringExtra("imgurl");
+            imageURL = intent.getStringExtra("imageURL");
             if (isStoragePermissionGranted(0)) {
                 downloadImage(imageURL, ImageOperations.PICK_IMAGE_REQUEST);
             }
@@ -1286,19 +1286,19 @@ public class ChatActivity extends AppCompatActivity {
 
         String time = room.getTime().substring(6, 8) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(0, 4);
         roomNameText.setText(room.getName());
-        roomDescriptionText.setText(room.getDesc());
+        roomDescriptionText.setText(room.getDescription());
         roomCategoryText.setText(getResources().getStringArray(R.array.categories)[room.getCategory()]);
         roomCreationDateText.setText(time);
         roomMessageCountText.setText(String.valueOf(messageCount));
 
-        final StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImg());
+        final StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImage());
         GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refRoomImage)
                 .centerCrop()
                 .into(roomImage);
 
-        roomImage.setOnClickListener(v -> showFullscreenImage(room.getImg(), Image.ROOM_IMAGE));
+        roomImage.setOnClickListener(v -> showFullscreenImage(room.getImage(), Image.ROOM_IMAGE));
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -1375,17 +1375,17 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private ArrayList<Message> searchStringInMessage(ArrayList<Message> searchedMessageList, Message m, String text) {
-        if (m.getMsg().toLowerCase().contains(text.toLowerCase()) && m.getType() != Message.Type.HEADER && !Message.isImage(m.getType())) {
+        if (m.getText().toLowerCase().contains(text.toLowerCase()) && m.getType() != Message.Type.HEADER && !Message.isImage(m.getType())) {
             if (searchedMessageList.isEmpty() || !searchedMessageList.get(searchedMessageList.size() - 1).getTime().substring(0, 8).equals(m.getTime().substring(0, 8))) {
                 String time = m.getTime().substring(6, 8) + "." + m.getTime().substring(4, 6) + "." + m.getTime().substring(0, 4);
-                Message m2 = new Message(m.getUser(), time, m.getTime(), false, "-", Message.Type.HEADER, null, m.isPinned());
+                Message m2 = new Message(m.getUser(), time, m.getTime(), "-", Message.Type.HEADER, null, m.isPinned());
                 searchedMessageList.add(m2);
             }
             Message m2;
             if (Message.isConMessage(m.getType())) {
-                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuotedMessage(), m.isPinned());
+                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuotedMessage(), m.isPinned());
             } else {
-                m2 = new Message(m.getUser(), m.getMsg(), m.getTime(), m.isSender(), m.getKey(), m.getType(), m.getQuotedMessage(), m.isPinned());
+                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), m.getType(), m.getQuotedMessage(), m.isPinned());
             }
             m2.setSearchString(text);
             searchedMessageList.add(m2);
@@ -1410,13 +1410,13 @@ public class ChatActivity extends AppCompatActivity {
                     backup += "\n" + btimeDay + "\n";
                 }
                 if (Message.isQuote(m.getType()) || m.getType() == Message.Type.QUOTE_IMAGE_RECEIVED_CON || m.getType() == Message.Type.QUOTE_IMAGE_SENT_CON) {
-                    String quote = m.getQuotedMessage().getMsg();
+                    String quote = m.getQuotedMessage().getText();
                     if (quote.length() > 40) {
                         quote = quote.substring(0, 40) + "...";
                     }
-                    backup += btime + " - [" + m.getQuotedMessage().getUser().getName() + ": " + quote + "] - "  + m.getUser().getName() + ": " + m.getMsg() + "\n";
+                    backup += btime + " - [" + m.getQuotedMessage().getUser().getName() + ": " + quote + "] - "  + m.getUser().getName() + ": " + m.getText() + "\n";
                 } else {
-                    backup += btime + " - " + m.getUser().getName() + ": " + m.getMsg() + "\n";
+                    backup += btime + " - " + m.getUser().getName() + ": " + m.getText() + "\n";
                 }
             }
             newDay = btimeDay;
@@ -1506,11 +1506,11 @@ public class ChatActivity extends AppCompatActivity {
             Log.e("ParseException", e.toString());
         }
         intent.putExtra("newestMessage", creationTime);
-        intent.putExtra("passwd", room.getPasswd());
-        intent.putExtra("roomImage", room.getImg());
+        intent.putExtra("password", room.getPassword());
+        intent.putExtra("roomImage", room.getImage());
         Message newest = messageList.get(messageList.size() - 1);
         if (messageList.size() != 1) {
-            intent.putExtra("nmMessage", newest.getMsg());
+            intent.putExtra("nmMessage", newest.getText());
             String parsedTime = "";
             try {
                 parsedTime = sdf.format(sdf.parse(newest.getTime()));
@@ -1581,17 +1581,17 @@ public class ChatActivity extends AppCompatActivity {
                 .thumbnail(0.05f)
                 .into(banner);
 
-        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + user.getImg());
+        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + user.getImage());
         GlideApp.with(getApplicationContext())
                 .load(refProfileImage)
                 .centerCrop()
                 .into(profileIcon);
 
-        profileIcon.setOnClickListener(v -> showFullscreenImage(user.getImg(), Image.PROFILE_IMAGE));
+        profileIcon.setOnClickListener(v -> showFullscreenImage(user.getImage(), Image.PROFILE_IMAGE));
         banner.setOnClickListener(v -> showFullscreenImage(user.getBanner(), Image.PROFILE_BANNER));
 
         profileName.setText(user.getName());
-        profileDescription.setText(user.getProfileDescription());
+        profileDescription.setText(user.getDescription());
         birthday.setText(user.getBirthday().substring(6, 8) + "." + user.getBirthday().substring(4, 6) + "." + user.getBirthday().substring(0, 4));
         location.setText(user.getLocation());
 
@@ -1636,13 +1636,13 @@ public class ChatActivity extends AppCompatActivity {
 
             DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).child(newMessageKey);
             Map<String, Object> map = new HashMap<>();
-            map.put("name", userID);
+            map.put("sender", userID);
             if (Message.isImage(fMessage.getType())) {
-                map.put("msg", "");
-                map.put("img", fMessage.getMsg());
+                map.put("text", "");
+                map.put("image", fMessage.getText());
             } else {
-                map.put("msg", "(Forwarded) " + fMessage.getMsg());
-                map.put("img", "");
+                map.put("text", "(Forwarded) " + fMessage.getText());
+                map.put("image", "");
             }
             map.put("pinned", false);
             map.put("quote", quoteStatus);
@@ -1866,9 +1866,9 @@ public class ChatActivity extends AppCompatActivity {
         final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
 
         roomNameEditText.setText(room.getName());
-        roomDescriptionEditText.setText(room.getDesc());
-        roomPasswordEditText.setText(room.getPasswd());
-        roomPasswordRepeatEditText.setText(room.getPasswd());
+        roomDescriptionEditText.setText(room.getDescription());
+        roomPasswordEditText.setText(room.getPassword());
+        roomPasswordRepeatEditText.setText(room.getPassword());
 
         final Spinner spinner = view.findViewById(R.id.spinner);
         roomImageButton = view.findViewById(R.id.room_image);
@@ -1948,7 +1948,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        final StorageReference refImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImg());
+        final StorageReference refImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImage());
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
@@ -2012,16 +2012,16 @@ public class ChatActivity extends AppCompatActivity {
                                     DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
                                     Map<String, Object> map = new HashMap<>();
                                     map.put("name", roomName);
-                                    map.put("passwd", roomPassword);
-                                    map.put("desc", roomDescription);
+                                    map.put("password", roomPassword);
+                                    map.put("description", roomDescription);
                                     map.put("category", categoryIndex);
                                     messageRoot.updateChildren(map);
                                     fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
                                     setTitle(roomName);
                                     Toast.makeText(getApplicationContext(), R.string.roomedited, Toast.LENGTH_SHORT).show();
-                                    room.setDesc(roomDescription);
+                                    room.setDescription(roomDescription);
                                     room.setCategory(categoryIndex);
-                                    room.setPasswd(roomPassword);
+                                    room.setPassword(roomPassword);
                                     alert.cancel();
                                     openInfo();
                                 } else {

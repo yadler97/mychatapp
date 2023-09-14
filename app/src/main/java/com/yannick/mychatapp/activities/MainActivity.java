@@ -113,7 +113,7 @@ import hakobastvatsatryan.DropdownTextView;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
-    private String imgRoom;
+    private String imageRoom;
 
     private Theme theme;
 
@@ -257,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         roomImageButton = view.findViewById(R.id.room_image);
 
         Random rand = new Random();
-        imgRoom = "standard" + (rand.nextInt(4)+1);
+        imageRoom = "standard" + (rand.nextInt(4)+1);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -408,10 +408,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                                 map.put("admin", currentUser.getUserID());
                                                 map.put("name", roomName);
                                                 map.put("time", currentDateAndTime);
-                                                map.put("passwd", roomPassword);
-                                                map.put("desc", roomDescription);
+                                                map.put("password", roomPassword);
+                                                map.put("description", roomDescription);
                                                 map.put("category", categoryIndex);
-                                                map.put("img", imgRoom);
+                                                map.put("image", imageRoom);
                                                 messageRoot.updateChildren(map);
                                                 fileOperations.writeToFile(roomPassword, String.format(FileOperations.passwordFilePattern, roomKey));
                                                 fileOperations.writeToFile(Constants.roomDataDatabaseKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
@@ -525,7 +525,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .thumbnail(0.05f)
                 .into(banner);
 
-        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
+        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImage());
         GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
@@ -537,7 +537,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         banner.setOnClickListener(v -> showFullscreenImage(1));
 
         profileName.setText(currentUser.getName());
-        profileDescription.setText(currentUser.getProfileDescription());
+        profileDescription.setText(currentUser.getDescription());
         birthday.setText(currentUser.getBirthday());
         location.setText(currentUser.getLocation());
 
@@ -604,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         profileImageButton = view.findViewById(R.id.user_profile_image);
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
-        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImage());
         StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
 
         if (theme == Theme.DARK) {
@@ -656,7 +656,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         username.setText(currentUser.getName());
-        profileDescription.setText(currentUser.getProfileDescription());
+        profileDescription.setText(currentUser.getDescription());
         birthday.setText(currentUser.getBirthday());
         location.setText(currentUser.getLocation());
         GradientDrawable shape = new GradientDrawable();
@@ -732,7 +732,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             String oldUserName = currentUser.getName();
                             int oldColor = color;
                             currentUser.setName(username.getText().toString());
-                            currentUser.setProfileDescription(profileDescription.getText().toString());
+                            currentUser.setDescription(profileDescription.getText().toString());
                             currentUser.setLocation(location.getText().toString());
                             currentUser.setBirthday(birthday.getText().toString());
                             if (tmpcolor >= 0) {
@@ -741,13 +741,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                             Map<String, Object> map = new HashMap<>();
                             map.put("name", currentUser.getName());
-                            map.put("profileDescription", currentUser.getProfileDescription());
+                            map.put("description", currentUser.getDescription());
                             map.put("location", currentUser.getLocation());
                             map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
                             map.put("favColour", color);
-                            String imgUser = UUID.randomUUID().toString();
+                            String profileImage = UUID.randomUUID().toString();
                             if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
-                                map.put("img", imgUser);
+                                map.put("image", profileImage);
                             }
                             currentUserRoot.updateChildren(map);
                             profileNameText.setText(currentUser.getName());
@@ -768,7 +768,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 drawable.draw(canvas);
 
                                 byte[] byteArray;
-                                final StorageReference refNewProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + imgUser);
+                                final StorageReference refNewProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + profileImage);
                                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                                 byteArray = stream.toByteArray();
@@ -1064,7 +1064,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateNavigationDrawerIcon() {
-        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImage());
         GlideApp.with(getApplicationContext())
                 .load(refProfileImage)
                 .centerCrop()
@@ -1080,7 +1080,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateProfileImages() {
-        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImage());
         GlideApp.with(getApplicationContext())
                 .load(refProfileImage)
                 .centerCrop()
@@ -1095,7 +1095,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateEditProfileImages() {
-        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImg());
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImage());
         GlideApp.with(getApplicationContext())
                 .load(refProfileImage)
                 .centerCrop()
@@ -1209,11 +1209,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
                 currentUser.setOwnProfileImage(true);
-                currentUser.setImg(imageName);
+                currentUser.setImage(imageName);
                 DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
                 map.put("ownProfileImage", true);
-                map.put("img", imageName);
+                map.put("image", imageName);
                 currentUserRoot.updateChildren(map);
             } else if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
                 currentUser.setBanner(imageName);
@@ -1230,7 +1230,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             if (type == ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
-                imgRoom = imageName;
+                imageRoom = imageName;
                 StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + imageName);
                 GlideApp.with(getApplicationContext())
                         .load(refRoomImage)
@@ -1279,7 +1279,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if (type == 0) {
             ArrayList<String> images = new ArrayList<>();
-            images.add(currentUser.getImg());
+            images.add(currentUser.getImage());
             mViewPager.setAdapter(new FullScreenImageAdapter(this, images, Image.PROFILE_IMAGE));
         } else if (type == 1) {
             ArrayList<String> images = new ArrayList<>();

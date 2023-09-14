@@ -31,7 +31,6 @@
                 android:src="@color/lightGrey" />
 
             <LinearLayout
-                android:id="@+id/quotebox_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="10dp"

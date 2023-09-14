@@ -65,7 +65,7 @@ public class ImageOperations {
             int compressFactor = 2;
             int height = bmp.getHeight();
             int width = bmp.getWidth();
-            if (getImgSize(filePath) > height * width) {
+            if (getImageSize(filePath) > height * width) {
                 compressFactor = 4;
             }
 
@@ -113,14 +113,14 @@ public class ImageOperations {
         return byteBuffer.toByteArray();
     }
 
-    public Long getImgSize(Uri filePath) {
+    public Long getImageSize(Uri filePath) {
         Cursor returnCursor = contentResolver.query(filePath, null, null, null, null);
         int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
         returnCursor.moveToFirst();
         return returnCursor.getLong(sizeIndex);
     }
 
-    public Bitmap rotateImageIfRequired(Context context, Bitmap img, Uri selectedImage) throws IOException {
+    public Bitmap rotateImageIfRequired(Context context, Bitmap image, Uri selectedImage) throws IOException {
         InputStream input = context.getContentResolver().openInputStream(selectedImage);
         ExifInterface ei = new ExifInterface(input);
 
@@ -128,13 +128,13 @@ public class ImageOperations {
 
         switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_90:
-                return rotateImage(img, 90);
+                return rotateImage(image, 90);
             case ExifInterface.ORIENTATION_ROTATE_180:
-                return rotateImage(img, 180);
+                return rotateImage(image, 180);
             case ExifInterface.ORIENTATION_ROTATE_270:
-                return rotateImage(img, 270);
+                return rotateImage(image, 270);
             default:
-                return img;
+                return image;
         }
     }
 

@@ -2,7 +2,7 @@ package com.yannick.mychatapp.data;
 
 public class Message {
     private User user;
-    private String msg;
+    private String text;
     private String time;
     private boolean sender;
     private String key;
@@ -15,11 +15,10 @@ public class Message {
         this.type = Type.HEADER;
     }
 
-    public Message(User user, String msg, String time, boolean sender, String id, Type type, Message quotedMessage, boolean pinned) {
+    public Message(User user, String text, String time, String id, Type type, Message quotedMessage, boolean pinned) {
         this.user = user;
-        this.msg = msg;
+        this.text = text;
         this.time = time;
-        this.sender = sender;
         this.key = id;
         this.type = type;
         this.quotedMessage = quotedMessage;
@@ -317,16 +316,16 @@ public class Message {
         }
     }
 
-    public String getMsg() {
-        return msg;
+    public String getText() {
+        return text;
     }
 
     public String getTime() {
         return time;
     }
 
-    public boolean isSender() {
-        return sender;
+    public boolean isSender(String userID) {
+        return userID.equals(this.getUser().getUserID());
     }
 
     public String getKey() {
@@ -341,16 +340,12 @@ public class Message {
         return type;
     }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
+    public void setText(String text) {
+        this.text = text;
     }
 
     public void setTime(String time) {
         this.time = time;
-    }
-
-    public void setSender(boolean sender) {
-        this.sender = sender;
     }
 
     public Message getQuotedMessage() {

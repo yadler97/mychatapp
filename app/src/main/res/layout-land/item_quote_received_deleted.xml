@@ -39,7 +39,6 @@
         app:layout_constraintLeft_toRightOf="@+id/image_message_profile" >
 
         <LinearLayout
-            android:id="@+id/quotebox_content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="4dp"

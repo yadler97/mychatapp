@@ -131,7 +131,7 @@ public class RoomListFragmentMyRooms extends Fragment {
         room.setKey(roomKey);
         room.setMuted(fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1"));
 
-        if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
+        if (room.getPassword().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
             if (dataSnapshot.child(Constants.messagesDatabaseKey).getChildrenCount() > 0) {
                 DatabaseReference newestMessageRoot = root.child(roomKey).child(Constants.messagesDatabaseKey);
                 Query lastQuery = newestMessageRoot.orderByKey().limitToLast(1);
@@ -140,17 +140,17 @@ public class RoomListFragmentMyRooms extends Fragment {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         for (DataSnapshot child: dataSnapshot.getChildren()) {
                             String key = child.getKey();
-                            String message = child.child("msg").getValue().toString();
-                            String image = child.child("img").getValue().toString();
-                            String userid = child.child("name").getValue().toString();
+                            String message = child.child("text").getValue().toString();
+                            String image = child.child("image").getValue().toString();
+                            String userid = child.child("sender").getValue().toString();
                             boolean pinned = (boolean) child.child("pinned").getValue();
                             String time = child.child("time").getValue().toString();
 
                             Message newestMessage;
                             if (!image.isEmpty()) {
-                                newestMessage = new Message(null, image, time, false, key, Message.Type.IMAGE_RECEIVED, null, pinned);
+                                newestMessage = new Message(null, image, time, key, Message.Type.IMAGE_RECEIVED, null, pinned);
                             } else {
-                                newestMessage = new Message(null, message, time, false, key, Message.Type.MESSAGE_RECEIVED, null, pinned);
+                                newestMessage = new Message(null, message, time, key, Message.Type.MESSAGE_RECEIVED, null, pinned);
                             }
                             room.setNewestMessage(newestMessage);
 
@@ -240,7 +240,7 @@ public class RoomListFragmentMyRooms extends Fragment {
     private void requestPassword(final Room room) {
         String roomKey = room.getKey();
 
-        if (room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
+        if (room.getPassword().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
             Intent intent = new Intent(getContext(), ChatActivity.class);
             intent.putExtra("room_name", room.getName());
             intent.putExtra("room_key", roomKey);
@@ -310,8 +310,8 @@ public class RoomListFragmentMyRooms extends Fragment {
         searchRoomList.clear();
         for (Room r : roomList) {
             if (r.getName().toLowerCase().contains(text.toLowerCase())) {
-                Room r2 = new Room(r.getKey(), r.getName(), r.getCategory(), r.getTime(), r.getPasswd(), r.getAdmin());
-                r2.setImg(r.getImg());
+                Room r2 = new Room(r.getKey(), r.getName(), r.getCategory(), r.getTime(), r.getPassword(), r.getAdmin());
+                r2.setImage(r.getImage());
                 r2.setNewestMessage(r.getNewestMessage());
                 r2.setSearchString(text);
                 searchRoomList.add(r2);

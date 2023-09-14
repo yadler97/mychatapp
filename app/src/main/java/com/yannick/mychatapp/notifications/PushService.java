@@ -44,16 +44,16 @@ public class PushService extends FirebaseMessagingService {
         FileOperations fileOperations = new FileOperations(this);
         if (!appInForeground(this) || (appInForeground(this) && !fileOperations.readFromFile(FileOperations.currentRoomFile).equals(remoteMessage.getData().get("roomid")))) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            if (settings.getBoolean(MainActivity.settingsPushNotificationsKey, true) && !remoteMessage.getData().get("userid").equals(mAuth.getCurrentUser().getUid())) {
+            if (settings.getBoolean(MainActivity.settingsPushNotificationsKey, true) && !remoteMessage.getData().get("sender").equals(mAuth.getCurrentUser().getUid())) {
                 int pushID = 0;
                 for (int i = 0; i < remoteMessage.getData().get("roomid").length(); ++i) {
                     pushID += (int) remoteMessage.getData().get("roomid").charAt(i);
                 }
                 String pushText;
-                if (!remoteMessage.getData().get("img").isEmpty()) {
+                if (!remoteMessage.getData().get("image").isEmpty()) {
                     pushText = remoteMessage.getData().get("name") + " " + getResources().getString(R.string.sharedapicture);
                 } else {
-                    pushText = remoteMessage.getData().get("name") + ": " + remoteMessage.getData().get("msg");
+                    pushText = remoteMessage.getData().get("name") + ": " + remoteMessage.getData().get("text");
                 }
 
                 Intent intent = new Intent(getApplicationContext(), ChatActivity.class);

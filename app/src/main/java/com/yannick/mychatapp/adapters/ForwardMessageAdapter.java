@@ -55,7 +55,7 @@ public class ForwardMessageAdapter extends ArrayAdapter<Room> {
         viewHolder.roomNameText.setText(roomList.get(position).getName());
 
         StorageReference storageRef = storage.getReferenceFromUrl(FirebaseStorage.getInstance().getReference().toString());
-        final StorageReference refImage = storageRef.child(Constants.roomImagesStorageKey + roomList.get(position).getImg());
+        final StorageReference refImage = storageRef.child(Constants.roomImagesStorageKey + roomList.get(position).getImage());
         GlideApp.with(context)
                 .load(refImage)
                 .centerCrop()

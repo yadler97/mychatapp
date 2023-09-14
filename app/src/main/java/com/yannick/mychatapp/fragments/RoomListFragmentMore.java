@@ -135,7 +135,7 @@ public class RoomListFragmentMore extends Fragment {
         final Room room = dataSnapshot.child(Constants.roomDataDatabaseKey).getValue(Room.class);
         room.setKey(roomKey);
 
-        if (!room.getPasswd().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
+        if (!room.getPassword().equals(fileOperations.readFromFile(String.format(FileOperations.passwordFilePattern, roomKey)))) {
             boolean inList = false;
             for (Room r : roomList) {
                 if (r.getKey().equals(room.getKey())) {
@@ -211,7 +211,7 @@ public class RoomListFragmentMore extends Fragment {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view12 -> {
                 if (!inputPassword.getText().toString().isEmpty()) {
-                    if (inputPassword.getText().toString().trim().equals(room.getPasswd())) {
+                    if (inputPassword.getText().toString().trim().equals(room.getPassword())) {
                         String roomKey = room.getKey();
                         Intent tabIntent = new Intent("tab");
                         LocalBroadcastManager.getInstance(getActivity()).sendBroadcast(tabIntent);
@@ -230,7 +230,7 @@ public class RoomListFragmentMore extends Fragment {
                             fileOperations.writeToFile(roomKey, String.format(FileOperations.newestMessageFilePattern, roomKey));
                         }
                         updateRoomList(position);
-                        fileOperations.writeToFile(room.getPasswd(), String.format(FileOperations.passwordFilePattern, roomKey));
+                        fileOperations.writeToFile(room.getPassword(), String.format(FileOperations.passwordFilePattern, roomKey));
                         FirebaseMessaging.getInstance().subscribeToTopic(roomKey);
                         alert.cancel();
                         startActivity(intent);
@@ -284,8 +284,8 @@ public class RoomListFragmentMore extends Fragment {
         searchRoomList.clear();
         for (Room r : roomList) {
             if (r.getName().toLowerCase().contains(text.toLowerCase())) {
-                Room r2 = new Room(r.getKey(), r.getName(), r.getCategory(), r.getTime(), r.getPasswd(), r.getAdmin());
-                r2.setImg(r.getImg());
+                Room r2 = new Room(r.getKey(), r.getName(), r.getCategory(), r.getTime(), r.getPassword(), r.getAdmin());
+                r2.setImage(r.getImage());
                 r2.setNewestMessage(r.getNewestMessage());
                 r2.setSearchString(text);
                 searchRoomList.add(r2);

@@ -23,7 +23,6 @@
             android:paddingBottom="40dp" >
 
             <ImageView
-                android:id="@+id/imgsplash"
                 android:background="?attr/splashIcon"
                 android:layout_width="90dp"
                 android:layout_height="75dp" />

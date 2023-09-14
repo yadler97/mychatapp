@@ -91,8 +91,7 @@
     <string name="forwardmessage">Forward message</string>
     <string name="messageforwarded">Message forwarded</string>
     <string name="selectanoption">Select an option</string>
-    <string name="roomdesc">Description</string>
-    <string name="enterroomdesc">Enter description</string>
+    <string name="roomdescription">Description</string>
     <string name="backupof">Backup of</string>
     <string name="createdon">Created</string>
     <string name="imageforwarded">Image forwarded</string>

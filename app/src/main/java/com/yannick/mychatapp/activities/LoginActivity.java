@@ -68,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
     private static int colour = 0;
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
 
-    private String img = "";
+    private String image = "";
     private String banner = "";
 
     private ImageButton profileImageButton;
@@ -268,7 +268,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        img = "";
+        image = "";
         banner = "";
         ownProfileImage = false;
 
@@ -333,17 +333,17 @@ public class LoginActivity extends AppCompatActivity {
                         userID = user.getUid();
 
                         if (!ownProfileImage) {
-                            img = UUID.randomUUID().toString();
+                            image = UUID.randomUUID().toString();
                         }
 
                         DatabaseReference newUserRoot = userRoot.child(userID);
                         Map<String, Object> map = new HashMap<>();
                         map.put("name", name);
-                        map.put("profileDescription", description);
+                        map.put("description", description);
                         map.put("location", location);
                         map.put("birthday", birthday.substring(6, 10) + birthday.substring(3, 5) + birthday.substring(0, 2));
                         map.put("favColour", colour);
-                        map.put("img", img);
+                        map.put("image", image);
                         map.put("banner", banner);
                         map.put("ownProfileImage", ownProfileImage);
                         newUserRoot.updateChildren(map);
@@ -361,7 +361,7 @@ public class LoginActivity extends AppCompatActivity {
                             drawable.draw(canvas);
 
                             byte[] byteArray;
-                            final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + img);
+                            final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
                             ByteArrayOutputStream stream = new ByteArrayOutputStream();
                             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                             byteArray = stream.toByteArray();
@@ -435,7 +435,7 @@ public class LoginActivity extends AppCompatActivity {
         profileImageButton = view.findViewById(R.id.user_profile_image);
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
-        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + img);
+        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
         final StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
 
         birthdayEdit.setText(DEFAULT_BIRTHDAY);
@@ -562,11 +562,11 @@ public class LoginActivity extends AppCompatActivity {
                     if (!locationEdit.getText().toString().isEmpty()) {
                         if (!birthdayEdit.getText().toString().isEmpty()) {
                             String username = usernameEdit.getText().toString();
-                            String profileDescription = profileDescriptionEdit.getText().toString();
+                            String description = profileDescriptionEdit.getText().toString();
                             String location = locationEdit.getText().toString();
                             String birthday = birthdayEdit.getText().toString();
 
-                            createAccountAuth(email, password, username, profileDescription, location, birthday);
+                            createAccountAuth(email, password, username, description, location, birthday);
 
                             if (view12 != null) {
                                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -628,8 +628,8 @@ public class LoginActivity extends AppCompatActivity {
 
         StorageReference ref;
         if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
-            img = UUID.randomUUID().toString();
-            ref = storage.getReference().child(Constants.profileImagesStorageKey + img);
+            image = UUID.randomUUID().toString();
+            ref = storage.getReference().child(Constants.profileImagesStorageKey + image);
         } else {
             banner = UUID.randomUUID().toString();
             ref = storage.getReference().child(Constants.profileBannersStorageKey + banner);
@@ -658,7 +658,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void updateEditProfileImages() {
-        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + img);
+        StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
         refProfileImage.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refProfileImage)

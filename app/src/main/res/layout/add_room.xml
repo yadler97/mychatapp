@@ -49,7 +49,7 @@
                 android:gravity="top"
                 android:inputType="textMultiLine|textCapSentences"
                 android:maxLines="6"
-                android:hint="@string/roomdesc"
+                android:hint="@string/roomdescription"
                 android:maxLength="150"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
