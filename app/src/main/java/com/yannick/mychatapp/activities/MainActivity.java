@@ -532,9 +532,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .centerCrop()
                 .into(profileImage);
 
-        profileImage.setOnClickListener(v -> showFullscreenImage(0));
+        profileImage.setOnClickListener(v -> showFullscreenImage(currentUser.getImage(), Image.PROFILE_IMAGE));
 
-        banner.setOnClickListener(v -> showFullscreenImage(1));
+        banner.setOnClickListener(v -> showFullscreenImage(currentUser.getBanner(), Image.PROFILE_BANNER));
 
         profileName.setText(currentUser.getName());
         profileDescription.setText(currentUser.getDescription());
@@ -1248,7 +1248,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void showFullscreenImage(int type) {
+    private void showFullscreenImage(String image, Image type) {
         final View dialogView = getLayoutInflater().inflate(R.layout.fullscreen_image, null);
         if (theme == Theme.DARK) {
             fullscreendialog = new Dialog(this, R.style.FullScreenImageDark);
@@ -1276,16 +1276,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         CatchViewPager mViewPager = dialogView.findViewById(R.id.pager);
+        mViewPager.setContext(this);
 
-        if (type == 0) {
-            ArrayList<String> images = new ArrayList<>();
-            images.add(currentUser.getImage());
-            mViewPager.setAdapter(new FullScreenImageAdapter(this, images, Image.PROFILE_IMAGE));
-        } else if (type == 1) {
-            ArrayList<String> images = new ArrayList<>();
-            images.add(currentUser.getBanner());
-            mViewPager.setAdapter(new FullScreenImageAdapter(this, images, Image.PROFILE_BANNER));
-        }
+        ArrayList<String> images = new ArrayList<>();
+        images.add(image);
+        mViewPager.setAdapter(new FullScreenImageAdapter(this, images, type));
 
         fullscreendialog.show();
     }

@@ -1697,6 +1697,7 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         CatchViewPager mViewPager = dialogView.findViewById(R.id.pager);
+        mViewPager.setContext(this);
         mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
 
         if (type == Image.PROFILE_IMAGE || type == Image.PROFILE_BANNER || type == Image.ROOM_IMAGE) {

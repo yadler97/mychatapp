@@ -1,9 +1,9 @@
 package com.yannick.mychatapp.adapters;
 
-import android.content.Context;
-import android.content.Intent;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.viewpager.widget.PagerAdapter;
+
+import android.annotation.SuppressLint;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +44,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
         return view == ((LinearLayout) object);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
         View itemView = layoutInflater.inflate(R.layout.pager_item, container, false);
@@ -78,11 +79,6 @@ public class FullScreenImageAdapter extends PagerAdapter {
         }
 
         container.addView(itemView);
-
-        imageView.setOnClickListener(view -> {
-            Intent intent = new Intent("closefullscreen");
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
-        });
 
         return itemView;
     }
