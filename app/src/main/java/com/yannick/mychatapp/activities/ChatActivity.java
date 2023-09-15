@@ -18,6 +18,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -407,7 +408,9 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(ChatActivity.this, R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
+                if (mAuth.getCurrentUser() != null) {
+                    Toast.makeText(ChatActivity.this, R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -456,7 +459,9 @@ public class ChatActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-                            Toast.makeText(ChatActivity.this, R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
+                            if (mAuth.getCurrentUser() != null) {
+                                Toast.makeText(ChatActivity.this, R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
                 }
@@ -482,7 +487,9 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(ChatActivity.this, R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
+                if (mAuth.getCurrentUser() != null) {
+                    Toast.makeText(ChatActivity.this, R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -682,18 +689,22 @@ public class ChatActivity extends AppCompatActivity {
                 }
             }
         }
+
         for (Message m : messageList) {
             if (m.getType() != Message.Type.HEADER) {
-                if (m.getQuotedMessage().getKey().equals(key)) {
-                    if (image.equals("")) {
-                        m.getQuotedMessage().setText(text);
-                    } else {
-                        m.getQuotedMessage().setText(image);
+                if (m.getQuotedMessage() != null) {
+                    if (m.getQuotedMessage().getKey().equals(key)) {
+                        if (image.equals("")) {
+                            m.getQuotedMessage().setText(text);
+                        } else {
+                            m.getQuotedMessage().setText(image);
+                        }
+                        m.getQuotedMessage().setUser(getUser(userID));
                     }
-                    m.getQuotedMessage().setUser(getUser(userID));
                 }
             }
         }
+
         mAdapter.notifyDataSetChanged();
     }
 
@@ -1088,7 +1099,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public boolean isStoragePermissionGranted(int requestCode) {
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             Log.v("StoragePermission", "Permission is granted");
             return true;
         } else {

@@ -95,11 +95,7 @@ public class RoomListFragmentMyRooms extends Fragment {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                try {
-                    Toast.makeText(getActivity(), R.string.nodatabaseconnection, Toast.LENGTH_SHORT).show();
-                } catch (NullPointerException e) {
-                    Log.e("NullPointerException", e.toString());
-                }
+
             }
         });
 

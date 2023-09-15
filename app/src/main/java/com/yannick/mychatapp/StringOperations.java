@@ -1,6 +1,15 @@
 package com.yannick.mychatapp;
 
 public class StringOperations {
+
+    public static String convertDateToDisplayFormat(String date) {
+        return date.substring(6, 8) + "." + date.substring(4, 6) + "." + date.substring(0, 4);
+    }
+
+    public static String convertDateToDatabaseFormat(String date) {
+        return date.substring(6, 10) + date.substring(3, 5) + date.substring(0, 2);
+    }
+
     public static String buildDate(int year, int monthOfYear, int dayOfMonth) {
         String date;
 
