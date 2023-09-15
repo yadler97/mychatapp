@@ -342,7 +342,7 @@ public class LoginActivity extends AppCompatActivity {
                         map.put("name", name);
                         map.put("description", description);
                         map.put("location", location);
-                        map.put("birthday", birthday.substring(6, 10) + birthday.substring(3, 5) + birthday.substring(0, 2));
+                        map.put("birthday", StringOperations.convertDateToDatabaseFormat(birthday));
                         map.put("favColour", colour);
                         map.put("image", image);
                         map.put("banner", banner);
@@ -505,9 +505,7 @@ public class LoginActivity extends AppCompatActivity {
             if (theme == Theme.DARK) {
                 datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
             }
-            Calendar c = Calendar.getInstance();
-            c.set(2004, 11, 31);
-            datePicker.getDatePicker().setMaxDate(c.getTimeInMillis());
+            datePicker.getDatePicker().setMaxDate(calculateMinBirthday());
             datePicker.show();
         });
 
@@ -703,4 +701,10 @@ public class LoginActivity extends AppCompatActivity {
                     }
                 }
             });
+
+    public long calculateMinBirthday() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.YEAR, -14);
+        return cal.getTimeInMillis();
+    }
 }

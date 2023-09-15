@@ -98,6 +98,7 @@ import com.yannick.mychatapp.data.User;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.security.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -658,14 +659,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         username.setText(currentUser.getName());
         profileDescription.setText(currentUser.getDescription());
-        birthday.setText(StringOperations.convertDateToDisplayFormat(currentUser.getBirthday()));
+        birthday.setText(currentUser.getBirthday());
         location.setText(currentUser.getLocation());
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.OVAL);
         shape.setColor(getResources().getIntArray(R.array.favcolors)[color]);
         favColour.setBackground(shape);
 
-        AtomicReference<String> selectedBirthday = new AtomicReference<>(StringOperations.convertDateToDisplayFormat(currentUser.getBirthday()));
+        AtomicReference<String> selectedBirthday = new AtomicReference<>(currentUser.getBirthday());
 
         birthday.setOnClickListener(view15 -> {
             DatePickerDialog datePicker = new DatePickerDialog(view15.getContext(), (view14, year, monthOfYear, dayOfMonth) -> {
@@ -676,9 +677,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (theme == Theme.DARK) {
                 datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
             }
-            Calendar c = Calendar.getInstance();
-            c.set(2004, 11, 31);
-            datePicker.getDatePicker().setMaxDate(c.getTimeInMillis());
+            datePicker.getDatePicker().setMaxDate(calculateMinBirthday());
             datePicker.show();
         });
 
@@ -747,7 +746,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             map.put("name", currentUser.getName());
                             map.put("description", currentUser.getDescription());
                             map.put("location", currentUser.getLocation());
-                            map.put("birthday", currentUser.getBirthday().substring(6, 10) + currentUser.getBirthday().substring(3, 5) + currentUser.getBirthday().substring(0, 2));
+                            map.put("birthday", StringOperations.convertDateToDatabaseFormat(currentUser.getBirthday()));
                             map.put("favColour", color);
                             String profileImage = UUID.randomUUID().toString();
                             if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
@@ -1126,7 +1125,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onDataChange(DataSnapshot dataSnapshot) {
                 currentUser = dataSnapshot.getValue(User.class);
                 currentUser.setUserID(userID);
-                currentUser.setBirthday(currentUser.getBirthday().substring(6, 8) + "." + currentUser.getBirthday().substring(4, 6) + "." + currentUser.getBirthday().substring(0, 4));
+                currentUser.setBirthday(StringOperations.convertDateToDisplayFormat(currentUser.getBirthday()));
                 updateNavigationDrawerIcon();
                 profileNameText.setText(currentUser.getName());
             }
@@ -1355,4 +1354,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 }
             });
+
+    public long calculateMinBirthday() {
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.YEAR, -14);
+        return cal.getTimeInMillis();
+    }
 }
