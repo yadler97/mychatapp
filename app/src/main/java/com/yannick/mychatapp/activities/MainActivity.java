@@ -107,6 +107,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 import hakobastvatsatryan.DropdownTextView;
@@ -657,18 +658,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         username.setText(currentUser.getName());
         profileDescription.setText(currentUser.getDescription());
-        birthday.setText(currentUser.getBirthday());
+        birthday.setText(StringOperations.convertDateToDisplayFormat(currentUser.getBirthday()));
         location.setText(currentUser.getLocation());
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.OVAL);
         shape.setColor(getResources().getIntArray(R.array.favcolors)[color]);
         favColour.setBackground(shape);
 
+        AtomicReference<String> selectedBirthday = new AtomicReference<>(StringOperations.convertDateToDisplayFormat(currentUser.getBirthday()));
+
         birthday.setOnClickListener(view15 -> {
             DatePickerDialog datePicker = new DatePickerDialog(view15.getContext(), (view14, year, monthOfYear, dayOfMonth) -> {
                 String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
+                selectedBirthday.set(date);
                 birthday.setText(date);
-            }, StringOperations.getYear(currentUser.getBirthday()), StringOperations.getMonth(currentUser.getBirthday()), StringOperations.getDay(currentUser.getBirthday()));
+            }, StringOperations.getYear(selectedBirthday.toString()), StringOperations.getMonth(selectedBirthday.toString()), StringOperations.getDay(selectedBirthday.toString()));
             if (theme == Theme.DARK) {
                 datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
             }

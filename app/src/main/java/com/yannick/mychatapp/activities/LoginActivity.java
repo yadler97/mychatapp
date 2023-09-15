@@ -56,6 +56,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -493,11 +494,14 @@ public class LoginActivity extends AppCompatActivity {
         shape.setColor(getResources().getIntArray(R.array.favcolors)[colour]);
         favColour.setBackground(shape);
 
+        AtomicReference<String> selectedBirthday = new AtomicReference<>(DEFAULT_BIRTHDAY);
+
         birthdayEdit.setOnClickListener(view14 -> {
             DatePickerDialog datePicker = new DatePickerDialog(view14.getContext(), (view141, year, monthOfYear, dayOfMonth) -> {
                 String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
+                selectedBirthday.set(date);
                 birthdayEdit.setText(date);
-            }, StringOperations.getYear(DEFAULT_BIRTHDAY), StringOperations.getMonth(DEFAULT_BIRTHDAY), StringOperations.getDay(DEFAULT_BIRTHDAY));
+            }, StringOperations.getYear(selectedBirthday.toString()), StringOperations.getMonth(selectedBirthday.toString()), StringOperations.getDay(selectedBirthday.toString()));
             if (theme == Theme.DARK) {
                 datePicker.getWindow().setBackgroundDrawableResource(R.color.dark_background);
             }
