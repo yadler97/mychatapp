@@ -28,7 +28,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingTop="@dimen/edit_text_padding_top"
-                android:inputType="text"
+                android:inputType="textEmailAddress"
                 android:hint="@string/hint_email"
                 android:maxLength="40"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />

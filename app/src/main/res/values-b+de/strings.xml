@@ -139,7 +139,7 @@
     <string name="roomimage">Raumbild</string>
     <string name="login">Anmelden</string>
     <string name="email">E-Mail-Adresse</string>
-    <string name="enteremail">E-Mail eingeben</string>
+    <string name="enteremail">E-Mail-Adresse eingeben</string>
     <string name="loginfailed">Anmeldung fehlgeschlagen</string>
     <string name="createnewaccount">Neuen Account erstellen</string>
     <string name="passwordmustcontainatleastsixcharacters">Passwort muss aus mindestens 6 Zeichen bestehen</string>
@@ -157,6 +157,7 @@
     <string name="delete_room">Raum löschen</string>
     <string name="room_successfully_deleted">Raum erfolgreich gelöscht</string>
     <string name="room_deletion_info">Möchtest du diesen Raum wirklich löschen?</string>
+    <string name="invalid_email">Ungültige E-Mail-Adresse</string>
 
     <string name="hint_email">E-Mail-Adresse <font color='#FF0000'>*</font></string>
     <string name="hint_name">Name <font color='#FF0000'>*</font></string>
