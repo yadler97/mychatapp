@@ -3,6 +3,9 @@
     <integer name="ExpandableMaxLines">25</integer>
     <integer name="ExpandableMaxLinesLand">15</integer>
 
+    <integer name="max_profile_password_length">32</integer>
+    <integer name="max_room_password_length">32</integer>
+
     <integer-array name="themeDrawables">
         <item>@drawable/theme_standard</item>
         <item>@drawable/theme_dark</item>

@@ -93,7 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="16"
+            app:counterMaxLength="@integer/max_room_password_length"
             app:passwordToggleEnabled="true"
             app:passwordToggleTint="?android:textColorHint" >
 
@@ -104,7 +104,7 @@
                 android:paddingTop="@dimen/edit_text_padding_top"
                 android:inputType="textPassword"
                 android:hint="@string/hint_password"
-                android:maxLength="16"
+                android:maxLength="@integer/max_room_password_length"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -114,7 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="16"
+            app:counterMaxLength="@integer/max_room_password_length"
             app:passwordToggleEnabled="true"
             app:passwordToggleTint="?android:textColorHint" >
 
@@ -125,7 +125,7 @@
                 android:paddingTop="@dimen/edit_text_padding_top"
                 android:inputType="textPassword"
                 android:hint="@string/hint_confirm_password"
-                android:maxLength="16"
+                android:maxLength="@integer/max_room_password_length"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>

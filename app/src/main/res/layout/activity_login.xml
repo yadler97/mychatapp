@@ -80,7 +80,7 @@
                 android:padding="14dp"
                 android:inputType="textPassword"
                 android:hint="@string/password"
-                android:maxLength="16"
+                android:maxLength="@integer/max_profile_password_length"
                 android:textColor="@color/black"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
