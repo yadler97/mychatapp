@@ -18,6 +18,7 @@ import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -1098,7 +1099,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     public boolean isStoragePermissionGranted(int requestCode) {
-        if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             Log.v("StoragePermission", "Permission is granted");
             return true;
         } else {
