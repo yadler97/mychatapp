@@ -428,10 +428,10 @@
         <item>"- The character limit for passwords has been increased to 32\n"
         "- When writing in the E-Mail fields the E-Mail keyboard is now used\n"
         "- When creating a new account an additional check if the E-Mail address has a valid format has been implemented\n"
-        "- The minimum age for users no dynamically increases (Users must be at least 14 years old\n"
+        "- The minimum age for users now dynamically increases (Users must be at least 14 years old)\n"
         "- The message \"No database connection\" is no longer displayed when logging out\n"
         "- A crash that occurred when pinning a message has been fixed\n"
-        "- A bug that the birthday in the data picker dialog is reset to the default value has been fixed\n"
+        "- A bug that the birthday in the date picker dialog is reset to the default value has been fixed\n"
         "- A bug that the camera, backup and save image functions were not usable on Android 13 has been fixed\n"
         "\n "</item>
     </string-array>
