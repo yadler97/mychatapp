@@ -216,6 +216,7 @@
         <item>Version 1.1.1 (02.09.2023)</item>
         <item>Version 1.1.2 (10.09.2023)</item>
         <item>Version 1.2.0 (14.09.2023)</item>
+        <item>Version 1.2.1 (15.09.2023)</item>
     </string-array>
 
     <string-array name="changelog_text">
@@ -422,6 +423,16 @@
         "- Ein Fehler wurde behoben, dass die Receiver \"Antworten\" und \"Als gelesen markieren\" bei Push-Nachrichten nicht funktionierten\n"
         "- Ein Fehler wurde behoben, dass unbekannte Nutzer mehrmals in der Mitgliederliste auftauchten\n"
         "- Zahlreiche Verbesserungen am Code\n"
+        "\n "</item>
+
+        <item>"- Das Zeichenlimit für Passwörter wurde auf 32 erhöht\n"
+        "- Bei Eingabe in ein E-Mail-Feld wird jetzt die E-Mail-Tastatur genutzt\n"
+        "- Bei Erstellung eines Accounts wird jetzt überprüft, ob die eingegebene E-Mail-Adresse ein korrektes Format hat\n"
+        "- Das minimale Alter wird jetzt dynamisch erhöht (Nutzer müssen mindestens 14 Jahre alt sein)\n"
+        "- Die Nachricht \"Datenbank konnte nicht erreicht werden\" wird jetzt nicht mehr angezeigt, wenn sich der Nutzer abmeldet\n"
+        "- Ein Absturz wurde behoben, der beim Anpinnen einer Nachricht auftrat\n"
+        "- Ein Fehler wurde behoben, dass das Geburtsdatum im Auswahldialog auf den Standardwert zurückgesetzt wird\n"
+        "- Ein Fehler wurde behoben, dass Kamera, Backup und \"Bild speichern\" auf Android 13 nicht funktioniert haben\n"
         "\n "</item>
     </string-array>
 
