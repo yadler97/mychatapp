@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="15"
+            app:counterMaxLength="@integer/maxProfileNameLength"
             app:errorEnabled="true" >
 
             <org.droidparts.widget.ClearableEditText
@@ -30,7 +30,7 @@
                 android:paddingTop="@dimen/edit_text_padding_top"
                 android:inputType="text|textCapSentences"
                 android:hint="@string/hint_name"
-                android:maxLength="15"
+                android:maxLength="@integer/maxProfileNameLength"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -39,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="200"
+            app:counterMaxLength="@integer/maxProfileDescriptionLength"
             app:errorEnabled="true" >
 
             <org.droidparts.widget.ClearableEditText
@@ -51,7 +51,7 @@
                 android:inputType="textMultiLine|textCapSentences"
                 android:maxLines="6"
                 android:hint="@string/aboutme"
-                android:maxLength="200"
+                android:maxLength="@integer/maxProfileDescriptionLength"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -76,7 +76,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="25"
+            app:counterMaxLength="@integer/maxProfileLocationLength"
             app:errorEnabled="true" >
 
             <org.droidparts.widget.ClearableEditText
@@ -86,7 +86,7 @@
                 android:paddingTop="@dimen/edit_text_padding_top"
                 android:inputType="text|textCapSentences"
                 android:hint="@string/hint_location"
-                android:maxLength="25"
+                android:maxLength="@integer/maxProfileLocationLength"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>

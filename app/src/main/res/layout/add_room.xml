@@ -20,7 +20,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="25"
+            app:counterMaxLength="@integer/maxRoomNameLength"
             app:errorEnabled="true" >
 
             <org.droidparts.widget.ClearableEditText
@@ -30,7 +30,7 @@
                 android:paddingTop="@dimen/edit_text_padding_top"
                 android:inputType="text|textCapSentences"
                 android:hint="@string/hint_room_name"
-                android:maxLength="25"
+                android:maxLength="@integer/maxRoomNameLength"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -39,7 +39,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="150" >
+            app:counterMaxLength="@integer/maxRoomDescriptionLength" >
 
             <org.droidparts.widget.ClearableEditText
                 android:id="@+id/room_description"
@@ -50,7 +50,7 @@
                 android:inputType="textMultiLine|textCapSentences"
                 android:maxLines="6"
                 android:hint="@string/roomdescription"
-                android:maxLength="150"
+                android:maxLength="@integer/maxRoomDescriptionLength"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -93,7 +93,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="@integer/max_room_password_length"
+            app:counterMaxLength="@integer/maxRoomPasswordLength"
             app:passwordToggleEnabled="true"
             app:passwordToggleTint="?android:textColorHint" >
 
@@ -104,7 +104,7 @@
                 android:paddingTop="@dimen/edit_text_padding_top"
                 android:inputType="textPassword"
                 android:hint="@string/hint_password"
-                android:maxLength="@integer/max_room_password_length"
+                android:maxLength="@integer/maxRoomPasswordLength"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -114,7 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="@integer/max_room_password_length"
+            app:counterMaxLength="@integer/maxRoomPasswordLength"
             app:passwordToggleEnabled="true"
             app:passwordToggleTint="?android:textColorHint" >
 
@@ -125,7 +125,7 @@
                 android:paddingTop="@dimen/edit_text_padding_top"
                 android:inputType="textPassword"
                 android:hint="@string/hint_confirm_password"
-                android:maxLength="@integer/max_room_password_length"
+                android:maxLength="@integer/maxRoomPasswordLength"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
         </com.google.android.material.textfield.TextInputLayout>

@@ -56,7 +56,7 @@
                 android:padding="14dp"
                 android:inputType="textEmailAddress"
                 android:hint="@string/email"
-                android:maxLength="40"
+                android:maxLength="@integer/maxProfileEmailLength"
                 android:textColor="@color/black"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
@@ -80,7 +80,7 @@
                 android:padding="14dp"
                 android:inputType="textPassword"
                 android:hint="@string/password"
-                android:maxLength="@integer/max_profile_password_length"
+                android:maxLength="@integer/maxProfilePasswordLength"
                 android:textColor="@color/black"
                 android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
