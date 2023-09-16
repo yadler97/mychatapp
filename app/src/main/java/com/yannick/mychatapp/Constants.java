@@ -10,4 +10,6 @@ public class Constants {
     public static final String profileImagesStorageKey = "profile_images/";
     public static final String profileBannersStorageKey = "profile_banners/";
     public static final String roomImagesStorageKey = "room_images/";
+
+    public static final String DEFAULT_BIRTHDAY = "01.01.2000";
 }

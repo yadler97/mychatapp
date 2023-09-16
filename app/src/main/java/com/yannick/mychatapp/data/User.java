@@ -1,5 +1,11 @@
 package com.yannick.mychatapp.data;
 
+import android.content.Context;
+
+import com.yannick.mychatapp.Constants;
+import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.StringOperations;
+
 public class User {
     private String userID;
     private String name;
@@ -92,5 +98,9 @@ public class User {
 
     public void setBanner(String banner) {
         this.banner = banner;
+    }
+
+    public static User getUnknownUser(Context context, String key) {
+        return new User(key, context.getResources().getString(R.string.unknownuser), StringOperations.convertDateToDatabaseFormat(Constants.DEFAULT_BIRTHDAY), "", context.getResources().getString(R.string.unknown), 0, "unknown_user", "");
     }
 }

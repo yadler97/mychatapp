@@ -65,7 +65,6 @@ public class LoginActivity extends AppCompatActivity {
     private Theme theme;
     private FirebaseStorage storage;
     private static String userID = "";
-    private static final String DEFAULT_BIRTHDAY = "01.01.2000";
     private static boolean ownProfileImage = false;
     private static int colour = 0;
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
@@ -444,7 +443,7 @@ public class LoginActivity extends AppCompatActivity {
         final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
         final StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
 
-        birthdayEdit.setText(DEFAULT_BIRTHDAY);
+        birthdayEdit.setText(Constants.DEFAULT_BIRTHDAY);
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
@@ -499,7 +498,7 @@ public class LoginActivity extends AppCompatActivity {
         shape.setColor(getResources().getIntArray(R.array.favcolors)[colour]);
         favColour.setBackground(shape);
 
-        AtomicReference<String> selectedBirthday = new AtomicReference<>(DEFAULT_BIRTHDAY);
+        AtomicReference<String> selectedBirthday = new AtomicReference<>(Constants.DEFAULT_BIRTHDAY);
 
         birthdayEdit.setOnClickListener(view14 -> {
             DatePickerDialog datePicker = new DatePickerDialog(view14.getContext(), (view141, year, monthOfYear, dayOfMonth) -> {
