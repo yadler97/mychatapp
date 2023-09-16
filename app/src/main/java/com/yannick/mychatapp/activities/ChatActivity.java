@@ -165,12 +165,9 @@ public class ChatActivity extends AppCompatActivity {
     private AlertDialog pinboardAlert;
     private boolean userListCreated = false;
     private boolean cancelFullscreenImage = false;
-    private boolean imageListOpened = false;
     private boolean lastReadMessageReached = false;
     private FloatingActionButton scrollDownButton;
-
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
-    private SimpleDateFormat sdf_local = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
 
     private int categoryIndex = 0;
 
@@ -274,7 +271,7 @@ public class ChatActivity extends AppCompatActivity {
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(pushID);
 
-        if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
+        if (settings.getBoolean(Constants.settingsSaveEnteredTextKey, true)) {
             messageInput.setText(fileOperations.readFromFile(String.format(FileOperations.currentInputFilePattern, roomKey)).replaceAll("<br />", "\n"));
         }
 
@@ -510,7 +507,7 @@ public class ChatActivity extends AppCompatActivity {
         String creationTime = room.getTime();
 
         try {
-            creationTime = sdf_local.format(sdf_local.parse(creationTime));
+            creationTime = sdf.format(sdf.parse(creationTime));
         } catch (ParseException e) {
             Log.e("ParseException", e.toString());
         }
@@ -536,7 +533,7 @@ public class ChatActivity extends AppCompatActivity {
         User user = getUser(userId);
 
         try {
-            time = sdf_local.format(sdf_local.parse(time));
+            time = sdf.format(sdf.parse(time));
         } catch (ParseException e) {
             Log.e("ParseException", e.toString());
         }
@@ -858,7 +855,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 quoteStatus = "";
 
-                if (type == ImageOperations.CAPTURE_IMAGE_REQUEST && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
+                if (type == ImageOperations.CAPTURE_IMAGE_REQUEST && settings.getBoolean(Constants.settingsStoreCameraPicturesKey, true)) {
                     downloadImage(imageName, type);
                 }
             } else {
@@ -1264,7 +1261,7 @@ public class ChatActivity extends AppCompatActivity {
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
-            if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
+            if (settings.getBoolean(Constants.settingsSaveEnteredTextKey, true)) {
                 fileOperations.writeToFile(messageInput.getText().toString().trim().replaceAll("\\n", "<br />"), String.format(FileOperations.currentInputFilePattern, roomKey));
                 if (!messageInput.getText().toString().trim().isEmpty()) {
                     Toast.makeText(this, R.string.messagesaved, Toast.LENGTH_SHORT).show();
@@ -1335,7 +1332,7 @@ public class ChatActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(fullscreenReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
-        if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
+        if (settings.getBoolean(Constants.settingsSaveEnteredTextKey, true)) {
             fileOperations.writeToFile(messageInput.getText().toString().trim().replaceAll("\\n", "<br />"), String.format(FileOperations.currentInputFilePattern, roomKey));
         }
         fileOperations.writeToFile("0", FileOperations.currentRoomFile);
@@ -1347,7 +1344,7 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
-        if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
+        if (settings.getBoolean(Constants.settingsSaveEnteredTextKey, true)) {
             fileOperations.writeToFile(messageInput.getText().toString().trim().replaceAll("\\n", "<br />"), String.format(FileOperations.currentInputFilePattern, roomKey));
         }
         if (!messageList.isEmpty()) {
@@ -1405,7 +1402,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private String createBackup() {
-        String currentDateAndTime = sdf_local.format(new Date());
+        String currentDateAndTime = sdf.format(new Date());
         String fcdat = currentDateAndTime.substring(0, 4) + "." + currentDateAndTime.substring(4, 6) + "." + currentDateAndTime.substring(6, 8) + " " + currentDateAndTime.substring(9, 11) + ":" + currentDateAndTime.substring(11, 13) + ":" + currentDateAndTime.substring(13, 15);
         String ftime = room.getTime().substring(0, 4) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(6, 8) + " " + room.getTime().substring(9, 11) + ":" + room.getTime().substring(11, 13) + ":" + room.getTime().substring(13, 15);
         String backup = getResources().getString(R.string.backupof) + " " + roomName + "\n" + getResources().getString(R.string.createdon) + ": " + fcdat + "\n\n" +
@@ -1459,7 +1456,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 createSnackbar(file, "text/plain", getResources().getString(R.string.backupcreated));
             } catch (IOException e) {
-                Log.e("Exception", "File write failed: " + e.toString());
+                Log.e("Exception", "File write failed: " + e);
             }
         }
     }
@@ -1496,7 +1493,7 @@ public class ChatActivity extends AppCompatActivity {
 
         recyclerView.scrollToPosition(messageList.size() - 1);
 
-        if (imageListOpened) {
+        if (imageListAlert.isShowing()) {
             imageListAlert.dismiss();
             openImageList();
         }
@@ -1738,10 +1735,9 @@ public class ChatActivity extends AppCompatActivity {
             }
             builder.setCustomTitle(setupHeader(getResources().getString(R.string.images)));
             builder.setView(view);
-            builder.setPositiveButton(R.string.close, (dialogInterface, i) -> imageListOpened = false);
+            builder.setPositiveButton(R.string.close, null);
             imageListAlert = builder.create();
             imageListAlert.show();
-            imageListOpened = true;
         } else {
             Toast.makeText(this, R.string.noimagesfound, Toast.LENGTH_SHORT).show();
         }

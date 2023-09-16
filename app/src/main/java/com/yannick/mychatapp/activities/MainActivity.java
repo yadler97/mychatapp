@@ -98,7 +98,6 @@ import com.yannick.mychatapp.data.User;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -127,8 +126,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int categoryIndex = 0;
     private static int color = 0;
     private int tmpcolor = -1;
-    private final ArrayList<String> userIdList = new ArrayList<>();
-    private boolean userListCreated = false;
     private TabLayout tabLayout;
     private RoomListFragmentMore rFragMore = new RoomListFragmentMore();
     private RoomListFragmentFavorites rFragFavs = new RoomListFragmentFavorites();
@@ -153,11 +150,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FirebaseAuth mAuth;
 
     private final FileOperations fileOperations = new FileOperations(this);
-
-    public static final String settingsPushNotificationsKey = "settingsPushNotifications";
-    public static final String settingsSaveEnteredTextKey = "settingsSaveEnteredText";
-    public static final String settingsPreviewImagesKey = "settingsPreviewImages";
-    public static final String settingsStoreCameraPicturesKey = "settingsStoreCameraPictures";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -214,32 +206,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FloatingActionButton addRoomButton = findViewById(R.id.addroom);
         addRoomButton.setOnClickListener(view -> addRoom());
 
-        userRoot.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    userIdList.add(ds.getKey());
-                }
-                userListCreated = true;
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!userListCreated) {
-                    handler.postDelayed(this, 1000);
-                } else {
-                    createUserProfile(mAuth.getCurrentUser().getUid());
-                }
-            }
-        }, 100);
+        createUserProfile(mAuth.getCurrentUser().getUid());
     }
 
     private void addRoom() {
@@ -688,7 +655,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
             }
-            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[color]).setFixedColumnCount(5).setOnColorSelectedListener((positiveResult, scolor) -> {
+            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor)
+                    .setSelectedColor(getResources().getIntArray(R.array.favcolors)[color])
+                    .setFixedColumnCount(5)
+                    .setOnColorSelectedListener((positiveResult, scolor) -> {
                 if (positiveResult) {
                     int i = 0;
                     for (int c : getResources().getIntArray(R.array.favcolors)) {
@@ -856,10 +826,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SwitchCompat camera = view.findViewById(R.id.camera);
         Button deleteAccount = view.findViewById(R.id.delete_account);
 
-        boolean settingPushNotification = sharedPref.getBoolean(settingsPushNotificationsKey, true);
-        boolean settingSavEnteredText = sharedPref.getBoolean(settingsSaveEnteredTextKey, true);
-        boolean settingPreviewImages = sharedPref.getBoolean(settingsPreviewImagesKey, true);
-        boolean settingStoreCameraPictures = sharedPref.getBoolean(settingsStoreCameraPicturesKey, true);
+        boolean settingPushNotification = sharedPref.getBoolean(Constants.settingsPushNotificationsKey, true);
+        boolean settingSavEnteredText = sharedPref.getBoolean(Constants.settingsSaveEnteredTextKey, true);
+        boolean settingPreviewImages = sharedPref.getBoolean(Constants.settingsPreviewImagesKey, true);
+        boolean settingStoreCameraPictures = sharedPref.getBoolean(Constants.settingsStoreCameraPicturesKey, true);
 
         push.setChecked(settingPushNotification);
         save.setChecked(settingSavEnteredText);
@@ -878,10 +848,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(settingsPushNotificationsKey, push.isChecked());
-            editor.putBoolean(settingsSaveEnteredTextKey, save.isChecked());
-            editor.putBoolean(settingsPreviewImagesKey, preview.isChecked());
-            editor.putBoolean(settingsStoreCameraPicturesKey, camera.isChecked());
+            editor.putBoolean(Constants.settingsPushNotificationsKey, push.isChecked());
+            editor.putBoolean(Constants.settingsSaveEnteredTextKey, save.isChecked());
+            editor.putBoolean(Constants.settingsPreviewImagesKey, preview.isChecked());
+            editor.putBoolean(Constants.settingsStoreCameraPicturesKey, camera.isChecked());
             editor.apply();
 
             Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();

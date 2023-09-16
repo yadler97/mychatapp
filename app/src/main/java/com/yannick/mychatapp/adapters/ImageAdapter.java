@@ -15,7 +15,6 @@ import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.SquareImageView;
-import com.yannick.mychatapp.activities.MainActivity;
 
 import java.util.ArrayList;
 
@@ -50,7 +49,7 @@ public class ImageAdapter extends BaseAdapter {
         StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 
         SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
-        if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {
+        if (!settings.getBoolean(Constants.settingsPreviewImagesKey, true)) {
             GlideApp.with(context)
                     .load(pathReference)
                     .onlyRetrieveFromCache(true)

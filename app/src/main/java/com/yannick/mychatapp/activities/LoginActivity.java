@@ -64,7 +64,6 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private Theme theme;
     private FirebaseStorage storage;
-    private static String userID = "";
     private static boolean ownProfileImage = false;
     private static int colour = 0;
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
@@ -335,7 +334,7 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
-                        userID = user.getUid();
+                        String userID = user.getUid();
 
                         if (!ownProfileImage) {
                             image = UUID.randomUUID().toString();
@@ -556,7 +555,6 @@ public class LoginActivity extends AppCompatActivity {
                 imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
             }
             dialogInterface.cancel();
-            userID = "";
         });
 
         final AlertDialog alert = builder.create();

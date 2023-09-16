@@ -39,7 +39,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
-import com.yannick.mychatapp.activities.MainActivity;
 import com.yannick.mychatapp.data.Message;
 import com.yannick.mychatapp.PatternEditableBuilder;
 import com.yannick.mychatapp.R;
@@ -414,7 +413,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
             StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + imageURL);
 
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this.context);
-            if (!settings.getBoolean(MainActivity.settingsPreviewImagesKey, true)) {
+            if (!settings.getBoolean(Constants.settingsPreviewImagesKey, true)) {
                 GlideApp.with(context)
                         .load(pathReference)
                         .onlyRetrieveFromCache(true)

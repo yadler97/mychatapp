@@ -40,7 +40,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
     private final Context context;
     private final ArrayList<Room> roomList;
     private final RoomListType type;
-    private final SimpleDateFormat sdf_local = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private final FirebaseStorage storage;
     private final FirebaseAuth mAuth;
 
@@ -175,11 +175,11 @@ public class RoomAdapter extends ArrayAdapter<Room> {
 
     private String parseTime(String time) {
         try {
-            time = sdf_local.format(sdf_local.parse(time));
+            time = sdf.format(sdf.parse(time));
         } catch (ParseException e) {
             Log.e("ParseException", e.toString());
         }
-        if (time.substring(0, 8).equals(sdf_local.format(new Date()).substring(0, 8))) {
+        if (time.substring(0, 8).equals(sdf.format(new Date()).substring(0, 8))) {
             return time.substring(9, 11) + ":" + time.substring(11, 13);
         } else {
             return time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
