@@ -158,6 +158,9 @@
     <string name="room_successfully_deleted">Room successfully deleted</string>
     <string name="room_deletion_info">Do you really want to delete this room?</string>
     <string name="invalid_email">Invalid E-Mail address</string>
+    <string name="delete_message"><font color='#FF0000'>Delete message</font></string>
+    <string name="really_delete_message">Really delete message?</string>
+    <string name="message_deleted">Message deleted</string>
 
     <string name="hint_email">E-Mail Address <font color='#FF0000'>*</font></string>
     <string name="hint_name">Name <font color='#FF0000'>*</font></string>

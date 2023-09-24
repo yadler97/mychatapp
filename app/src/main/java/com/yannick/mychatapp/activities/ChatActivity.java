@@ -246,6 +246,7 @@ public class ChatActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(pinReceiver, new IntentFilter("pinMessage"));
         LocalBroadcastManager.getInstance(this).registerReceiver(jumppinnedReceiver, new IntentFilter("jumppinned"));
         LocalBroadcastManager.getInstance(this).registerReceiver(closeFullscreenReceiver, new IntentFilter("closefullscreen"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(deleteReceiver, new IntentFilter("delete"));
 
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
@@ -1086,6 +1087,39 @@ public class ChatActivity extends AppCompatActivity {
             fullscreendialog.dismiss();
         }
     };
+
+    public BroadcastReceiver deleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            String messageId = intent.getStringExtra("messageID");
+            for (Message m : messageList) {
+                if (m.getKey().equals(messageId)) {
+                    deleteMessage(m);
+                }
+            }
+        }
+    };
+
+    private void deleteMessage(Message message) {
+        AlertDialog.Builder builder;
+        if (theme == Theme.DARK) {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
+        } else {
+            builder = new AlertDialog.Builder(this);
+        }
+        builder.setTitle(R.string.really_delete_message);
+        builder.setPositiveButton(R.string.yes, (dialogInterface, which) -> {
+            roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).child(message.getKey()).removeValue();
+            if (Message.isImage(message.getType())) {
+                StorageReference ref = storageReference.child(Constants.imagesStorageKey + message.getText());
+                ref.delete();
+            }
+            Toast.makeText(getApplicationContext(), R.string.message_deleted, Toast.LENGTH_SHORT).show();
+        });
+        builder.setNegativeButton(R.string.no, null);
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
 
     private class SingleTapConfirm extends GestureDetector.SimpleOnGestureListener {
 

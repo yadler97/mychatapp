@@ -4,7 +4,6 @@ public class Message {
     private User user;
     private String text;
     private String time;
-    private boolean sender;
     private String key;
     private Type type;
     private Message quotedMessage;

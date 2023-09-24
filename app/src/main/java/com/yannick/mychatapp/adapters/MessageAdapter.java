@@ -251,6 +251,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 Intent intent = new Intent("permission");
                 intent.putExtra("imageURL", message.getQuotedMessage().getText());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+            } else if (item.getItemId() == R.id.delete_message) {
+                Intent intent = new Intent("delete");
+                intent.putExtra("messageID", message.getKey());
+                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
             }
         }
 
@@ -266,23 +270,45 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     return false;
                 });
 
-                if (Message.isImage(type)) {
-                    if (!clickedDataItem.isPinned()) {
-                        sheetMenu.setMenu(R.menu.menu_image);
+                if (!clickedDataItem.isSender(mAuth.getCurrentUser().getUid())) {
+                    if (Message.isImage(type)) {
+                        if (!clickedDataItem.isPinned()) {
+                            sheetMenu.setMenu(R.menu.menu_image);
+                        } else {
+                            sheetMenu.setMenu(R.menu.menu_image_unpin);
+                        }
+                    } else if (Message.isQuoteImage(type)) {
+                        if (!clickedDataItem.isPinned()) {
+                            sheetMenu.setMenu(R.menu.menu_quote_image);
+                        } else {
+                            sheetMenu.setMenu(R.menu.menu_quote_image_unpin);
+                        }
                     } else {
-                        sheetMenu.setMenu(R.menu.menu_image_unpin);
-                    }
-                } else if (Message.isQuoteImage(type)) {
-                    if (!clickedDataItem.isPinned()) {
-                        sheetMenu.setMenu(R.menu.menu_quote_image);
-                    } else {
-                        sheetMenu.setMenu(R.menu.menu_quote_image_unpin);
+                        if (!clickedDataItem.isPinned()) {
+                            sheetMenu.setMenu(R.menu.menu_message);
+                        } else {
+                            sheetMenu.setMenu(R.menu.menu_message_unpin);
+                        }
                     }
                 } else {
-                    if (!clickedDataItem.isPinned()) {
-                        sheetMenu.setMenu(R.menu.menu_message);
+                    if (Message.isImage(type)) {
+                        if (!clickedDataItem.isPinned()) {
+                            sheetMenu.setMenu(R.menu.menu_image_sender);
+                        } else {
+                            sheetMenu.setMenu(R.menu.menu_image_unpin_sender);
+                        }
+                    } else if (Message.isQuoteImage(type)) {
+                        if (!clickedDataItem.isPinned()) {
+                            sheetMenu.setMenu(R.menu.menu_quote_image_sender);
+                        } else {
+                            sheetMenu.setMenu(R.menu.menu_quote_image_unpin_sender);
+                        }
                     } else {
-                        sheetMenu.setMenu(R.menu.menu_message_unpin);
+                        if (!clickedDataItem.isPinned()) {
+                            sheetMenu.setMenu(R.menu.menu_message_sender);
+                        } else {
+                            sheetMenu.setMenu(R.menu.menu_message_unpin_sender);
+                        }
                     }
                 }
 
