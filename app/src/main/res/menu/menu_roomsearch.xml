@@ -8,7 +8,7 @@
     <item
         android:id="@+id/roomsearch"
         android:title="@string/searchroom"
-        android:icon="@drawable/icon_roomsearch"
+        android:icon="@drawable/icon_search"
         app:showAsAction="always"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
 

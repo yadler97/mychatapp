@@ -66,7 +66,7 @@
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
-                    android:src="@drawable/ic_home"
+                    android:src="@drawable/icon_location"
                     app:tint="?iconColor" />
 
                 <TextView
@@ -79,7 +79,7 @@
                 <ImageView
                     android:layout_width="18dp"
                     android:layout_height="18dp"
-                    android:src="@drawable/ic_birthday"
+                    android:src="@drawable/icon_birthday"
                     app:tint="?iconColor" />
 
                 <TextView

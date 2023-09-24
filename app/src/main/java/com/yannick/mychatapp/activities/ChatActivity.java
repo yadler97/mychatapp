@@ -330,14 +330,14 @@ public class ChatActivity extends AppCompatActivity {
         imageButton.setOnTouchListener((view, event) -> {
             if (gestureDetector.onTouchEvent(event)) {
                 chooseImage();
-                imageButton.setBackgroundResource(R.drawable.ic_image);
+                imageButton.setBackgroundResource(R.drawable.icon_image);
                 return true;
             } else {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    imageButton.setBackgroundResource(R.drawable.ic_image_light);
+                    imageButton.setBackgroundResource(R.drawable.icon_image_pressed);
                     return true;
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    imageButton.setBackgroundResource(R.drawable.ic_image);
+                    imageButton.setBackgroundResource(R.drawable.icon_image);
                     return true;
                 }
             }
@@ -347,14 +347,14 @@ public class ChatActivity extends AppCompatActivity {
         cameraButton.setOnTouchListener((view, event) -> {
             if (gestureDetector.onTouchEvent(event)) {
                 takePicture();
-                cameraButton.setBackgroundResource(R.drawable.ic_camera);
+                cameraButton.setBackgroundResource(R.drawable.icon_camera);
                 return true;
             } else {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    cameraButton.setBackgroundResource(R.drawable.ic_camera_light);
+                    cameraButton.setBackgroundResource(R.drawable.icon_camera_pressed);
                     return true;
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    cameraButton.setBackgroundResource(R.drawable.ic_camera);
+                    cameraButton.setBackgroundResource(R.drawable.icon_camera);
                     return true;
                 }
             }
@@ -368,14 +368,14 @@ public class ChatActivity extends AppCompatActivity {
                 quoteImageImageView.setImageDrawable(null);
                 quoteImageImageView.setVisibility(View.GONE);
                 quoteLayout.setVisibility(View.GONE);
-                removeQuoteButton.setBackgroundResource(R.drawable.ic_clear);
+                removeQuoteButton.setBackgroundResource(R.drawable.icon_clear);
                 return true;
             } else {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    removeQuoteButton.setBackgroundResource(R.drawable.ic_clear_light);
+                    removeQuoteButton.setBackgroundResource(R.drawable.icon_clear_pressed);
                     return true;
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    removeQuoteButton.setBackgroundResource(R.drawable.ic_clear);
+                    removeQuoteButton.setBackgroundResource(R.drawable.icon_clear);
                     return true;
                 }
             }
