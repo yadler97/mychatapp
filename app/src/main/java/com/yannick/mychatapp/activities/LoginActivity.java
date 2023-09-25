@@ -29,12 +29,15 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -82,6 +85,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Button loginButton = findViewById(R.id.loginbutton);
         Button createButton = findViewById(R.id.createbutton);
+        Button resetButton = findViewById(R.id.forgotpasswordbutton);
         EditText inputEmail = findViewById(R.id.login_email);
         EditText inputPassword = findViewById(R.id.login_password);
         TextInputLayout inputEmailLayout = findViewById(R.id.login_email_layout);
@@ -143,6 +147,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         createButton.setOnClickListener(view -> createAccount());
+
+        resetButton.setOnClickListener(view -> openForgotPasswordDialog());
     }
 
     private void login(String email, String password) {
@@ -195,6 +201,77 @@ public class LoginActivity extends AppCompatActivity {
         resendEmailButton.setOnClickListener(view1 -> {
             resendEmail();
             alert.cancel();
+        });
+
+        alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        alert.show();
+    }
+
+    private void openForgotPasswordDialog() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.enter_email, null);
+
+        final TextView email = view.findViewById(R.id.account_email);
+        final TextInputLayout emailLayout = view.findViewById(R.id.account_email_layout);
+
+        email.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.length() != 0) {
+                    emailLayout.setError(null);
+                }
+            }
+        });
+
+        AlertDialog.Builder builder;
+        if (theme == Theme.DARK) {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
+        } else {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
+        }
+
+        builder.setCustomTitle(setupHeader(getResources().getString(R.string.forgot_password)));
+        builder.setCancelable(false);
+        builder.setView(view);
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (view1 != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+            }
+            dialogInterface.cancel();
+        });
+
+        final AlertDialog alert = builder.create();
+        alert.setOnShowListener(dialogInterface -> {
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(view12 -> {
+                if (!email.getText().toString().isEmpty()) {
+                    if (Patterns.EMAIL_ADDRESS.matcher(email.getText()).matches()) {
+                        mAuth.sendPasswordResetEmail(email.getText().toString()).addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(LoginActivity.this, R.string.password_reset_mail_sent, Toast.LENGTH_SHORT).show();
+                                alert.cancel();
+                            }
+                        });
+                    } else {
+                        emailLayout.setError(getResources().getString(R.string.invalid_email));
+                    }
+                } else {
+                    emailLayout.setError(getResources().getString(R.string.enteremail));
+                }
+            });
         });
 
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);

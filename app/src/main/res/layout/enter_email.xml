@@ -10,24 +10,22 @@
     android:paddingRight="@dimen/activity_horizontal_margin" >
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/room_password_layout"
+        android:id="@+id/account_email_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="20dp"
         app:counterEnabled="true"
-        app:counterMaxLength="@integer/maxRoomPasswordLength"
-        app:passwordToggleEnabled="true"
-        app:passwordToggleTint="?android:textColorHint"
+        app:counterMaxLength="@integer/maxProfileEmailLength"
         app:errorEnabled="true" >
 
         <org.droidparts.widget.ClearableEditText
-            android:id="@+id/room_password"
+            android:id="@+id/account_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingTop="@dimen/edit_text_padding_top"
-            android:inputType="textPassword"
-            android:hint="@string/hint_password"
-            android:maxLength="@integer/maxRoomPasswordLength"
+            android:inputType="textEmailAddress"
+            android:hint="@string/hint_email"
+            android:maxLength="@integer/maxProfileEmailLength"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
     </com.google.android.material.textfield.TextInputLayout>

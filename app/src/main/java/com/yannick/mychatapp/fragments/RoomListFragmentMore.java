@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import com.google.android.material.textfield.TextInputLayout;
@@ -186,7 +188,7 @@ public class RoomListFragmentMore extends Fragment {
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialog));
         }
-        builder.setTitle(R.string.pleaseenterpassword);
+        builder.setCustomTitle(setupHeader(getResources().getString(R.string.pleaseenterpassword)));
         builder.setView(view);
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
@@ -285,5 +287,23 @@ public class RoomListFragmentMore extends Fragment {
                 searchRoomList.add(r2);
             }
         }
+    }
+
+    private TextView setupHeader(String title) {
+        TextView header = new TextView(getContext());
+
+        if (theme == Theme.DARK) {
+            header.setBackgroundColor(getResources().getColor(R.color.dark_button));
+        } else {
+            header.setBackgroundColor(getResources().getColor(R.color.red));
+        }
+
+        header.setText(title);
+        header.setPadding(30, 30, 30, 30);
+        header.setTextSize(20F);
+        header.setTypeface(Typeface.DEFAULT_BOLD);
+        header.setTextColor(Color.WHITE);
+
+        return header;
     }
 }

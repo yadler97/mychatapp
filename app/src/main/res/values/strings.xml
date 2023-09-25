@@ -161,6 +161,8 @@
     <string name="delete_message"><font color='#FF0000'>Delete message</font></string>
     <string name="really_delete_message">Really delete message?</string>
     <string name="message_deleted">Message deleted</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="password_reset_mail_sent">Sent mail to reset password</string>
 
     <string name="hint_email">E-Mail Address <font color='#FF0000'>*</font></string>
     <string name="hint_name">Name <font color='#FF0000'>*</font></string>
