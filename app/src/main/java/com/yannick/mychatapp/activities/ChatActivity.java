@@ -1507,7 +1507,7 @@ public class ChatActivity extends AppCompatActivity {
                 path.mkdirs();
             }
 
-            final File file = new File(path, getResources().getString(R.string.app_name) + "_" + roomName.replace(" ", "") + "_backup.txt");
+            final File file = new File(path, getResources().getString(R.string.app_name) + "_" + roomName.replace(" ", "_").replace("/", "_") + "_backup.txt");
 
             try {
                 file.createNewFile();
@@ -1540,7 +1540,7 @@ public class ChatActivity extends AppCompatActivity {
                 });
         View sbView = snack.getView();
         if (theme == Theme.DARK) {
-            sbView.setBackgroundColor(getResources().getColor(R.color.dark_actionbar));
+            sbView.setBackgroundColor(getResources().getColor(R.color.dark_button));
         } else {
             sbView.setBackgroundColor(getResources().getColor(R.color.red));
         }
