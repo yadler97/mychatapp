@@ -113,7 +113,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 return false;
             });
 
-            try {
+            if (message != null) {
                 message.setOnTouchListener((view13, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
@@ -121,7 +121,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                         if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                             GradientDrawable shape = new GradientDrawable();
                             shape.setShape(GradientDrawable.RECTANGLE);
-                            float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
+                            float[] corners = new float[]{27, 27, 27, 27, 27, 27, 27, 27};
                             shape.setCornerRadii(corners);
                             if (action == MotionEvent.ACTION_DOWN) {
                                 if (messageList.get(pos).isSender(mAuth.getCurrentUser().getUid())) {
@@ -156,11 +156,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     }
                     return true;
                 });
-            } catch (NullPointerException e) {
-
             }
 
-            try {
+            if (messageExpandable != null) {
                 messageExpandable.setOnTouchListener((view12, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
@@ -193,11 +191,9 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     }
                     return true;
                 });
-            } catch (NullPointerException e) {
-
             }
 
-            try {
+            if (image != null) {
                 image.setOnTouchListener((view1, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
@@ -212,8 +208,28 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     }
                     return true;
                 });
-            } catch (NullPointerException e) {
+            }
 
+            if (profileImage != null) {
+                profileImage.setOnTouchListener((view1, event) -> {
+                    pos = getAdapterPosition();
+                    if (pos != RecyclerView.NO_POSITION) {
+                        int action = event.getActionMasked();
+                        if (action == MotionEvent.ACTION_DOWN) {
+                            profileImage.setForeground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.image_overlay_profile, null));
+                        }
+                        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                            if (action == MotionEvent.ACTION_UP) {
+                                Intent intent = new Intent("userprofile");
+                                intent.putExtra("userid", messageList.get(pos).getUser().getUserID());
+                                LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                            }
+
+                            profileImage.setForeground(null);
+                        }
+                    }
+                    return true;
+                });
             }
         }
 
