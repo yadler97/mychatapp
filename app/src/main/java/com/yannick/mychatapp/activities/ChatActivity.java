@@ -1195,66 +1195,92 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu (Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        if (!fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
-            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
-                inflater.inflate(R.menu.menu_chatroom, menu);
-            } else {
-                inflater.inflate(R.menu.menu_chatroom_unmute, menu);
-            }
-        } else {
-            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
-                inflater.inflate(R.menu.menu_chatroom_unfav, menu);
-            } else {
-                inflater.inflate(R.menu.menu_chatroom_unmute_unfav, menu);
-            }
-        }
-
-        if (menu instanceof MenuBuilder) {
-            MenuBuilder m = (MenuBuilder) menu;
-            m.setOptionalIconsVisible(true);
-        }
-
-        MenuItem searchItem = menu.findItem(R.id.roomsearch);
-        searchView = (SearchView) searchItem.getActionView();
-        searchView.setFocusable(false);
-        searchView.setQueryHint(getResources().getString(R.string.searchmessage));
-        ImageView searchClose = searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
-        searchClose.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                TextView noMessageFound = findViewById(R.id.no_message_found);
-                if (!s.trim().isEmpty()) {
-                    searchResultList = searchMessage(s);
-
-                    if (!searchResultList.isEmpty()) {
-                        mAdapter = new MessageAdapter(searchResultList);
-                        recyclerView.setAdapter(mAdapter);
-                        recyclerView.setVisibility(View.VISIBLE);
-                        noMessageFound.setVisibility(View.GONE);
-                        mAdapter.notifyDataSetChanged();
-                        recyclerView.scrollToPosition(searchResultList.size() - 1);
-                    } else {
-                        recyclerView.setVisibility(View.GONE);
-                        noMessageFound.setVisibility(View.VISIBLE);
-                    }
+            public void run() {
+                if (room == null) {
+                    handler.postDelayed(this, 10);
                 } else {
-                    mAdapter = new MessageAdapter(messageList);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    noMessageFound.setVisibility(View.GONE);
-                    recyclerView.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
+                    MenuInflater inflater = getMenuInflater();
+                    if (room.getAdmin().equals(mAuth.getCurrentUser().getUid())) {
+                        if (!fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+                            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+                                inflater.inflate(R.menu.menu_chatroom_admin, menu);
+                            } else {
+                                inflater.inflate(R.menu.menu_chatroom_unmute_admin, menu);
+                            }
+                        } else {
+                            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+                                inflater.inflate(R.menu.menu_chatroom_unfav_admin, menu);
+                            } else {
+                                inflater.inflate(R.menu.menu_chatroom_unmute_unfav_admin, menu);
+                            }
+                        }
+                    } else {
+                        if (!fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+                            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+                                inflater.inflate(R.menu.menu_chatroom, menu);
+                            } else {
+                                inflater.inflate(R.menu.menu_chatroom_unmute, menu);
+                            }
+                        } else {
+                            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+                                inflater.inflate(R.menu.menu_chatroom_unfav, menu);
+                            } else {
+                                inflater.inflate(R.menu.menu_chatroom_unmute_unfav, menu);
+                            }
+                        }
+                    }
+
+                    if (menu instanceof MenuBuilder) {
+                        MenuBuilder m = (MenuBuilder) menu;
+                        m.setOptionalIconsVisible(true);
+                    }
+
+                    MenuItem searchItem = menu.findItem(R.id.roomsearch);
+                    searchView = (SearchView) searchItem.getActionView();
+                    searchView.setFocusable(false);
+                    searchView.setQueryHint(getResources().getString(R.string.searchmessage));
+                    ImageView searchClose = searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
+                    searchClose.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+                        @Override
+                        public boolean onQueryTextSubmit(String s) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onQueryTextChange(String s) {
+                            TextView noMessageFound = findViewById(R.id.no_message_found);
+                            if (!s.trim().isEmpty()) {
+                                searchResultList = searchMessage(s);
+
+                                if (!searchResultList.isEmpty()) {
+                                    mAdapter = new MessageAdapter(searchResultList);
+                                    recyclerView.setAdapter(mAdapter);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    noMessageFound.setVisibility(View.GONE);
+                                    mAdapter.notifyDataSetChanged();
+                                    recyclerView.scrollToPosition(searchResultList.size() - 1);
+                                } else {
+                                    recyclerView.setVisibility(View.GONE);
+                                    noMessageFound.setVisibility(View.VISIBLE);
+                                }
+                            } else {
+                                mAdapter = new MessageAdapter(messageList);
+                                recyclerView.setVisibility(View.VISIBLE);
+                                noMessageFound.setVisibility(View.GONE);
+                                recyclerView.setAdapter(mAdapter);
+                                mAdapter.notifyDataSetChanged();
+                            }
+                            return false;
+                        }
+                    });
                 }
-                return false;
             }
-        });
+        }, 10);
 
         return true;
     }
@@ -1287,6 +1313,9 @@ public class ChatActivity extends AppCompatActivity {
             return true;
         } else if (item.getItemId() == R.id.roomleave) {
             leaveRoom();
+            return true;
+        } else if (item.getItemId() == R.id.roomdelete) {
+            deleteRoom();
             return true;
         } else if (item.getItemId() == android.R.id.home) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(userReceiver);
@@ -1357,7 +1386,6 @@ public class ChatActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.close, null);
         if (room.getAdmin().equals(userID)) {
             builder.setNegativeButton(R.string.editroom, (dialogInterface, i) -> editRoom());
-            builder.setNeutralButton(R.string.delete_room, (dialogInterface, i) -> deleteRoom());
         }
         AlertDialog alert = builder.create();
         alert.show();
@@ -2102,7 +2130,7 @@ public class ChatActivity extends AppCompatActivity {
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
         }
-        builder.setCustomTitle(setupHeader(getResources().getString(R.string.delete_room)));
+        builder.setCustomTitle(setupHeader(getResources().getString(R.string.delete_room_header)));
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.close, null);

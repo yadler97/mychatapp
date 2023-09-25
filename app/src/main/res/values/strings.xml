@@ -154,7 +154,8 @@
     <string name="account_successfully_deleted">Account successfully deleted</string>
     <string name="account_deletion_info">CAUTION: You are about to delete your account. This action cannot be reverted! If you really want to delete your account, please enter your password to proceed.</string>
     <string name="email_verification_info">You have to verify your E-Mail address before you can use your account. If you have not received a mail, click the resend button. If you have verified your mail, you can close this window and proceed with login.</string>
-    <string name="delete_room">Delete room</string>
+    <string name="delete_room"><font color='#FF0000'>Delete room</font></string>
+    <string name="delete_room_header">Delete room</string>
     <string name="room_successfully_deleted">Room successfully deleted</string>
     <string name="room_deletion_info">Do you really want to delete this room?</string>
     <string name="invalid_email">Invalid E-Mail address</string>

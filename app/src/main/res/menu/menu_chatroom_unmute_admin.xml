@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".activities.ChatActivity" >
+
+    <item
+        android:id="@+id/roominfo"
+        android:title="@string/roominfo"
+        android:icon="@drawable/icon_info"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/roomfav"
+        android:title="@string/favorite"
+        android:icon="@drawable/icon_fav"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/roomsearch"
+        android:title="@string/searchmessage"
+        android:icon="@drawable/icon_search"
+        app:showAsAction="always"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
+
+    <item
+        android:id="@+id/roomphotos"
+        android:title="@string/images"
+        android:icon="@drawable/icon_photos"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/roompinboard"
+        android:title="@string/pinboard"
+        android:icon="@drawable/icon_pinboard"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/roommute"
+        android:title="@string/unmute"
+        android:icon="@drawable/icon_unmute"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/roombackup"
+        android:title="@string/backup"
+        android:icon="@drawable/icon_backup"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/roomleave"
+        android:title="@string/leaveroom"
+        android:icon="@drawable/icon_leave"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/roomdelete"
+        android:title="@string/delete_room"
+        android:icon="@drawable/icon_delete"
+        app:showAsAction="never" />
+
+</menu>
