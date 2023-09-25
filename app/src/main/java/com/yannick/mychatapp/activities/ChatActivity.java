@@ -173,7 +173,7 @@ public class ChatActivity extends AppCompatActivity {
     private int categoryIndex = 0;
 
     private GravityImageView backgroundView;
-    private ImageButton roomImageButton;
+    private CircleImageView roomImageButton;
 
     private TextView quoteText;
     private LinearLayout quoteLayout;
@@ -1927,6 +1927,7 @@ public class ChatActivity extends AppCompatActivity {
         alert.show();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void editRoom() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.add_room, null);
@@ -2024,28 +2025,28 @@ public class ChatActivity extends AppCompatActivity {
         });
 
         final StorageReference refImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImage());
+        GlideApp.with(getApplicationContext())
+                .load(refImage)
+                .centerCrop()
+                .into(roomImageButton);
 
-        if (theme == Theme.DARK) {
-            GlideApp.with(getApplicationContext())
-                    .load(refImage)
-                    .placeholder(R.drawable.side_nav_bar_dark)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(roomImageButton);
-        } else {
-            GlideApp.with(getApplicationContext())
-                    .load(refImage)
-                    .placeholder(R.drawable.side_nav_bar)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(roomImageButton);
-        }
+        roomImageButton.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                roomImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickRoomImageLauncher.launch(intent);
+                }
 
-        roomImageButton.setOnClickListener(view13 -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickRoomImageLauncher.launch(intent);
+                roomImageButton.setForeground(null);
+            }
+
+            return true;
         });
 
         AlertDialog.Builder builder;

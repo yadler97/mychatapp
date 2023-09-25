@@ -1,5 +1,6 @@
 package com.yannick.mychatapp.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.util.Patterns;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -31,6 +33,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.material.textfield.TextInputLayout;
@@ -57,6 +60,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
@@ -69,7 +74,7 @@ public class LoginActivity extends AppCompatActivity {
     private String image = "";
     private String banner = "";
 
-    private ImageButton profileImageButton;
+    private CircleImageView profileImageButton;
     private ImageButton profileBannerButton;
 
     @Override
@@ -449,6 +454,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void createAccountData(final String email, final String password) {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.edit_profile, null);
@@ -503,20 +509,18 @@ public class LoginActivity extends AppCompatActivity {
         profileImageButton = view.findViewById(R.id.user_profile_image);
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
-        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
+        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + "unknown_user");
         final StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
 
         birthdayEdit.setText(Constants.DEFAULT_BIRTHDAY);
 
-        if (theme == Theme.DARK) {
-            GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
-                    .load(refProfileImage)
-                    .placeholder(R.drawable.side_nav_bar_dark)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(profileImageButton);
+        GlideApp.with(getApplicationContext())
+                //.using(new FirebaseImageLoader())
+                .load(refProfileImage)
+                .centerCrop()
+                .into(profileImageButton);
 
+        if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
@@ -527,14 +531,6 @@ public class LoginActivity extends AppCompatActivity {
         } else {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(refProfileImage)
-                    .placeholder(R.drawable.side_nav_bar)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(profileImageButton);
-
-            GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -542,18 +538,42 @@ public class LoginActivity extends AppCompatActivity {
                     .into(profileBannerButton);
         }
 
-        profileImageButton.setOnClickListener(view15 -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickProfileImageLauncher.launch(intent);
+        profileImageButton.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                profileImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickProfileImageLauncher.launch(intent);
+                }
+
+                profileImageButton.setForeground(null);
+            }
+
+            return true;
         });
 
-        profileBannerButton.setOnClickListener(view16 -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickProfileBannerLauncher.launch(intent);
+        profileBannerButton.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                profileBannerButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickProfileBannerLauncher.launch(intent);
+                }
+
+                profileBannerButton.setForeground(null);
+            }
+
+            return true;
         });
 
         GradientDrawable shape = new GradientDrawable();

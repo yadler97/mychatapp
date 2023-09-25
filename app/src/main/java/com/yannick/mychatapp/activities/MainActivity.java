@@ -1,5 +1,6 @@
 package com.yannick.mychatapp.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -26,6 +27,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -48,6 +50,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.view.GravityCompat;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -134,9 +137,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CircleImageView profileImage;
     private ImageView banner;
     private ImageView profileBannerImageView;
-    private ImageButton profileImageButton;
+    private CircleImageView profileImageButton;
     private ImageButton profileBannerButton;
-    private ImageButton roomImageButton;
+    private CircleImageView roomImageButton;
     private CircleImageView profileImageImageView;
     private TextView profileNameText;
 
@@ -208,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         createUserProfile(mAuth.getCurrentUser().getUid());
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void addRoom() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.add_room, null);
@@ -299,29 +303,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + "0");
+        StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + imageRoom);
+        GlideApp.with(getApplicationContext())
+                .load(refRoomImage)
+                .centerCrop()
+                .into(roomImageButton);
 
-        if (theme == Theme.DARK) {
-            GlideApp.with(getApplicationContext())
-                    .load(refRoomImage)
-                    .placeholder(R.drawable.side_nav_bar_dark)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(roomImageButton);
-        } else {
-            GlideApp.with(getApplicationContext())
-                    .load(refRoomImage)
-                    .placeholder(R.drawable.side_nav_bar)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(roomImageButton);
-        }
+        roomImageButton.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                roomImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickRoomImageLauncher.launch(intent);
+                }
 
-        roomImageButton.setOnClickListener(view13 -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickRoomImageLauncher.launch(intent);
+                roomImageButton.setForeground(null);
+            }
+
+            return true;
         });
 
         AlertDialog.Builder builder;
@@ -517,6 +521,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         alert.show();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void editProfile() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.edit_profile, null);
@@ -574,15 +579,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImage());
         StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
 
-        if (theme == Theme.DARK) {
-            GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
-                    .load(refProfileImage)
-                    .placeholder(R.drawable.side_nav_bar_dark)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(profileImageButton);
+        GlideApp.with(getApplicationContext())
+                //.using(new FirebaseImageLoader())
+                .load(refProfileImage)
+                .centerCrop()
+                .into(profileImageButton);
 
+        if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
@@ -593,14 +596,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else {
             GlideApp.with(getApplicationContext())
                     //.using(new FirebaseImageLoader())
-                    .load(refProfileImage)
-                    .placeholder(R.drawable.side_nav_bar)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(profileImageButton);
-
-            GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -608,18 +603,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .into(profileBannerButton);
         }
 
-        profileImageButton.setOnClickListener(v -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickProfileImageLauncher.launch(intent);
+        profileImageButton.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                profileImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickProfileImageLauncher.launch(intent);
+                }
+
+                profileImageButton.setForeground(null);
+            }
+
+            return true;
         });
 
-        profileBannerButton.setOnClickListener(v -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickProfileBannerLauncher.launch(intent);
+        profileBannerButton.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                profileBannerButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickProfileBannerLauncher.launch(intent);
+                }
+
+                profileBannerButton.setForeground(null);
+            }
+
+            return true;
         });
 
         username.setText(currentUser.getName());

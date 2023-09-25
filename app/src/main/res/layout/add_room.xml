@@ -74,17 +74,26 @@
 
             <TextView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:text="@string/roomimage"
+                android:gravity="center_vertical"
                 android:paddingRight="10dp"
                 android:textSize="15sp" />
 
-            <ImageButton
+            <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/room_image"
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="@dimen/room_list_image_size"
+                android:layout_height="@dimen/room_list_image_size"
                 android:layout_gravity="center_vertical"
                 android:background="?attr/selectableItemBackground"/>
+
+            <ImageButton
+                android:id="@+id/room_image_remove"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/icon_clear" />
 
         </LinearLayout>
 
