@@ -84,6 +84,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.yannick.mychatapp.Constants;
+import com.yannick.mychatapp.StringOperations;
 import com.yannick.mychatapp.adapters.ForwardMessageAdapter;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.BuildConfig;
@@ -310,6 +311,7 @@ public class ChatActivity extends AppCompatActivity {
                     map.put("text", messageInput.getText().toString().trim());
                     map.put("image", "");
                     map.put("pinned", false);
+                    map.put("forwarded", false);
                     map.put("quote", quoteStatus);
                     map.put("time", currentDateAndTime);
 
@@ -514,9 +516,9 @@ public class ChatActivity extends AppCompatActivity {
         }
 
         User user = getUser(room.getAdmin());
-        String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
+        String creationTimeCon = StringOperations.convertDateToDisplayFormat(creationTime);
         String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
-        Message m = new Message(user, text, creationTime, room.getKey(), Message.Type.HEADER, null, false);
+        Message m = new Message(user, text, creationTime, room.getKey(), Message.Type.HEADER, null, false, false);
 
         messageList.add(m);
         mAdapter.notifyDataSetChanged();
@@ -528,6 +530,7 @@ public class ChatActivity extends AppCompatActivity {
         String image = dataSnapshot.child("image").getValue().toString();
         String userId = dataSnapshot.child("sender").getValue().toString();
         boolean pinned = (boolean) dataSnapshot.child("pinned").getValue();
+        boolean forwarded = (boolean) dataSnapshot.child("forwarded").getValue();
         String quote = dataSnapshot.child("quote").getValue().toString();
         String time = dataSnapshot.child("time").getValue().toString();
 
@@ -539,14 +542,14 @@ public class ChatActivity extends AppCompatActivity {
             Log.e("ParseException", e.toString());
         }
         if (lastReadMessage.equals(lastKey) && !lastReadMessageReached) {
-            Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, "-", Message.Type.HEADER, null, false);
+            Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, "-", Message.Type.HEADER, null, false, false);
             messageList.add(m);
         }
         lastKey = key;
 
         if (index == -1 && !messageList.get(messageList.size() - 1).getTime().substring(0, 8).equals(time.substring(0, 8))) {
-            String timeText = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
-            Message m = new Message(user, timeText, time, "-", Message.Type.HEADER, null, false);
+            String timeText = StringOperations.convertDateToDisplayFormat(time);
+            Message m = new Message(user, timeText, time, "-", Message.Type.HEADER, null, false, false);
             messageList.add(m);
         }
 
@@ -561,24 +564,24 @@ public class ChatActivity extends AppCompatActivity {
         Message m;
         if (quote.equals("")) {
             if (!text.equals("")) {
-                if (text.length() > 11 && text.substring(0, 12).equals("(Forwarded) ")) {
-                    if (text.length() > 2000 + 12) {
-                        m = new Message(user, text.substring(12), time, key, Message.getFittingForwardedExpandableMessageType(sender, con), null, pinned);
+                if (forwarded) {
+                    if (text.length() > 2000) {
+                        m = new Message(user, text, time, key, Message.getFittingForwardedExpandableMessageType(sender, con), null, pinned, forwarded);
                     } else {
-                        m = new Message(user, text.substring(12), time, key, Message.getFittingForwardedMessageType(sender, con), null, pinned);
+                        m = new Message(user, text, time, key, Message.getFittingForwardedMessageType(sender, con), null, pinned, forwarded);
                     }
                 } else {
                     if (text.length() > 2000) {
-                        m = new Message(user, text, time, key, Message.getFittingExpandableMessageType(sender, con), null, pinned);
+                        m = new Message(user, text, time, key, Message.getFittingExpandableMessageType(sender, con), null, pinned, forwarded);
                     } else {
-                        m = new Message(user, text, time, key, Message.getFittingBasicMessageType(sender, con), null, pinned);
+                        m = new Message(user, text, time, key, Message.getFittingBasicMessageType(sender, con), null, pinned, forwarded);
                     }
                 }
             } else {
                 if (!imageList.contains(image)) {
                     imageList.add(image);
                 }
-                m = new Message(user, image, time, key, Message.getFittingImageMessageType(sender, con), null, pinned);
+                m = new Message(user, image, time, key, Message.getFittingImageMessageType(sender, con), null, pinned, forwarded);
             }
         } else {
             Message quotedMessage = null;
@@ -591,15 +594,15 @@ public class ChatActivity extends AppCompatActivity {
 
             if (quotedMessage != null) {
                 if (!Message.isImage(quotedMessage.getType())) {
-                    m = new Message(user, text, time, key, Message.getFittingQuoteMessageType(sender, con), quotedMessage, pinned);
+                    m = new Message(user, text, time, key, Message.getFittingQuoteMessageType(sender, con), quotedMessage, pinned, forwarded);
                 } else {
-                    m = new Message(user, text, time, key, Message.getFittingQuoteImageMessageType(sender, con), quotedMessage, pinned);
+                    m = new Message(user, text, time, key, Message.getFittingQuoteImageMessageType(sender, con), quotedMessage, pinned, forwarded);
                 }
             } else {
                 quotedMessage = new Message();
                 quotedMessage.setText(getResources().getString(R.string.quotedmessagenolongeravailable));
                 quotedMessage.setKey(quote);
-                m = new Message(user, text, time, key, Message.getFittingQuoteDeletedMessageType(sender, con), quotedMessage, pinned);
+                m = new Message(user, text, time, key, Message.getFittingQuoteDeletedMessageType(sender, con), quotedMessage, pinned, forwarded);
             }
         }
         if (index != -1 && messageList.get(ind).getTime().equals("")) {
@@ -849,6 +852,7 @@ public class ChatActivity extends AppCompatActivity {
                 map.put("text", "");
                 map.put("image", imageName);
                 map.put("pinned", false);
+                map.put("forwarded", false);
                 map.put("quote", "");
                 map.put("time", currentDateAndTime);
 
@@ -1326,7 +1330,7 @@ public class ChatActivity extends AppCompatActivity {
         final ListView memberListView = view.findViewById(R.id.memberList);
         memberListView.setAdapter(new MemberListAdapter(getApplicationContext(), memberList, room.getAdmin()));
 
-        String time = room.getTime().substring(6, 8) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(0, 4);
+        String time = StringOperations.convertDateToDisplayFormat(room.getTime());
         roomNameText.setText(room.getName());
         roomDescriptionText.setText(room.getDescription());
         roomCategoryText.setText(getResources().getStringArray(R.array.categories)[room.getCategory()]);
@@ -1419,15 +1423,15 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<Message> searchStringInMessage(ArrayList<Message> searchedMessageList, Message m, String text) {
         if (m.getText().toLowerCase().contains(text.toLowerCase()) && m.getType() != Message.Type.HEADER && !Message.isImage(m.getType())) {
             if (searchedMessageList.isEmpty() || !searchedMessageList.get(searchedMessageList.size() - 1).getTime().substring(0, 8).equals(m.getTime().substring(0, 8))) {
-                String time = m.getTime().substring(6, 8) + "." + m.getTime().substring(4, 6) + "." + m.getTime().substring(0, 4);
-                Message m2 = new Message(m.getUser(), time, m.getTime(), "-", Message.Type.HEADER, null, m.isPinned());
+                String time = StringOperations.convertDateToDisplayFormat(m.getTime());
+                Message m2 = new Message(m.getUser(), time, m.getTime(), "-", Message.Type.HEADER, null, m.isPinned(), m.isForwarded());
                 searchedMessageList.add(m2);
             }
             Message m2;
             if (Message.isConMessage(m.getType())) {
-                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuotedMessage(), m.isPinned());
+                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuotedMessage(), m.isPinned(), m.isForwarded());
             } else {
-                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), m.getType(), m.getQuotedMessage(), m.isPinned());
+                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), m.getType(), m.getQuotedMessage(), m.isPinned(), m.isForwarded());
             }
             m2.setSearchString(text);
             searchedMessageList.add(m2);
@@ -1634,7 +1638,7 @@ public class ChatActivity extends AppCompatActivity {
 
         profileName.setText(user.getName());
         profileDescription.setText(user.getDescription());
-        birthday.setText(user.getBirthday().substring(6, 8) + "." + user.getBirthday().substring(4, 6) + "." + user.getBirthday().substring(0, 4));
+        birthday.setText(StringOperations.convertDateToDisplayFormat(user.getBirthday()));
         location.setText(user.getLocation());
 
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.profile, user.getName())));
@@ -1683,10 +1687,11 @@ public class ChatActivity extends AppCompatActivity {
                 map.put("text", "");
                 map.put("image", fMessage.getText());
             } else {
-                map.put("text", "(Forwarded) " + fMessage.getText());
+                map.put("text", fMessage.getText());
                 map.put("image", "");
             }
             map.put("pinned", false);
+            map.put("forwarded", true);
             map.put("quote", quoteStatus);
             map.put("time", currentDateAndTime);
 

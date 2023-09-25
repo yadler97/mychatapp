@@ -45,6 +45,7 @@ public class ReplyReceiver extends BroadcastReceiver {
         map.put("text", message.toString());
         map.put("image", "");
         map.put("pinned", false);
+        map.put("forwarded", false);
         map.put("quote", "");
         map.put("time", currentDateAndTime);
 

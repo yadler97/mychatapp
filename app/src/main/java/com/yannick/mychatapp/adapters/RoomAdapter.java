@@ -23,6 +23,7 @@ import com.google.firebase.storage.StorageReference;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.StringOperations;
 import com.yannick.mychatapp.data.Message;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.data.Room;
@@ -103,7 +104,9 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         } else {
             if (r.getNewestMessage() != null) {
                 if (r.getNewestMessage().getType() == Message.Type.MESSAGE_RECEIVED) {
-                    if (r.getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
+                    if (r.getNewestMessage().isForwarded()) {
+                        viewHolder.categoryText.setText(context.getResources().getString(R.string.forwarded) + ": " + r.getNewestMessage().getText());
+                    } else if (r.getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
                         viewHolder.categoryText.setText(context.getResources().getString(R.string.you) + ": " + r.getNewestMessage().getText());
                     } else {
                         viewHolder.categoryText.setText(r.getNewestMessage().getUser().getName() + ": " + r.getNewestMessage().getText());
@@ -182,7 +185,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         if (time.substring(0, 8).equals(sdf.format(new Date()).substring(0, 8))) {
             return time.substring(9, 11) + ":" + time.substring(11, 13);
         } else {
-            return time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
+            return StringOperations.convertDateToDisplayFormat(time);
         }
     }
 

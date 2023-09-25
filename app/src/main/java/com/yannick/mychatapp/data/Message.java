@@ -9,12 +9,13 @@ public class Message {
     private Message quotedMessage;
     private String searchString;
     private boolean pinned;
+    private boolean forwarded;
 
     public Message() {
         this.type = Type.HEADER;
     }
 
-    public Message(User user, String text, String time, String id, Type type, Message quotedMessage, boolean pinned) {
+    public Message(User user, String text, String time, String id, Type type, Message quotedMessage, boolean pinned, boolean forwarded) {
         this.user = user;
         this.text = text;
         this.time = time;
@@ -23,6 +24,7 @@ public class Message {
         this.quotedMessage = quotedMessage;
         this.searchString = "";
         this.pinned = pinned;
+        this.forwarded = forwarded;
     }
 
     public enum Type {
@@ -381,5 +383,9 @@ public class Message {
 
     public void setPinned(boolean pinned) {
         this.pinned = pinned;
+    }
+
+    public boolean isForwarded() {
+        return forwarded;
     }
 }
