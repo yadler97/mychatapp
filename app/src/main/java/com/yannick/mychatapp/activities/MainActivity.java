@@ -104,7 +104,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -225,8 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final Spinner spinner = view.findViewById(R.id.spinner);
         roomImageButton = view.findViewById(R.id.room_image);
 
-        Random rand = new Random();
-        imageRoom = "standard" + (rand.nextInt(4)+1);
+        imageRoom = ImageOperations.getStandardRoomImage();
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
