@@ -44,6 +44,7 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
@@ -62,6 +63,8 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
@@ -647,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         location.setText(currentUser.getLocation());
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.OVAL);
-        shape.setColor(getResources().getIntArray(R.array.favcolors)[color]);
+        shape.setColor(getResources().getIntArray(R.array.favcolors)[currentUser.getFavColour()]);
         favColour.setBackground(shape);
 
         AtomicReference<String> selectedBirthday = new AtomicReference<>(currentUser.getBirthday());
@@ -673,7 +676,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
             }
             builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor)
-                    .setSelectedColor(getResources().getIntArray(R.array.favcolors)[color])
+                    .setSelectedColor(getResources().getIntArray(R.array.favcolors)[currentUser.getFavColour()])
                     .setFixedColumnCount(5)
                     .setOnColorSelectedListener((positiveResult, scolor) -> {
                 if (positiveResult) {
@@ -721,13 +724,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (!birthday.getText().toString().isEmpty()) {
                             String oldUserName = currentUser.getName();
                             int oldColor = color;
+                            if (tmpcolor >= 0) {
+                                color = tmpcolor;
+                            }
+
                             currentUser.setName(username.getText().toString());
                             currentUser.setDescription(profileDescription.getText().toString());
                             currentUser.setLocation(location.getText().toString());
                             currentUser.setBirthday(birthday.getText().toString());
-                            if (tmpcolor >= 0) {
-                                color = tmpcolor;
-                            }
+                            currentUser.setFavColour(color);
+
                             DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                             Map<String, Object> map = new HashMap<>();
                             map.put("name", currentUser.getName());
@@ -747,15 +753,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
                             }
                             if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
-                                TextDrawable drawable = TextDrawable.builder()
-                                        .beginConfig()
-                                        .bold()
-                                        .endConfig()
-                                        .buildRect(currentUser.getName().substring(0, 1), getResources().getIntArray(R.array.favcolors)[color]);
-                                Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-                                Canvas canvas = new Canvas(bitmap);
-                                drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                                drawable.draw(canvas);
+                                Bitmap bitmap = ImageOperations.generateStandardProfileImage(this, currentUser.getName(), color);
 
                                 byte[] byteArray;
                                 final StorageReference refNewProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + profileImage);
@@ -767,7 +765,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 } catch (IOException ioe) {
                                     ioe.printStackTrace();
                                 }
-                                refNewProfileImage.putBytes(byteArray);
+
+                                refNewProfileImage.putBytes(byteArray).addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        currentUser.setImage(profileImage);
+
+                                        updateNavigationDrawerIcon();
+                                        updateProfileImages();
+                                    }
+                                });
                             }
                             showProfile();
                             alert.cancel();

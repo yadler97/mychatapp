@@ -60,6 +60,10 @@ public class User {
         return favColour;
     }
 
+    public void setFavColour(int favColour) {
+        this.favColour = favColour;
+    }
+
     public boolean getOwnProfileImage() {
         return ownProfileImage;
     }
