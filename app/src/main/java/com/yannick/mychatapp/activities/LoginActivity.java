@@ -467,6 +467,9 @@ public class LoginActivity extends AppCompatActivity {
         final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
         final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
+        final ImageButton removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
+        final ImageButton removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
+
         usernameEdit.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -571,6 +574,41 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
                 profileBannerButton.setForeground(null);
+            }
+
+            return true;
+        });
+
+        removeProfileImage.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeProfileImage.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    image = "";
+                    ownProfileImage = false;
+                    updateEditProfileImages();
+                }
+
+                removeProfileImage.setBackgroundResource(R.drawable.icon_clear);
+            }
+
+            return true;
+        });
+
+        removeProfileBanner.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeProfileBanner.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    banner = "";
+                    updateEditProfileImages();
+                }
+
+                removeProfileBanner.setBackgroundResource(R.drawable.icon_clear);
             }
 
             return true;
@@ -739,9 +777,8 @@ public class LoginActivity extends AppCompatActivity {
             progressDialog.dismiss();
             Toast.makeText(LoginActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(taskSnapshot -> {
-            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                    .getTotalByteCount());
-            progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
+            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+            progressDialog.setMessage((int)progress + "% " + getResources().getString(R.string.uploaded));
         });
     }
 
@@ -750,7 +787,6 @@ public class LoginActivity extends AppCompatActivity {
         refProfileImage.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
-                .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                 .centerCrop()
                 .into(profileImageButton));
 
@@ -758,7 +794,6 @@ public class LoginActivity extends AppCompatActivity {
         refProfileBanner.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
                 //.using(new FirebaseImageLoader())
                 .load(refProfileBanner)
-                .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                 .centerCrop()
                 .thumbnail(0.05f)
                 .into(profileBannerButton));

@@ -228,6 +228,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final TextInputLayout roomPasswordLayout = view.findViewById(R.id.room_password_layout);
         final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
 
+        final ImageButton removeRoomImage = view.findViewById(R.id.room_image_remove);
+
         final Spinner spinner = view.findViewById(R.id.spinner);
         roomImageButton = view.findViewById(R.id.room_image);
 
@@ -326,6 +328,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
                 roomImageButton.setForeground(null);
+            }
+
+            return true;
+        });
+
+        removeRoomImage.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeRoomImage.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    imageRoom = ImageOperations.getStandardRoomImage();
+                    StorageReference refRoomImageStandard = storage.getReference().child(Constants.roomImagesStorageKey + imageRoom);
+                    GlideApp.with(getApplicationContext())
+                            .load(refRoomImageStandard)
+                            .centerCrop()
+                            .into(roomImageButton);
+                }
+
+                removeRoomImage.setBackgroundResource(R.drawable.icon_clear);
             }
 
             return true;
@@ -537,6 +560,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
         final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
+        final ImageButton removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
+        final ImageButton removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
+
         username.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -639,6 +665,74 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
                 profileBannerButton.setForeground(null);
+            }
+
+            return true;
+        });
+
+        removeProfileImage.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeProfileImage.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    String profileImage = UUID.randomUUID().toString();
+                    Bitmap bitmap = ImageOperations.generateStandardProfileImage(this, currentUser.getName(), color);
+
+                    byte[] byteArray;
+                    final StorageReference refNewProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + profileImage);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    byteArray = stream.toByteArray();
+                    try {
+                        stream.close();
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
+
+                    refNewProfileImage.putBytes(byteArray).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            currentUser.setOwnProfileImage(true);
+                            currentUser.setImage(profileImage);
+                            DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("ownProfileImage", true);
+                            map.put("image", profileImage);
+                            currentUserRoot.updateChildren(map);
+
+                            updateEditProfileImages();
+                            updateNavigationDrawerIcon();
+                            updateProfileImages();
+                        }
+                    });
+                }
+
+                removeProfileImage.setBackgroundResource(R.drawable.icon_clear);
+            }
+
+            return true;
+        });
+
+        removeProfileBanner.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeProfileBanner.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    currentUser.setBanner("");
+                    DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("banner", "");
+                    currentUserRoot.updateChildren(map);
+
+                    updateEditProfileImages();
+                    updateNavigationDrawerIcon();
+                    updateProfileImages();
+                }
+
+                removeProfileBanner.setBackgroundResource(R.drawable.icon_clear);
             }
 
             return true;
@@ -1098,11 +1192,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .into(profileImageButton);
 
         StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
-        GlideApp.with(getApplicationContext())
-                .load(refProfileBanner)
-                .centerCrop()
-                .thumbnail(0.05f)
-                .into(profileBannerButton);
+        if (theme == Theme.DARK) {
+            GlideApp.with(getApplicationContext())
+                    //.using(new FirebaseImageLoader())
+                    .load(refProfileBanner)
+                    .placeholder(R.drawable.side_nav_bar_dark)
+                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
+                    .centerCrop()
+                    .thumbnail(0.05f)
+                    .into(profileBannerButton);
+        } else {
+            GlideApp.with(getApplicationContext())
+                    //.using(new FirebaseImageLoader())
+                    .load(refProfileBanner)
+                    .placeholder(R.drawable.side_nav_bar)
+                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
+                    .centerCrop()
+                    .thumbnail(0.05f)
+                    .into(profileBannerButton);
+        }
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -1238,9 +1346,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             progressDialog.dismiss();
             Toast.makeText(MainActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(taskSnapshot -> {
-            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                    .getTotalByteCount());
-            progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
+            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+            progressDialog.setMessage((int)progress + "% " + getResources().getString(R.string.uploaded));
         });
     }
 

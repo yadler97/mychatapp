@@ -883,9 +883,8 @@ public class ChatActivity extends AppCompatActivity {
             progressDialog.dismiss();
             Toast.makeText(ChatActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(taskSnapshot -> {
-            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                    .getTotalByteCount());
-            progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
+            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+            progressDialog.setMessage((int)progress + "% " + getResources().getString(R.string.uploaded));
         });
     }
 
@@ -1941,6 +1940,8 @@ public class ChatActivity extends AppCompatActivity {
         final TextInputLayout roomPasswordLayout = view.findViewById(R.id.room_password_layout);
         final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
 
+        final ImageButton removeRoomImage = view.findViewById(R.id.room_image_remove);
+
         roomNameEditText.setText(room.getName());
         roomDescriptionEditText.setText(room.getDescription());
         roomPasswordEditText.setText(room.getPassword());
@@ -2044,6 +2045,36 @@ public class ChatActivity extends AppCompatActivity {
                 }
 
                 roomImageButton.setForeground(null);
+            }
+
+            return true;
+        });
+
+        removeRoomImage.setOnTouchListener((view1, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeRoomImage.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    String imageRoom = ImageOperations.getStandardRoomImage();
+
+                    DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("image", imageRoom);
+                    messageRoot.updateChildren(map);
+
+                    room.setImage(imageRoom);
+
+                    StorageReference pathReference = storage.getReference().child(Constants.roomImagesStorageKey + imageRoom);
+                    GlideApp.with(getApplicationContext())
+                            .load(pathReference)
+                            .centerCrop()
+                            .thumbnail(0.05f)
+                            .into(roomImageButton);
+                }
+
+                removeRoomImage.setBackgroundResource(R.drawable.icon_clear);
             }
 
             return true;
