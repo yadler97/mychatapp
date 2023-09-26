@@ -1,7 +1,6 @@
 package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -154,12 +153,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
             }
 
             if (r.isMuted()) {
-                viewHolder.muteIcon.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_muted, null));
-                if (Theme.getCurrentTheme(context) == Theme.DARK) {
-                    viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
-                } else {
-                    viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.iconGrey), PorterDuff.Mode.SRC_ATOP);
-                }
+                viewHolder.muteIcon.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.icon_muted, context.getTheme()));
             } else {
                 viewHolder.muteIcon.setImageDrawable(null);
             }
