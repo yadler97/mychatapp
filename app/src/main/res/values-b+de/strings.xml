@@ -174,7 +174,7 @@
     <string name="hint_confirm_password">Passwort wiederholen <font color='#FF0000'>*</font></string>
 
     <string-array name="categories">
-        <item>Kategorie auswählen</item>
+        <item>Kategorie auswählen <font color='#FF0000'>*</font></item>
         <item>Studium &amp; Arbeit</item>
         <item>Videospiele</item>
         <item>Politik</item>

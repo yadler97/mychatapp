@@ -174,7 +174,7 @@
     <string name="hint_confirm_password">Confirm password <font color='#FF0000'>*</font></string>
 
     <string-array name="categories">
-        <item>Select category</item>
+        <item>Select category <font color='#FF0000'>*</font></item>
         <item>Study &amp; Work</item>
         <item>Gaming</item>
         <item>Politics</item>

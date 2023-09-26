@@ -84,6 +84,7 @@
                 android:id="@+id/room_image"
                 android:layout_width="@dimen/room_list_image_size"
                 android:layout_height="@dimen/room_list_image_size"
+                android:src="@color/lightGrey"
                 android:layout_gravity="center_vertical"
                 android:background="?attr/selectableItemBackground"/>
 

@@ -134,6 +134,7 @@
                 android:id="@+id/user_profile_image"
                 android:layout_width="@dimen/room_list_image_size"
                 android:layout_height="@dimen/room_list_image_size"
+                android:src="@color/lightGrey"
                 android:layout_gravity="center_vertical"
                 android:background="?attr/selectableItemBackground"/>
 
@@ -167,6 +168,7 @@
                 android:id="@+id/user_profile_banner"
                 android:layout_width="98dp"
                 android:layout_height="56dp"
+                android:src="@color/lightGrey"
                 android:layout_gravity="center_vertical"
                 android:background="?attr/selectableItemBackground" />
 
