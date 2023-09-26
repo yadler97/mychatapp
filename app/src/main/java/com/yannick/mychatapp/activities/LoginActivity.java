@@ -775,7 +775,7 @@ public class LoginActivity extends AppCompatActivity {
         }).addOnFailureListener(e -> {
             Log.e("Upload failed", e.toString());
             progressDialog.dismiss();
-            Toast.makeText(LoginActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, R.string.image_upload_failed, Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(taskSnapshot -> {
             double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
             progressDialog.setMessage((int)progress + "% " + getResources().getString(R.string.uploaded));

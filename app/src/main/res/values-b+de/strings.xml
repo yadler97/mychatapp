@@ -34,7 +34,7 @@
     <string name="enterroomname">Raumnamen eingeben</string>
     <string name="selectcategory">Kategorie auswählen</string>
     <string name="imageuploaded">Bild hochgeladen</string>
-    <string name="imagetoolarge">Fehlgeschlagen: Bild zu groß</string>
+    <string name="image_upload_failed">Bild hochladen fehlgschlagen</string>
     <string name="copy">Kopieren</string>
     <string name="quote">Zitieren</string>
     <string name="jumptoquotedimage">Zu zitiertem Bild springen</string>

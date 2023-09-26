@@ -67,7 +67,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
 
-import com.bumptech.glide.signature.ObjectKey;
 import com.chrisrenke.giv.GravityImageView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -881,7 +880,7 @@ public class ChatActivity extends AppCompatActivity {
         }).addOnFailureListener(e -> {
             Log.e("Upload failed", e.toString());
             progressDialog.dismiss();
-            Toast.makeText(ChatActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ChatActivity.this, R.string.image_upload_failed, Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(taskSnapshot -> {
             double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
             progressDialog.setMessage((int)progress + "% " + getResources().getString(R.string.uploaded));

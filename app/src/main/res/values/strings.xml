@@ -34,7 +34,7 @@
     <string name="enterroomname">Enter room name</string>
     <string name="selectcategory">Select category</string>
     <string name="imageuploaded">Image uploaded</string>
-    <string name="imagetoolarge">Failed: Image too large</string>
+    <string name="image_upload_failed">Image upload failed</string>
     <string name="copy">Copy</string>
     <string name="quote">Quote</string>
     <string name="jumptoquotedimage">Jump to quoted image</string>

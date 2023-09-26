@@ -11,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -44,14 +43,12 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.view.GravityCompat;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -61,10 +58,7 @@ import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
-import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
 import com.google.android.material.tabs.TabLayout;
@@ -1344,7 +1338,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }).addOnFailureListener(e -> {
             Log.e("Upload failed", e.toString());
             progressDialog.dismiss();
-            Toast.makeText(MainActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, R.string.image_upload_failed, Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(taskSnapshot -> {
             double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
             progressDialog.setMessage((int)progress + "% " + getResources().getString(R.string.uploaded));
