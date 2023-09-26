@@ -459,12 +459,14 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 GlideApp.with(context)
                         .load(pathReference)
                         .onlyRetrieveFromCache(true)
+                        .placeholder(R.color.lightGrey)
                         .centerCrop()
                         .thumbnail(0.05f)
                         .into(holder.image);
             } else {
                 GlideApp.with(context)
                         .load(pathReference)
+                        .placeholder(R.color.lightGrey)
                         .centerCrop()
                         .thumbnail(0.05f)
                         .into(holder.image);
