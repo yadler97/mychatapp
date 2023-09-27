@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
@@ -61,16 +62,16 @@ import at.blogc.android.views.ExpandableTextView;
 import de.hdodenhof.circleimageview.CircleImageView;
 import ru.whalemare.sheetmenu.SheetMenu;
 
-public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHolder> {
+public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder> {
 
     private final List<Message> messageList;
-    private final ArrayList<MyViewHolder> holderList = new ArrayList<>();
+    private final ArrayList<MessageViewHolder> holderList = new ArrayList<>();
     private Context context;
     private FirebaseStorage storage;
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private final FirebaseAuth mAuth;
 
-    public class MyViewHolder extends RecyclerView.ViewHolder{
+    public class MessageViewHolder extends RecyclerView.ViewHolder{
         private final TextView name, message, time, quoteName, quoteMessage;
         private final LinearLayout quoteBox, messageBox;
         private final Button messagebutton;
@@ -80,9 +81,10 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         private int pos;
         private final GestureDetector gestureDetector;
         private final CircleImageView profileImage, quoteProfileImage;
+        private String messageKey;
 
         @SuppressLint("ClickableViewAccessibility")
-        private MyViewHolder(View view) {
+        private MessageViewHolder(View view) {
             super(view);
             name = view.findViewById(R.id.text_message_name);
             message = view.findViewById(R.id.text_message_body);
@@ -119,21 +121,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     if (pos != RecyclerView.NO_POSITION) {
                         int action = event.getActionMasked();
                         if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                            GradientDrawable shape = new GradientDrawable();
-                            shape.setShape(GradientDrawable.RECTANGLE);
-                            float[] corners = new float[]{27, 27, 27, 27, 27, 27, 27, 27};
-                            shape.setCornerRadii(corners);
+                            GradientDrawable shape;
                             if (action == MotionEvent.ACTION_DOWN) {
                                 if (messageList.get(pos).isSender(mAuth.getCurrentUser().getUid())) {
-                                    shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent_clicked));
+                                    shape = getMessageBox(R.color.textbox_sent_clicked);
                                 } else {
-                                    shape.setColor(ContextCompat.getColor(context, R.color.textbox_received_clicked));
+                                    shape = getMessageBox(R.color.textbox_received_clicked);
                                 }
                             } else {
                                 if (messageList.get(pos).isSender(mAuth.getCurrentUser().getUid())) {
-                                    shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent));
+                                    shape = getMessageBox(R.color.textbox_sent);
                                 } else {
-                                    shape.setColor(ContextCompat.getColor(context, R.color.textbox_received));
+                                    shape = getMessageBox(R.color.textbox_received);
                                 }
                             }
 
@@ -164,28 +163,18 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     if (pos != RecyclerView.NO_POSITION) {
                         int action = event.getActionMasked();
                         if (action == MotionEvent.ACTION_DOWN) {
-                            GradientDrawable shape = new GradientDrawable();
-                            shape.setShape(GradientDrawable.RECTANGLE);
-                            float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
-                            shape.setCornerRadii(corners);
                             if (messageList.get(pos).isSender(mAuth.getCurrentUser().getUid())) {
-                                shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent_clicked));
+                                messageBox.setBackground(getMessageBox(R.color.textbox_sent_clicked));
                             } else {
-                                shape.setColor(ContextCompat.getColor(context, R.color.textbox_received_clicked));
+                                messageBox.setBackground(getMessageBox(R.color.textbox_received_clicked));
                             }
-                            messageBox.setBackground(shape);
                         }
                         if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-                            GradientDrawable shape = new GradientDrawable();
-                            shape.setShape(GradientDrawable.RECTANGLE);
-                            float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
-                            shape.setCornerRadii(corners);
                             if (messageList.get(pos).isSender(mAuth.getCurrentUser().getUid())) {
-                                shape.setColor(ContextCompat.getColor(context, R.color.textbox_sent));
+                                messageBox.setBackground(getMessageBox(R.color.textbox_sent));
                             } else {
-                                shape.setColor(ContextCompat.getColor(context, R.color.textbox_received));
+                                messageBox.setBackground(getMessageBox(R.color.textbox_received));
                             }
-                            messageBox.setBackground(shape);
                         }
                         return gestureDetector.onTouchEvent(event);
                     }
@@ -255,6 +244,16 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                 Intent intent = new Intent("quotedMessage");
                 intent.putExtra("quoteID", message.getQuotedMessage().getKey());
                 LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                final Handler handler = new Handler();
+                handler.postDelayed(() -> {
+                    for (MessageViewHolder m : holderList) {
+                        if (m.messageKey.equals(message.getQuotedMessage().getKey())) {
+                            m.image.setForeground(ResourcesCompat.getDrawable(context.getResources(), R.drawable.image_overlay, null));
+                            handler.postDelayed(() -> m.image.setForeground(null), 1000);
+                            break;
+                        }
+                    }
+                }, 100);
             } else if (item.getItemId() == R.id.quote) {
                 Intent intent = new Intent("quote");
                 intent.putExtra("quoteID", message.getKey());
@@ -353,9 +352,34 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
                     intent.putExtra("image", clickedDataItem.getQuotedMessage().getText());
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
                 } else if (Message.isQuote(type)) {
+                    String quotedMessageKey = clickedDataItem.getQuotedMessage().getKey();
                     Intent intent = new Intent("quotedMessage");
-                    intent.putExtra("quoteID", clickedDataItem.getQuotedMessage().getKey());
+                    intent.putExtra("quoteID", quotedMessageKey);
                     LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
+                    final Handler handler = new Handler();
+                    handler.postDelayed(() -> {
+                        for (MessageViewHolder m : holderList) {
+                            if (m.messageKey.equals(quotedMessageKey)) {
+                                Message quotedMessage = messageList.stream().filter(message -> message.getKey().equals(quotedMessageKey)).findFirst().orElse(null);
+                                if (quotedMessage != null) {
+                                    if (quotedMessage.isSender(mAuth.getCurrentUser().getUid())) {
+                                        m.message.setBackground(getMessageBox(R.color.textbox_sent_clicked));
+                                    } else {
+                                        m.message.setBackground(getMessageBox(R.color.textbox_received_clicked));
+                                    }
+                                    handler.postDelayed(() -> {
+                                        if (quotedMessage.isSender(mAuth.getCurrentUser().getUid())) {
+                                            m.message.setBackground(getMessageBox(R.color.textbox_sent));
+                                        } else {
+                                            m.message.setBackground(getMessageBox(R.color.textbox_received));
+                                        }
+                                    }, 1000);
+                                }
+
+                                break;
+                            }
+                        }
+                    }, 100);
                 }
             }
         }
@@ -392,17 +416,19 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
     }
 
     @Override
-    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MessageViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         context = parent.getContext();
         int layout = context.getResources().obtainTypedArray(R.array.messageLayouts).getResourceId(viewType, -1);
         View itemView = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
-        return new MyViewHolder(itemView);
+        MessageViewHolder holder = new MessageViewHolder(itemView);
+        holderList.add(holder);
+        return holder;
     }
 
     @Override
-    public void onBindViewHolder(final MyViewHolder holder, int position) {
-        holderList.add(holder);
+    public void onBindViewHolder(final MessageViewHolder holder, int position) {
         Message m = messageList.get(position);
+        holder.messageKey = m.getKey();
         Message.Type type = m.getType();
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.RECTANGLE);
@@ -553,6 +579,15 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MyViewHo
         if (messageList.size() > position + 1 && Message.isConMessage(messageList.get(position + 1).getType())) {
             holder.time.setText("");
         }
+    }
+
+    private GradientDrawable getMessageBox(int color) {
+        GradientDrawable shape = new GradientDrawable();
+        shape.setShape(GradientDrawable.RECTANGLE);
+        float[] corners = new float[] { 27, 27, 27, 27, 27, 27, 27, 27 };
+        shape.setCornerRadii(corners);
+        shape.setColor(ContextCompat.getColor(context, color));
+        return shape;
     }
 
     @Override
