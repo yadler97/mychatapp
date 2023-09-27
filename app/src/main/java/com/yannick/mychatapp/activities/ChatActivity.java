@@ -1557,7 +1557,7 @@ public class ChatActivity extends AppCompatActivity {
 
         recyclerView.scrollToPosition(messageList.size() - 1);
 
-        if (imageListAlert.isShowing()) {
+        if (imageListAlert != null && imageListAlert.isShowing()) {
             imageListAlert.dismiss();
             openImageList();
         }
