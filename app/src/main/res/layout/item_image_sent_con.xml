@@ -12,7 +12,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:maxWidth="@dimen/message_image_max_width"
-        android:padding="8dp"
         android:layout_marginRight="8dp"
         app:cardCornerRadius="10dp"
         app:layout_constraintRight_toRightOf="parent"

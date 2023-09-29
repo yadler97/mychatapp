@@ -22,13 +22,11 @@
             android:textStyle="italic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="@dimen/message_text_padding"
             android:maxWidth="@dimen/message_max_width"
             android:gravity="center"
             android:textColor="@color/white"
-            android:layout_marginBottom="4dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginLeft="8dp" />
+            android:layout_marginBottom="4dp" />
 
         <View
             android:layout_width="match_parent"
@@ -40,7 +38,7 @@
             android:id="@+id/text_message_body"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="8dp"
+            android:padding="@dimen/message_text_padding"
             android:maxWidth="@dimen/message_max_width"
             android:autoLink="all"
             android:textColorLink="@color/white"
