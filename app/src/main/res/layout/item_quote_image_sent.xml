@@ -12,7 +12,7 @@
         android:id="@+id/quotebox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="240dp"
+        android:maxWidth="@dimen/message_max_width"
         android:layout_marginTop="4dp"
         android:layout_marginRight="8dp"
         android:orientation="vertical"
@@ -42,7 +42,7 @@
                     android:textStyle="bold"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="208dp"
+                    android:maxWidth="@dimen/message_max_width_quote"
                     android:textColor="@color/white"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp" />
@@ -74,10 +74,10 @@
 
         <TextView
             android:id="@+id/text_message_body"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:maxWidth="216dp"
+            android:maxWidth="@dimen/message_max_width"
             android:autoLink="all"
             android:textColorLink="@color/white"
             android:textColor="@color/white" />

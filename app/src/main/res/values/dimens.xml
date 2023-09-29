@@ -13,7 +13,9 @@
     <dimen name="message_text_padding">8dp</dimen>
     <dimen name="message_time_margin">4dp</dimen>
     <dimen name="message_max_width">240dp</dimen>
+    <dimen name="message_max_width_quote">182dp</dimen>
     <dimen name="message_max_width_land">480dp</dimen>
+    <dimen name="message_max_width_land_quote">422dp</dimen>
 
     <dimen name="message_image_max_width">240dp</dimen>
     <dimen name="message_image_max_height">180dp</dimen>

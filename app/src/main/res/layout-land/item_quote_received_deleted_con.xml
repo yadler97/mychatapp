@@ -11,31 +11,24 @@
         android:id="@+id/quotebox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="480dp"
+        android:maxWidth="@dimen/message_max_width_land"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginLeft="48dp" >
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/quote_message"
+            android:textStyle="italic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:padding="4dp"
-            android:orientation="vertical" >
-
-            <TextView
-                android:id="@+id/quote_message"
-                android:textStyle="italic"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:maxWidth="456dp"
-                android:gravity="center"
-                android:textColor="@color/white"
-                android:layout_marginBottom="4dp"
-                android:layout_marginRight="8dp"
-                android:layout_marginLeft="8dp"/>
-
-        </LinearLayout>
+            android:padding="8dp"
+            android:maxWidth="@dimen/message_max_width_land"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:layout_marginBottom="4dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="8dp" />
 
         <View
             android:layout_width="match_parent"
@@ -48,7 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:maxWidth="456dp"
+            android:maxWidth="@dimen/message_max_width_land"
             android:autoLink="all"
             android:textColorLink="@color/white"
             android:textColor="@color/white" />

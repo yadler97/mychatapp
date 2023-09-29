@@ -12,7 +12,7 @@
         android:id="@+id/quotebox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="480dp"
+        android:maxWidth="@dimen/message_max_width_land"
         android:layout_marginTop="4dp"
         android:layout_marginRight="8dp"
         android:orientation="vertical"
@@ -42,7 +42,7 @@
                     android:textStyle="bold"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="448dp"
+                    android:maxWidth="@dimen/message_max_width_land_quote"
                     android:textColor="@color/white"
                     android:layout_marginTop="4dp" />
 
@@ -51,7 +51,7 @@
                     android:textStyle="italic"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:maxWidth="456dp"
+                    android:maxWidth="@dimen/message_max_width_land_quote"
                     android:maxLines="3"
                     android:minLines="1"
                     android:ellipsize="end"
@@ -71,10 +71,10 @@
 
         <TextView
             android:id="@+id/text_message_body"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:maxWidth="456dp"
+            android:maxWidth="@dimen/message_max_width_land"
             android:autoLink="all"
             android:textColorLink="@color/white"
             android:textColor="@color/white" />
