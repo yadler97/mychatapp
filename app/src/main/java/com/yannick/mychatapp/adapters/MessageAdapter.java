@@ -547,7 +547,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 StorageReference pathReference = storage.getReference().child(Constants.profileImagesStorageKey + imageURL);
 
                 GlideApp.with(context)
-                        //.using(new FirebaseImageLoader())
                         .load(pathReference)
                         .centerCrop()
                         .thumbnail(0.05f)
@@ -560,7 +559,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
                 StorageReference pathReference = storage.getReference().child(Constants.imagesStorageKey + imageURL);
 
                 GlideApp.with(context)
-                        //.using(new FirebaseImageLoader())
                         .load(pathReference)
                         .centerCrop()
                         .thumbnail(0.05f)

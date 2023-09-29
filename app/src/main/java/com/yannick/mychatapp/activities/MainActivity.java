@@ -518,7 +518,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImage());
         GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
                 .centerCrop()
                 .into(profileImage);
@@ -603,14 +602,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
 
         GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
                 .centerCrop()
                 .into(profileImageButton);
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -618,7 +615,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .into(profileBannerButton);
         } else {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -1188,7 +1184,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -1197,7 +1192,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .into(profileBannerButton);
         } else {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))

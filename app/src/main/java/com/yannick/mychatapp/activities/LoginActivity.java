@@ -518,14 +518,12 @@ public class LoginActivity extends AppCompatActivity {
         birthdayEdit.setText(Constants.DEFAULT_BIRTHDAY);
 
         GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
                 .centerCrop()
                 .into(profileImageButton);
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -533,7 +531,6 @@ public class LoginActivity extends AppCompatActivity {
                     .into(profileBannerButton);
         } else {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -785,14 +782,12 @@ public class LoginActivity extends AppCompatActivity {
     private void updateEditProfileImages() {
         StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
         refProfileImage.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
                 .centerCrop()
                 .into(profileImageButton));
 
         StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
         refProfileBanner.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refProfileBanner)
                 .centerCrop()
                 .thumbnail(0.05f)

@@ -1366,7 +1366,6 @@ public class ChatActivity extends AppCompatActivity {
 
         final StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImage());
         GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refRoomImage)
                 .centerCrop()
                 .into(roomImage);

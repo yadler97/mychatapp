@@ -72,7 +72,6 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
             StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 
             GlideApp.with(context)
-                    //.using(new FirebaseImageLoader())
                     .load(pathReference)
                     .centerCrop()
                     .thumbnail(0.05f)
