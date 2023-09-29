@@ -1,15 +1,12 @@
 package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
-
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.R;
@@ -21,7 +18,7 @@ import java.util.ArrayList;
 public class BackgroundAdapter extends BaseAdapter {
     private final Context context;
     private final TypedArray imageList;
-    private final Background selected;
+    private Background selected;
     private final Theme theme;
     private final ArrayList<SquareImageView> viewList = new ArrayList<>();
 
@@ -48,45 +45,29 @@ public class BackgroundAdapter extends BaseAdapter {
         final SquareImageView imageView = new SquareImageView(this.context);
         imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-        if (position == 0) {
+        imageView.setBorderWidth((float) 6);
+        imageView.setCornerRadius((float) 10);
+
+        if (selected == Background.getByPosition(position)) {
             if (theme == Theme.DARK) {
                 imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
             } else {
                 imageView.setBorderColor(context.getResources().getColor(R.color.red));
             }
-            imageView.setBorderWidth((float)8);
         } else {
-            imageView.setBorderWidth((float)2);
             imageView.setBorderColor(context.getResources().getColor(R.color.grey));
         }
 
-        if (selected == Background.getByPosition(position) && position != 0) {
-            for (SquareImageView v : viewList) {
-                v.setBorderColor(context.getResources().getColor(R.color.grey));
-                v.setBorderWidth((float)2);
-            }
-            if (theme == Theme.DARK) {
-                imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
-            } else {
-                imageView.setBorderColor(context.getResources().getColor(R.color.red));
-            }
-            imageView.setBorderWidth((float)8);
-        }
-
         imageView.setOnClickListener(view -> {
+            selected = Background.getByPosition(position);
             for (SquareImageView v : viewList) {
                 v.setBorderColor(context.getResources().getColor(R.color.grey));
-                v.setBorderWidth((float)2);
             }
             if (theme == Theme.DARK) {
                 imageView.setBorderColor(context.getResources().getColor(R.color.dark_button));
             } else {
                 imageView.setBorderColor(context.getResources().getColor(R.color.red));
             }
-            imageView.setBorderWidth((float)8);
-            Intent intent = new Intent("backgroundOption");
-            intent.putExtra("position", position);
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
         });
 
         if (position == 0) {
@@ -103,5 +84,9 @@ public class BackgroundAdapter extends BaseAdapter {
         viewList.add(imageView);
 
         return imageView;
+    }
+
+    public Background getSelected() {
+        return selected;
     }
 }

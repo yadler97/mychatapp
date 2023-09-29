@@ -114,10 +114,7 @@ import hakobastvatsatryan.DropdownTextView;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
     private String imageRoom;
-
     private Theme theme;
-
-    private Background background;
     private User currentUser;
     private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsDatabaseKey);
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
@@ -177,8 +174,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mAuth = FirebaseAuth.getInstance();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(tabReceiver, new IntentFilter("tab"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(themeReceiver, new IntentFilter("themeOption"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(backgroundReceiver, new IntentFilter("backgroundOption"));
         LocalBroadcastManager.getInstance(this).registerReceiver(closeFullscreenReceiver, new IntentFilter("closefullscreen"));
 
         fileOperations.writeToFile("0", FileOperations.currentRoomFile);
@@ -884,10 +879,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Background currentBackground = Background.getCurrentBackground(getApplicationContext());
 
         GridView themeGrid = view.findViewById(R.id.gridview_themes);
-        themeGrid.setAdapter(new ThemeAdapter(this, getResources().obtainTypedArray(R.array.themeDrawables), currentTheme, theme));
+        ThemeAdapter themeAdapter = new ThemeAdapter(this, getResources().obtainTypedArray(R.array.themeDrawables), currentTheme, theme);
+        themeGrid.setAdapter(themeAdapter);
 
         GridView backgroundGrid = view.findViewById(R.id.gridview_backgrounds);
-        backgroundGrid.setAdapter(new BackgroundAdapter(this, getResources().obtainTypedArray(R.array.backgroundDrawables), currentBackground, theme));
+        BackgroundAdapter backgroundAdapter = new BackgroundAdapter(this, getResources().obtainTypedArray(R.array.backgroundDrawables), currentBackground, theme);
+        backgroundGrid.setAdapter(backgroundAdapter);
 
         AlertDialog.Builder builder;
         if (this.theme == Theme.DARK) {
@@ -902,11 +899,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.cancel());
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
-
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
             b.setOnClickListener(view1 -> {
+                theme = themeAdapter.getSelected();
                 Theme.setTheme(getApplicationContext(), theme);
-                Background.setBackground(getApplicationContext(), background);
+                Background.setBackground(getApplicationContext(), backgroundAdapter.getSelected());
                 if (currentTheme != theme) {
                     FragmentManager mFragmentManager = getSupportFragmentManager();
                     mFragmentManager.beginTransaction().remove(rFragMore).commit();
@@ -1231,24 +1228,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onReceive(Context context, Intent intent) {
             TabLayout.Tab tab = tabLayout.getTabAt(0);
             tab.select();
-        }
-    };
-
-    public BroadcastReceiver themeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int position = intent.getIntExtra("position", 0);
-
-            theme = Theme.getByPosition(position);
-        }
-    };
-
-    public BroadcastReceiver backgroundReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int position = intent.getIntExtra("position", 0);
-
-            background = Background.getByPosition(position);
         }
     };
 
