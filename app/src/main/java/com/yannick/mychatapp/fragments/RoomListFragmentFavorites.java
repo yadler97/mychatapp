@@ -97,8 +97,8 @@ public class RoomListFragmentFavorites extends Fragment {
             }
         });
 
-        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-            int position = listView.getPositionForView(view1);
+        listView.setOnItemClickListener((adapterView, layoutView, i, l) -> {
+            int position = listView.getPositionForView(layoutView);
             Room room = roomList.get(position);
             requestPassword(room);
         });

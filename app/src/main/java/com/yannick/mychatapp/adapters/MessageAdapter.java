@@ -107,7 +107,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
 
             theme = Theme.getCurrentTheme(context);
 
-            view.setOnTouchListener((view14, event) -> {
+            view.setOnTouchListener((messageView, event) -> {
                 pos = getAdapterPosition();
                 if (pos != RecyclerView.NO_POSITION) {
                     return gestureDetector.onTouchEvent(event);
@@ -116,7 +116,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             });
 
             if (message != null) {
-                message.setOnTouchListener((view13, event) -> {
+                message.setOnTouchListener((messageView, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         int action = event.getActionMasked();
@@ -158,7 +158,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
 
             if (messageExpandable != null) {
-                messageExpandable.setOnTouchListener((view12, event) -> {
+                messageExpandable.setOnTouchListener((expandableView, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         int action = event.getActionMasked();
@@ -183,7 +183,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
 
             if (image != null) {
-                image.setOnTouchListener((view1, event) -> {
+                image.setOnTouchListener((imageView, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         int action = event.getActionMasked();
@@ -200,7 +200,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageV
             }
 
             if (profileImage != null) {
-                profileImage.setOnTouchListener((view1, event) -> {
+                profileImage.setOnTouchListener((profileImageView, event) -> {
                     pos = getAdapterPosition();
                     if (pos != RecyclerView.NO_POSITION) {
                         int action = event.getActionMasked();

@@ -1690,8 +1690,8 @@ public class ChatActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.cancel, null);
         final AlertDialog alert = builder.create();
         alert.show();
-        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-            int position = listView.getPositionForView(view1);
+        listView.setOnItemClickListener((adapterView, layoutView, i, l) -> {
+            int position = listView.getPositionForView(layoutView);
             String roomKey = roomList.get(position).getKey();
             Message fMessage = new Message();
             for (Message m : messageList) {
@@ -1789,7 +1789,7 @@ public class ChatActivity extends AppCompatActivity {
             View view = inflater.inflate(R.layout.image_list, null);
             GridView imageGrid = view.findViewById(R.id.gridview);
             imageGrid.setAdapter(new ImageAdapter(this, imageList));
-            imageGrid.setOnItemClickListener((adapterView, view1, i, l) -> showFullscreenImage(imageList.get(i), Image.MESSAGE_IMAGE));
+            imageGrid.setOnItemClickListener((adapterView, layoutView, i, l) -> showFullscreenImage(imageList.get(i), Image.MESSAGE_IMAGE));
             AlertDialog.Builder builder;
             if (theme == Theme.DARK) {
                 builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
@@ -1975,7 +1975,7 @@ public class ChatActivity extends AppCompatActivity {
                 .centerCrop()
                 .into(roomImageButton);
 
-        roomImageButton.setOnTouchListener((view1, event) -> {
+        roomImageButton.setOnTouchListener((roomImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 roomImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
@@ -1994,7 +1994,7 @@ public class ChatActivity extends AppCompatActivity {
             return true;
         });
 
-        removeRoomImage.setOnTouchListener((view1, event) -> {
+        removeRoomImage.setOnTouchListener((removeImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 removeRoomImage.setBackgroundResource(R.drawable.icon_clear_pressed);
@@ -2035,10 +2035,10 @@ public class ChatActivity extends AppCompatActivity {
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
             openInfo();
@@ -2046,7 +2046,7 @@ public class ChatActivity extends AppCompatActivity {
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 final String roomName = roomNameEditText.getText().toString().trim();
                 final String roomPassword = roomPasswordEditText.getText().toString().trim();
                 final String roomPasswordRepeat = roomPasswordRepeatEditText.getText().toString().trim();
@@ -2056,9 +2056,9 @@ public class ChatActivity extends AppCompatActivity {
                         if (!roomPassword.isEmpty()) {
                             if (!roomPasswordRepeat.isEmpty()) {
                                 if (roomPassword.equals(roomPasswordRepeat)) {
-                                    if (view12 != null) {
+                                    if (buttonView != null) {
                                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                        imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                                        imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                                     }
                                     DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
                                     Map<String, Object> map = new HashMap<>();
@@ -2113,7 +2113,7 @@ public class ChatActivity extends AppCompatActivity {
         AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().getUid().equals(room.getAdmin())) {
                     roomRoot.child(roomKey).removeValue((error, ref) -> {
                         Intent homeIntent = new Intent(ChatActivity.this, MainActivity.class);

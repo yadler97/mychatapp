@@ -249,7 +249,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .centerCrop()
                 .into(roomImageButton);
 
-        roomImageButton.setOnTouchListener((view1, event) -> {
+        roomImageButton.setOnTouchListener((roomImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 roomImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
@@ -268,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         });
 
-        removeRoomImage.setOnTouchListener((view1, event) -> {
+        removeRoomImage.setOnTouchListener((removeImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 removeRoomImage.setBackgroundResource(R.drawable.icon_clear_pressed);
@@ -300,17 +300,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 final String roomName = roomNameEditText.getText().toString().trim();
                 final String roomPassword = roomPasswordEditText.getText().toString().trim();
                 final String roomPasswordRepeat = roomPasswordRepeatEditText.getText().toString().trim();
@@ -320,9 +320,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (!roomPassword.isEmpty()) {
                             if (!roomPasswordRepeat.isEmpty()) {
                                 if (roomPassword.equals(roomPasswordRepeat)) {
-                                    if (view12 != null) {
+                                    if (buttonView != null) {
                                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                        imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                                        imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                                     }
                                     if (!searchView.isIconified()) {
                                         searchView.setIconified(true);
@@ -528,7 +528,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .into(profileBannerButton);
         }
 
-        profileImageButton.setOnTouchListener((view1, event) -> {
+        profileImageButton.setOnTouchListener((profileImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 profileImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
@@ -547,7 +547,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         });
 
-        profileBannerButton.setOnTouchListener((view1, event) -> {
+        profileBannerButton.setOnTouchListener((profileBannerView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 profileBannerButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay, null));
@@ -566,7 +566,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         });
 
-        removeProfileImage.setOnTouchListener((view1, event) -> {
+        removeProfileImage.setOnTouchListener((removeImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 removeProfileImage.setBackgroundResource(R.drawable.icon_clear_pressed);
@@ -610,7 +610,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             return true;
         });
 
-        removeProfileBanner.setOnTouchListener((view1, event) -> {
+        removeProfileBanner.setOnTouchListener((removeImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 removeProfileBanner.setBackgroundResource(R.drawable.icon_clear_pressed);
@@ -645,8 +645,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         AtomicReference<String> selectedBirthday = new AtomicReference<>(currentUser.getBirthday());
 
-        birthday.setOnClickListener(view15 -> {
-            DatePickerDialog datePicker = new DatePickerDialog(view15.getContext(), (view14, year, monthOfYear, dayOfMonth) -> {
+        birthday.setOnClickListener(birthdayEditView -> {
+            DatePickerDialog datePicker = new DatePickerDialog(birthdayEditView.getContext(), (datePickerView, year, monthOfYear, dayOfMonth) -> {
                 String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
                 selectedBirthday.set(date);
                 birthday.setText(date);
@@ -658,7 +658,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             datePicker.show();
         });
 
-        favColour.setOnClickListener(view13 -> {
+        favColour.setOnClickListener(favColourEditView -> {
             SpectrumDialog.Builder builder;
             if (theme == Theme.DARK) {
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
@@ -697,10 +697,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view12 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view12 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
             showProfile();
@@ -708,7 +708,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view1 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!username.getText().toString().isEmpty()) {
                     if (!location.getText().toString().isEmpty()) {
                         if (!birthday.getText().toString().isEmpty()) {
@@ -738,9 +738,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             currentUserRoot.updateChildren(map);
                             profileNameText.setText(currentUser.getName());
                             Toast.makeText(getApplicationContext(), R.string.profileedited, Toast.LENGTH_SHORT).show();
-                            if (view1 != null) {
+                            if (buttonView != null) {
                                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                                imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                             }
                             if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
                                 Bitmap bitmap = ImageOperations.generateStandardProfileImage(this, currentUser.getName(), color);
@@ -811,7 +811,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view1 -> {
+            b.setOnClickListener(buttonView -> {
                 theme = themeAdapter.getSelected();
                 Theme.setTheme(getApplicationContext(), theme);
                 Background.setBackground(getApplicationContext(), backgroundAdapter.getSelected());
@@ -851,7 +851,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         preview.setChecked(settingPreviewImages);
         camera.setChecked(settingStoreCameraPictures);
 
-        deleteAccount.setOnClickListener(view1 -> showPasswordRequest());
+        deleteAccount.setOnClickListener(buttonView -> showPasswordRequest());
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -898,10 +898,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
 
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
@@ -909,16 +909,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!passwordEdit.getText().toString().isEmpty()) {
                     AuthCredential credential = EmailAuthProvider.getCredential(mAuth.getCurrentUser().getEmail(), passwordEdit.getText().toString());
                     mAuth.getCurrentUser().reauthenticate(credential).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             deleteAccount();
 
-                            if (view12 != null) {
+                            if (buttonView != null) {
                                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                                imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                             }
 
                             alert.cancel();

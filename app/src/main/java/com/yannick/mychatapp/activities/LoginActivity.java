@@ -162,7 +162,7 @@ public class LoginActivity extends AppCompatActivity {
 
         final AlertDialog alert = builder.create();
 
-        resendEmailButton.setOnClickListener(view1 -> {
+        resendEmailButton.setOnClickListener(buttonView -> {
             resendEmail();
             alert.cancel();
         });
@@ -192,10 +192,10 @@ public class LoginActivity extends AppCompatActivity {
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
@@ -203,7 +203,7 @@ public class LoginActivity extends AppCompatActivity {
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!email.getText().toString().isEmpty()) {
                     if (Patterns.EMAIL_ADDRESS.matcher(email.getText()).matches()) {
                         mAuth.sendPasswordResetEmail(email.getText().toString()).addOnCompleteListener(task -> {
@@ -257,10 +257,10 @@ public class LoginActivity extends AppCompatActivity {
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
@@ -268,7 +268,7 @@ public class LoginActivity extends AppCompatActivity {
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!email.getText().toString().isEmpty()) {
                     if (Patterns.EMAIL_ADDRESS.matcher(email.getText()).matches()) {
                         if (!password.getText().toString().trim().isEmpty()) {
@@ -399,7 +399,7 @@ public class LoginActivity extends AppCompatActivity {
                     .into(profileBannerButton);
         }
 
-        profileImageButton.setOnTouchListener((view1, event) -> {
+        profileImageButton.setOnTouchListener((profileImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 profileImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
@@ -418,7 +418,7 @@ public class LoginActivity extends AppCompatActivity {
             return true;
         });
 
-        profileBannerButton.setOnTouchListener((view1, event) -> {
+        profileBannerButton.setOnTouchListener((profileBannerView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 profileBannerButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay, null));
@@ -437,7 +437,7 @@ public class LoginActivity extends AppCompatActivity {
             return true;
         });
 
-        removeProfileImage.setOnTouchListener((view1, event) -> {
+        removeProfileImage.setOnTouchListener((removeImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 removeProfileImage.setBackgroundResource(R.drawable.icon_clear_pressed);
@@ -455,7 +455,7 @@ public class LoginActivity extends AppCompatActivity {
             return true;
         });
 
-        removeProfileBanner.setOnTouchListener((view1, event) -> {
+        removeProfileBanner.setOnTouchListener((removeImageView, event) -> {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
                 removeProfileBanner.setBackgroundResource(R.drawable.icon_clear_pressed);
@@ -479,8 +479,8 @@ public class LoginActivity extends AppCompatActivity {
 
         AtomicReference<String> selectedBirthday = new AtomicReference<>(Constants.DEFAULT_BIRTHDAY);
 
-        birthdayEdit.setOnClickListener(view14 -> {
-            DatePickerDialog datePicker = new DatePickerDialog(view14.getContext(), (view141, year, monthOfYear, dayOfMonth) -> {
+        birthdayEdit.setOnClickListener(birthdayEditView -> {
+            DatePickerDialog datePicker = new DatePickerDialog(birthdayEditView.getContext(), (datePickerView, year, monthOfYear, dayOfMonth) -> {
                 String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
                 selectedBirthday.set(date);
                 birthdayEdit.setText(date);
@@ -492,7 +492,7 @@ public class LoginActivity extends AppCompatActivity {
             datePicker.show();
         });
 
-        favColour.setOnClickListener(view13 -> {
+        favColour.setOnClickListener(favColourEditView -> {
             SpectrumDialog.Builder builder;
             if (theme == Theme.DARK) {
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
@@ -529,19 +529,18 @@ public class LoginActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
 
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
 
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
-
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!usernameEdit.getText().toString().isEmpty()) {
                     if (!locationEdit.getText().toString().isEmpty()) {
                         if (!birthdayEdit.getText().toString().isEmpty()) {
@@ -552,9 +551,9 @@ public class LoginActivity extends AppCompatActivity {
 
                             createAccountAuth(email, password, username, description, location, birthday);
 
-                            if (view12 != null) {
+                            if (buttonView != null) {
                                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                                imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                             }
 
                             alert.cancel();

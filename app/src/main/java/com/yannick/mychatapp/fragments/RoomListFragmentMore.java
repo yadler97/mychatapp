@@ -103,8 +103,8 @@ public class RoomListFragmentMore extends Fragment {
             }
         });
 
-        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-            int position = listView.getPositionForView(view1);
+        listView.setOnItemClickListener((adapterView, layoutView, i, l) -> {
+            int position = listView.getPositionForView(layoutView);
             Room room = roomList.get(position);
             requestPassword(room, position);
         });
@@ -177,10 +177,10 @@ public class RoomListFragmentMore extends Fragment {
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
@@ -189,7 +189,7 @@ public class RoomListFragmentMore extends Fragment {
         alert.setOnShowListener(dialogInterface -> {
 
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!inputPassword.getText().toString().isEmpty()) {
                     if (inputPassword.getText().toString().trim().equals(room.getPassword())) {
                         String roomKey = room.getKey();
