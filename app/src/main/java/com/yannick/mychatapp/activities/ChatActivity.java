@@ -22,10 +22,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.GestureDetector;
@@ -84,6 +82,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.StringOperations;
+import com.yannick.mychatapp.TextWatcher;
 import com.yannick.mychatapp.adapters.ForwardMessageAdapter;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.BuildConfig;
@@ -1966,62 +1965,9 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        roomNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomNameLayout.setError(null);
-                }
-            }
-        });
-
-        roomPasswordEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomPasswordLayout.setError(null);
-                }
-            }
-        });
-
-        roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomPasswordRepeatLayout.setError(null);
-                }
-            }
-        });
+        roomNameEditText.addTextChangedListener(new TextWatcher(roomNameLayout));
+        roomPasswordEditText.addTextChangedListener(new TextWatcher(roomPasswordLayout));
+        roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher(roomPasswordRepeatLayout));
 
         final StorageReference refImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImage());
         GlideApp.with(getApplicationContext())

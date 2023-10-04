@@ -12,8 +12,6 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.ContextThemeWrapper;
@@ -50,6 +48,7 @@ import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.ImageOperations;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.StringOperations;
+import com.yannick.mychatapp.TextWatcher;
 import com.yannick.mychatapp.data.Theme;
 
 import java.io.ByteArrayOutputStream;
@@ -94,43 +93,8 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         storage = FirebaseStorage.getInstance();
 
-        inputEmail.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    inputEmailLayout.setError(null);
-                }
-            }
-        });
-
-        inputPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    inputPasswordLayout.setError(null);
-                }
-            }
-        });
+        inputEmail.addTextChangedListener(new TextWatcher(inputEmailLayout));
+        inputPassword.addTextChangedListener(new TextWatcher(inputPasswordLayout));
 
         loginButton.setOnClickListener(view -> {
             String email = inputEmail.getText().toString().trim();
@@ -214,24 +178,7 @@ public class LoginActivity extends AppCompatActivity {
         final TextView email = view.findViewById(R.id.account_email);
         final TextInputLayout emailLayout = view.findViewById(R.id.account_email_layout);
 
-        email.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    emailLayout.setError(null);
-                }
-            }
-        });
+        email.addTextChangedListener(new TextWatcher(emailLayout));
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -290,60 +237,9 @@ public class LoginActivity extends AppCompatActivity {
         final TextInputLayout passwordLayout = view.findViewById(R.id.account_password_layout);
         final TextInputLayout passwordRepeatLayout = view.findViewById(R.id.account_password_repeat_layout);
 
-        email.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    emailLayout.setError(null);
-                }
-            }
-        });
-        password.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    passwordLayout.setError(null);
-                }
-            }
-        });
-        passwordRepeat.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    passwordRepeatLayout.setError(null);
-                }
-            }
-        });
+        email.addTextChangedListener(new TextWatcher(emailLayout));
+        password.addTextChangedListener(new TextWatcher(passwordLayout));
+        passwordRepeat.addTextChangedListener(new TextWatcher(passwordRepeatLayout));
 
         image = "";
         banner = "";
@@ -470,43 +366,8 @@ public class LoginActivity extends AppCompatActivity {
         final ImageButton removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
         final ImageButton removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
 
-        usernameEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    usernameLayout.setError(null);
-                }
-            }
-        });
-
-        locationEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    locationLayout.setError(null);
-                }
-            }
-        });
+        usernameEdit.addTextChangedListener(new TextWatcher(usernameLayout));
+        locationEdit.addTextChangedListener(new TextWatcher(locationLayout));
 
         final ImageButton favColour = view.findViewById(R.id.user_favcolor);
         profileImageButton = view.findViewById(R.id.user_profile_image);

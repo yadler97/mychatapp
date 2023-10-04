@@ -18,8 +18,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -78,6 +76,7 @@ import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.StringOperations;
+import com.yannick.mychatapp.TextWatcher;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.adapters.BackgroundAdapter;
 import com.yannick.mychatapp.BuildConfig;
@@ -240,62 +239,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        roomNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomNameLayout.setError(null);
-                }
-            }
-        });
-
-        roomPasswordEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomPasswordLayout.setError(null);
-                }
-            }
-        });
-
-        roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomPasswordRepeatLayout.setError(null);
-                }
-            }
-        });
+        roomNameEditText.addTextChangedListener(new TextWatcher(roomNameLayout));
+        roomPasswordEditText.addTextChangedListener(new TextWatcher(roomPasswordLayout));
+        roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher(roomPasswordRepeatLayout));
 
         StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + imageRoom);
         GlideApp.with(getApplicationContext())
@@ -551,43 +497,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final ImageButton removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
         final ImageButton removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
 
-        username.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    usernameLayout.setError(null);
-                }
-            }
-        });
-
-        location.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    locationLayout.setError(null);
-                }
-            }
-        });
+        username.addTextChangedListener(new TextWatcher(usernameLayout));
+        location.addTextChangedListener(new TextWatcher(locationLayout));
 
         final ImageButton favColour = view.findViewById(R.id.user_favcolor);
         profileImageButton = view.findViewById(R.id.user_profile_image);
@@ -972,24 +883,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final EditText passwordEdit = view.findViewById(R.id.profile_password);
         final TextInputLayout passwordLayout = view.findViewById(R.id.profile_password_layout);
 
-        passwordEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    passwordLayout.setError(null);
-                }
-            }
-        });
+        passwordEdit.addTextChangedListener(new TextWatcher(passwordLayout));
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {

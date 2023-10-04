@@ -13,8 +13,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +33,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.TextWatcher;
 import com.yannick.mychatapp.activities.ChatActivity;
 import com.yannick.mychatapp.adapters.RoomAdapter;
 import com.yannick.mychatapp.data.Room;
@@ -162,26 +161,11 @@ public class RoomListFragmentMore extends Fragment {
     private void requestPassword(final Room room, final int position) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.enter_room, null);
+
         final EditText inputPassword = view.findViewById(R.id.room_password);
         final TextInputLayout inputPasswordLayout = view.findViewById(R.id.room_password_layout);
-        inputPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        inputPassword.addTextChangedListener(new TextWatcher(inputPasswordLayout));
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    inputPasswordLayout.setError(null);
-                }
-            }
-        });
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialogDark));
