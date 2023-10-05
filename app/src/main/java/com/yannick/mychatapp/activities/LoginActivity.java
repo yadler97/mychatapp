@@ -75,6 +75,8 @@ public class LoginActivity extends AppCompatActivity {
 
     private CircleImageView profileImageButton;
     private ImageButton profileBannerButton;
+    private ImageButton removeProfileImage;
+    private ImageButton removeProfileBanner;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -363,8 +365,11 @@ public class LoginActivity extends AppCompatActivity {
         final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
         final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
-        final ImageButton removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
-        final ImageButton removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
+        removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
+        removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
+
+        removeProfileImage.setVisibility(View.GONE);
+        removeProfileBanner.setVisibility(View.GONE);
 
         usernameEdit.addTextChangedListener(new TextWatcher(usernameLayout));
         locationEdit.addTextChangedListener(new TextWatcher(locationLayout));
@@ -446,6 +451,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (action == MotionEvent.ACTION_UP) {
                     image = "";
                     ownProfileImage = false;
+                    removeProfileImage.setVisibility(View.GONE);
                     updateEditProfileImages();
                 }
 
@@ -463,6 +469,7 @@ public class LoginActivity extends AppCompatActivity {
             if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
                 if (action == MotionEvent.ACTION_UP) {
                     banner = "";
+                    removeProfileBanner.setVisibility(View.GONE);
                     updateEditProfileImages();
                 }
 
@@ -626,6 +633,9 @@ public class LoginActivity extends AppCompatActivity {
             progressDialog.dismiss();
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
                 ownProfileImage = true;
+                removeProfileImage.setVisibility(View.VISIBLE);
+            } else {
+                removeProfileBanner.setVisibility(View.VISIBLE);
             }
             updateEditProfileImages();
             Toast.makeText(LoginActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();

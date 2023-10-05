@@ -146,6 +146,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private final FileOperations fileOperations = new FileOperations(this);
 
+    private ImageButton removeRoomImage;
+    private ImageButton removeProfileImage;
+    private ImageButton removeProfileBanner;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -216,7 +220,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final TextInputLayout roomPasswordLayout = view.findViewById(R.id.room_password_layout);
         final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
 
-        final ImageButton removeRoomImage = view.findViewById(R.id.room_image_remove);
+        removeRoomImage = view.findViewById(R.id.room_image_remove);
+        removeRoomImage.setVisibility(View.GONE);
 
         final Spinner spinner = view.findViewById(R.id.spinner);
         roomImageButton = view.findViewById(R.id.room_image);
@@ -281,6 +286,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             .load(refRoomImageStandard)
                             .centerCrop()
                             .into(roomImageButton);
+
+                    removeRoomImage.setVisibility(View.GONE);
                 }
 
                 removeRoomImage.setBackgroundResource(R.drawable.icon_clear);
@@ -494,8 +501,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
         final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
-        final ImageButton removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
-        final ImageButton removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
+        removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
+        removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
+
+        if (!currentUser.getOwnProfileImage()) {
+            removeProfileImage.setVisibility(View.GONE);
+        }
+
+        if (currentUser.getBanner().length() == 0) {
+            removeProfileBanner.setVisibility(View.GONE);
+        }
 
         username.addTextChangedListener(new TextWatcher(usernameLayout));
         location.addTextChangedListener(new TextWatcher(locationLayout));
@@ -589,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                     refNewProfileImage.putBytes(byteArray).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
-                            currentUser.setOwnProfileImage(true);
+                            currentUser.setOwnProfileImage(false);
                             currentUser.setImage(profileImage);
                             DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                             Map<String, Object> map = new HashMap<>();
@@ -600,6 +615,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             updateEditProfileImages();
                             updateNavigationDrawerIcon();
                             updateProfileImages();
+
+                            removeProfileImage.setVisibility(View.GONE);
                         }
                     });
                 }
@@ -626,6 +643,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     updateEditProfileImages();
                     updateNavigationDrawerIcon();
                     updateProfileImages();
+
+                    removeProfileBanner.setVisibility(View.GONE);
                 }
 
                 removeProfileBanner.setBackgroundResource(R.drawable.icon_clear);
@@ -1180,12 +1199,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 map.put("ownProfileImage", true);
                 map.put("image", imageName);
                 currentUserRoot.updateChildren(map);
+                removeProfileImage.setVisibility(View.VISIBLE);
             } else if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
                 currentUser.setBanner(imageName);
                 DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
                 map.put("banner", imageName);
                 currentUserRoot.updateChildren(map);
+                removeProfileBanner.setVisibility(View.VISIBLE);
             }
 
             if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
@@ -1201,6 +1222,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .load(refRoomImage)
                         .centerCrop()
                         .into(roomImageButton);
+
+                removeRoomImage.setVisibility(View.VISIBLE);
             }
         }).addOnFailureListener(e -> {
             Log.e("Upload failed", e.toString());

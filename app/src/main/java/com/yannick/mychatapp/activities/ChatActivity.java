@@ -187,6 +187,8 @@ public class ChatActivity extends AppCompatActivity {
 
     private SharedPreferences settings;
 
+    private ImageButton removeRoomImage;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -875,6 +877,8 @@ public class ChatActivity extends AppCompatActivity {
                         .centerCrop()
                         .thumbnail(0.05f)
                         .into(roomImageButton);
+
+                removeRoomImage.setVisibility(View.VISIBLE);
             }
         }).addOnFailureListener(e -> {
             Log.e("Upload failed", e.toString());
@@ -1937,7 +1941,10 @@ public class ChatActivity extends AppCompatActivity {
         final TextInputLayout roomPasswordLayout = view.findViewById(R.id.room_password_layout);
         final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
 
-        final ImageButton removeRoomImage = view.findViewById(R.id.room_image_remove);
+        removeRoomImage = view.findViewById(R.id.room_image_remove);
+        if (room.getImage().startsWith("standard")) {
+            removeRoomImage.setVisibility(View.GONE);
+        }
 
         roomNameEditText.setText(room.getName());
         roomDescriptionEditText.setText(room.getDescription());
@@ -2016,6 +2023,8 @@ public class ChatActivity extends AppCompatActivity {
                             .centerCrop()
                             .thumbnail(0.05f)
                             .into(roomImageButton);
+
+                    removeRoomImage.setVisibility(View.GONE);
                 }
 
                 removeRoomImage.setBackgroundResource(R.drawable.icon_clear);
