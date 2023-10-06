@@ -72,7 +72,7 @@ public class MemberListAdapter extends ArrayAdapter<User> {
             viewHolder.adminText.setText(R.string.admin);
         }
 
-        view.setOnClickListener(view1 -> {
+        view.setOnClickListener(layoutView -> {
             Intent intent = new Intent("userprofile");
             intent.putExtra("userid", memberList.get(position).getUserID());
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);

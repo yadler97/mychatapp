@@ -15,6 +15,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.StringOperations;
 import com.yannick.mychatapp.data.Message;
 import com.yannick.mychatapp.R;
 
@@ -61,7 +62,7 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
         }
 
         String time = pinnedList.get(position).getTime();
-        String parsedTime = time.substring(0, 4) + "." + time.substring(4, 6) + "." + time.substring(6, 8) + " " + time.substring(9, 11) + ":" + time.substring(11, 13);
+        String parsedTime = StringOperations.convertDateToDisplayFormat(time) + " " + time.substring(9, 11) + ":" + time.substring(11, 13);
 
         viewHolder.userText.setText(pinnedList.get(position).getUser().getName());
         viewHolder.timeText.setText(parsedTime);
@@ -71,7 +72,6 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
             StorageReference pathReference = storageRef.child(Constants.imagesStorageKey + imageURL);
 
             GlideApp.with(context)
-                    //.using(new FirebaseImageLoader())
                     .load(pathReference)
                     .centerCrop()
                     .thumbnail(0.05f)
@@ -80,7 +80,7 @@ public class PinboardAdapter extends ArrayAdapter<Message> {
             viewHolder.messageText.setText(pinnedList.get(position).getText());
         }
 
-        rowView.setOnClickListener(view1 -> {
+        rowView.setOnClickListener(layoutView -> {
             Intent intent = new Intent("jumppinned");
             intent.putExtra("pinnedKey", pinnedList.get(position).getKey());
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent);

@@ -2,9 +2,11 @@ package com.yannick.mychatapp;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.provider.OpenableColumns;
@@ -12,10 +14,13 @@ import android.util.Log;
 
 import androidx.exifinterface.media.ExifInterface;
 
+import com.amulyakhare.textdrawable.TextDrawable;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Random;
 
 public class ImageOperations {
 
@@ -142,5 +147,24 @@ public class ImageOperations {
         Matrix matrix = new Matrix();
         matrix.postRotate(angle);
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix, true);
+    }
+
+    public static String getStandardRoomImage() {
+        Random rand = new Random();
+        return "standard" + (rand.nextInt(4) + 1);
+    }
+
+    public static Bitmap generateStandardProfileImage(Context context, String name, int colour) {
+        TextDrawable drawable = TextDrawable.builder()
+                .beginConfig()
+                .bold()
+                .endConfig()
+                .buildRect(name.substring(0, 1), context.getResources().getIntArray(R.array.favcolors)[colour]);
+        Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 }

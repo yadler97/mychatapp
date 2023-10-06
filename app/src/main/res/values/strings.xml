@@ -34,7 +34,7 @@
     <string name="enterroomname">Enter room name</string>
     <string name="selectcategory">Select category</string>
     <string name="imageuploaded">Image uploaded</string>
-    <string name="imagetoolarge">Failed: Image too large</string>
+    <string name="image_upload_failed">Image upload failed</string>
     <string name="copy">Copy</string>
     <string name="quote">Quote</string>
     <string name="jumptoquotedimage">Jump to quoted image</string>
@@ -154,10 +154,16 @@
     <string name="account_successfully_deleted">Account successfully deleted</string>
     <string name="account_deletion_info">CAUTION: You are about to delete your account. This action cannot be reverted! If you really want to delete your account, please enter your password to proceed.</string>
     <string name="email_verification_info">You have to verify your E-Mail address before you can use your account. If you have not received a mail, click the resend button. If you have verified your mail, you can close this window and proceed with login.</string>
-    <string name="delete_room">Delete room</string>
+    <string name="delete_room"><font color='#FF0000'>Delete room</font></string>
+    <string name="delete_room_header">Delete room</string>
     <string name="room_successfully_deleted">Room successfully deleted</string>
     <string name="room_deletion_info">Do you really want to delete this room?</string>
     <string name="invalid_email">Invalid E-Mail address</string>
+    <string name="delete_message"><font color='#FF0000'>Delete message</font></string>
+    <string name="really_delete_message">Really delete message?</string>
+    <string name="message_deleted">Message deleted</string>
+    <string name="forgot_password">Forgot password?</string>
+    <string name="password_reset_mail_sent">Sent mail to reset password</string>
 
     <string name="hint_email">E-Mail Address <font color='#FF0000'>*</font></string>
     <string name="hint_name">Name <font color='#FF0000'>*</font></string>
@@ -168,7 +174,7 @@
     <string name="hint_confirm_password">Confirm password <font color='#FF0000'>*</font></string>
 
     <string-array name="categories">
-        <item>Select category</item>
+        <item>Select category <font color='#FF0000'>*</font></item>
         <item>Study &amp; Work</item>
         <item>Gaming</item>
         <item>Politics</item>
@@ -217,6 +223,7 @@
         <item>Version 1.1.2 (September 10th, 2023)</item>
         <item>Version 1.2.0 (September 14th, 2023)</item>
         <item>Version 1.2.1 (September 15th, 2023)</item>
+        <item>Version 1.3.0 (October 6th, 2023)</item>
     </string-array>
 
     <string-array name="changelog_text">
@@ -428,11 +435,33 @@
         <item>"- The character limit for passwords has been increased to 32\n"
         "- When writing in the E-Mail fields the E-Mail keyboard is now used\n"
         "- When creating a new account an additional check if the E-Mail address has a valid format has been implemented\n"
-        "- The minimum age for users no dynamically increases (Users must be at least 14 years old\n"
+        "- The minimum age for users now dynamically increases (Users must be at least 14 years old)\n"
         "- The message \"No database connection\" is no longer displayed when logging out\n"
         "- A crash that occurred when pinning a message has been fixed\n"
-        "- A bug that the birthday in the data picker dialog is reset to the default value has been fixed\n"
+        "- A bug that the birthday in the date picker dialog is reset to the default value has been fixed\n"
         "- A bug that the camera, backup and save image functions were not usable on Android 13 has been fixed\n"
+        "\n "</item>
+
+        <item>"- Users can now delete their own messages\n"
+        "- A forgot password option has been added\n"
+        "- The ability to reset profile images/banners and room images has been added\n"
+        "- All icons now use vector assets\n"
+        "- Quoted messages are now highlighted when the users jumps to them\n"
+        "- The profile of other users can now be opened by clicking on their profile image next to the message\n"
+        "- Selected profile images/banners and room images are now displayed much larger and have a hover effect in the dialog window\n"
+        "- The option to delete a room has been moved to the menu on top of a chat room\n"
+        "- The room category field is now correctly marked as mandatory\n"
+        "- The default birthday is now used for unknown users\n"
+        "- The enter password dialog now uses the same header as all other dialogs\n"
+        "- Themes and backgrounds are now displayed with rounded corners in the change design dialog\n"
+        "- A crash that occurred when rotating the device inside a chat room has been fixed\n"
+        "- A bug that allowed to create fake forwarded messages by adding \"(Forwarded)\" at the start of a new message has been fixed\n"
+        "- A bug that the dates on the pinboard were not correctly formatted has been fixed\n"
+        "- A bug that a backup could not be created when the room name contains the character \"/\" has been fixed\n"
+        "- A bug that the snackbar in dark mode did not use the correct colour has been fixed\n"
+        "- A bug that the favourite colour was not properly previewed on the edit profile screen has been fixed\n"
+        "- A bug that some text boxes were displayed with a wrong width has been fixed\n"
+        "- A bug that dialogs were displayed in the wrong theme when changing the theme in the dialog but then cancelling the change has been fixed\n"
         "\n "</item>
     </string-array>
 

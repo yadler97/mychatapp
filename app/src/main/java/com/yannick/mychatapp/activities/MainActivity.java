@@ -1,5 +1,6 @@
 package com.yannick.mychatapp.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
@@ -10,7 +11,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.Typeface;
@@ -18,14 +18,13 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -57,7 +56,6 @@ import androidx.appcompat.view.menu.MenuBuilder;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 
-import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -78,6 +76,7 @@ import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.StringOperations;
+import com.yannick.mychatapp.TextWatcher;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.adapters.BackgroundAdapter;
 import com.yannick.mychatapp.BuildConfig;
@@ -98,14 +97,12 @@ import com.yannick.mychatapp.data.User;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.security.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
@@ -116,10 +113,7 @@ import hakobastvatsatryan.DropdownTextView;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, AdapterView.OnItemSelectedListener {
 
     private String imageRoom;
-
     private Theme theme;
-
-    private Background background;
     private User currentUser;
     private final DatabaseReference roomRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.roomsDatabaseKey);
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
@@ -127,8 +121,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int categoryIndex = 0;
     private static int color = 0;
     private int tmpcolor = -1;
-    private final ArrayList<String> userIdList = new ArrayList<>();
-    private boolean userListCreated = false;
     private TabLayout tabLayout;
     private RoomListFragmentMore rFragMore = new RoomListFragmentMore();
     private RoomListFragmentFavorites rFragFavs = new RoomListFragmentFavorites();
@@ -138,9 +130,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private CircleImageView profileImage;
     private ImageView banner;
     private ImageView profileBannerImageView;
-    private ImageButton profileImageButton;
+    private CircleImageView profileImageButton;
     private ImageButton profileBannerButton;
-    private ImageButton roomImageButton;
+    private CircleImageView roomImageButton;
     private CircleImageView profileImageImageView;
     private TextView profileNameText;
 
@@ -154,10 +146,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private final FileOperations fileOperations = new FileOperations(this);
 
-    public static final String settingsPushNotificationsKey = "settingsPushNotifications";
-    public static final String settingsSaveEnteredTextKey = "settingsSaveEnteredText";
-    public static final String settingsPreviewImagesKey = "settingsPreviewImages";
-    public static final String settingsStoreCameraPicturesKey = "settingsStoreCameraPictures";
+    private ImageButton removeRoomImage;
+    private ImageButton removeProfileImage;
+    private ImageButton removeProfileBanner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,8 +177,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mAuth = FirebaseAuth.getInstance();
 
         LocalBroadcastManager.getInstance(this).registerReceiver(tabReceiver, new IntentFilter("tab"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(themeReceiver, new IntentFilter("themeOption"));
-        LocalBroadcastManager.getInstance(this).registerReceiver(backgroundReceiver, new IntentFilter("backgroundOption"));
         LocalBroadcastManager.getInstance(this).registerReceiver(closeFullscreenReceiver, new IntentFilter("closefullscreen"));
 
         fileOperations.writeToFile("0", FileOperations.currentRoomFile);
@@ -214,34 +203,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FloatingActionButton addRoomButton = findViewById(R.id.addroom);
         addRoomButton.setOnClickListener(view -> addRoom());
 
-        userRoot.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    userIdList.add(ds.getKey());
-                }
-                userListCreated = true;
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (!userListCreated) {
-                    handler.postDelayed(this, 1000);
-                } else {
-                    createUserProfile(mAuth.getCurrentUser().getUid());
-                }
-            }
-        }, 100);
+        createUserProfile(mAuth.getCurrentUser().getUid());
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void addRoom() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.add_room, null);
@@ -255,11 +220,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final TextInputLayout roomPasswordLayout = view.findViewById(R.id.room_password_layout);
         final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
 
+        removeRoomImage = view.findViewById(R.id.room_image_remove);
+        removeRoomImage.setVisibility(View.GONE);
+
         final Spinner spinner = view.findViewById(R.id.spinner);
         roomImageButton = view.findViewById(R.id.room_image);
 
-        Random rand = new Random();
-        imageRoom = "standard" + (rand.nextInt(4)+1);
+        imageRoom = ImageOperations.getStandardRoomImage();
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -277,86 +244,56 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-        roomNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        roomNameEditText.addTextChangedListener(new TextWatcher(roomNameLayout));
+        roomPasswordEditText.addTextChangedListener(new TextWatcher(roomPasswordLayout));
+        roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher(roomPasswordRepeatLayout));
 
+        StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + imageRoom);
+        GlideApp.with(getApplicationContext())
+                .load(refRoomImage)
+                .centerCrop()
+                .into(roomImageButton);
+
+        roomImageButton.setOnTouchListener((roomImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                roomImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
             }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomNameLayout.setError(null);
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickRoomImageLauncher.launch(intent);
                 }
+
+                roomImageButton.setForeground(null);
             }
+
+            return true;
         });
 
-        roomPasswordEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+        removeRoomImage.setOnTouchListener((removeImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeRoomImage.setBackgroundResource(R.drawable.icon_clear_pressed);
             }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    imageRoom = ImageOperations.getStandardRoomImage();
+                    StorageReference refRoomImageStandard = storage.getReference().child(Constants.roomImagesStorageKey + imageRoom);
+                    GlideApp.with(getApplicationContext())
+                            .load(refRoomImageStandard)
+                            .centerCrop()
+                            .into(roomImageButton);
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomPasswordLayout.setError(null);
+                    removeRoomImage.setVisibility(View.GONE);
                 }
-            }
-        });
 
-        roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
+                removeRoomImage.setBackgroundResource(R.drawable.icon_clear);
             }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomPasswordRepeatLayout.setError(null);
-                }
-            }
-        });
-
-        StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + "0");
-
-        if (theme == Theme.DARK) {
-            GlideApp.with(getApplicationContext())
-                    .load(refRoomImage)
-                    .placeholder(R.drawable.side_nav_bar_dark)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(roomImageButton);
-        } else {
-            GlideApp.with(getApplicationContext())
-                    .load(refRoomImage)
-                    .placeholder(R.drawable.side_nav_bar)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(roomImageButton);
-        }
-
-        roomImageButton.setOnClickListener(view13 -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickRoomImageLauncher.launch(intent);
+            return true;
         });
 
         AlertDialog.Builder builder;
@@ -370,17 +307,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 final String roomName = roomNameEditText.getText().toString().trim();
                 final String roomPassword = roomPasswordEditText.getText().toString().trim();
                 final String roomPasswordRepeat = roomPasswordRepeatEditText.getText().toString().trim();
@@ -390,9 +327,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         if (!roomPassword.isEmpty()) {
                             if (!roomPasswordRepeat.isEmpty()) {
                                 if (roomPassword.equals(roomPasswordRepeat)) {
-                                    if (view12 != null) {
+                                    if (buttonView != null) {
                                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                        imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                                        imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                                     }
                                     if (!searchView.isIconified()) {
                                         searchView.setIconified(true);
@@ -529,7 +466,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImage());
         GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
                 .centerCrop()
                 .into(profileImage);
@@ -552,6 +488,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         alert.show();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void editProfile() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.edit_profile, null);
@@ -564,43 +501,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
         final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
-        username.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
+        removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
 
-            }
+        if (!currentUser.getOwnProfileImage()) {
+            removeProfileImage.setVisibility(View.GONE);
+        }
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        if (currentUser.getBanner().length() == 0) {
+            removeProfileBanner.setVisibility(View.GONE);
+        }
 
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    usernameLayout.setError(null);
-                }
-            }
-        });
-
-        location.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    locationLayout.setError(null);
-                }
-            }
-        });
+        username.addTextChangedListener(new TextWatcher(usernameLayout));
+        location.addTextChangedListener(new TextWatcher(locationLayout));
 
         final ImageButton favColour = view.findViewById(R.id.user_favcolor);
         profileImageButton = view.findViewById(R.id.user_profile_image);
@@ -609,17 +522,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + currentUser.getImage());
         StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
 
+        GlideApp.with(getApplicationContext())
+                .load(refProfileImage)
+                .centerCrop()
+                .into(profileImageButton);
+
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
-                    .load(refProfileImage)
-                    .placeholder(R.drawable.side_nav_bar_dark)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(profileImageButton);
-
-            GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -627,15 +536,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .into(profileBannerButton);
         } else {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
-                    .load(refProfileImage)
-                    .placeholder(R.drawable.side_nav_bar)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(profileImageButton);
-
-            GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -643,18 +543,114 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .into(profileBannerButton);
         }
 
-        profileImageButton.setOnClickListener(v -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickProfileImageLauncher.launch(intent);
+        profileImageButton.setOnTouchListener((profileImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                profileImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickProfileImageLauncher.launch(intent);
+                }
+
+                profileImageButton.setForeground(null);
+            }
+
+            return true;
         });
 
-        profileBannerButton.setOnClickListener(v -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickProfileBannerLauncher.launch(intent);
+        profileBannerButton.setOnTouchListener((profileBannerView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                profileBannerButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickProfileBannerLauncher.launch(intent);
+                }
+
+                profileBannerButton.setForeground(null);
+            }
+
+            return true;
+        });
+
+        removeProfileImage.setOnTouchListener((removeImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeProfileImage.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    String profileImage = UUID.randomUUID().toString();
+                    Bitmap bitmap = ImageOperations.generateStandardProfileImage(this, currentUser.getName(), color);
+
+                    byte[] byteArray;
+                    final StorageReference refNewProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + profileImage);
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    byteArray = stream.toByteArray();
+                    try {
+                        stream.close();
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
+
+                    refNewProfileImage.putBytes(byteArray).addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            currentUser.setOwnProfileImage(false);
+                            currentUser.setImage(profileImage);
+                            DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
+                            Map<String, Object> map = new HashMap<>();
+                            map.put("ownProfileImage", true);
+                            map.put("image", profileImage);
+                            currentUserRoot.updateChildren(map);
+
+                            updateEditProfileImages();
+                            updateNavigationDrawerIcon();
+                            updateProfileImages();
+
+                            removeProfileImage.setVisibility(View.GONE);
+                        }
+                    });
+                }
+
+                removeProfileImage.setBackgroundResource(R.drawable.icon_clear);
+            }
+
+            return true;
+        });
+
+        removeProfileBanner.setOnTouchListener((removeImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeProfileBanner.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    currentUser.setBanner("");
+                    DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("banner", "");
+                    currentUserRoot.updateChildren(map);
+
+                    updateEditProfileImages();
+                    updateNavigationDrawerIcon();
+                    updateProfileImages();
+
+                    removeProfileBanner.setVisibility(View.GONE);
+                }
+
+                removeProfileBanner.setBackgroundResource(R.drawable.icon_clear);
+            }
+
+            return true;
         });
 
         username.setText(currentUser.getName());
@@ -663,13 +659,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         location.setText(currentUser.getLocation());
         GradientDrawable shape = new GradientDrawable();
         shape.setShape(GradientDrawable.OVAL);
-        shape.setColor(getResources().getIntArray(R.array.favcolors)[color]);
+        shape.setColor(getResources().getIntArray(R.array.favcolors)[currentUser.getFavColour()]);
         favColour.setBackground(shape);
 
         AtomicReference<String> selectedBirthday = new AtomicReference<>(currentUser.getBirthday());
 
-        birthday.setOnClickListener(view15 -> {
-            DatePickerDialog datePicker = new DatePickerDialog(view15.getContext(), (view14, year, monthOfYear, dayOfMonth) -> {
+        birthday.setOnClickListener(birthdayEditView -> {
+            DatePickerDialog datePicker = new DatePickerDialog(birthdayEditView.getContext(), (datePickerView, year, monthOfYear, dayOfMonth) -> {
                 String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
                 selectedBirthday.set(date);
                 birthday.setText(date);
@@ -681,14 +677,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             datePicker.show();
         });
 
-        favColour.setOnClickListener(view13 -> {
+        favColour.setOnClickListener(favColourEditView -> {
             SpectrumDialog.Builder builder;
             if (theme == Theme.DARK) {
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
             } else {
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialog);
             }
-            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor).setSelectedColor(getResources().getIntArray(R.array.favcolors)[color]).setFixedColumnCount(5).setOnColorSelectedListener((positiveResult, scolor) -> {
+            builder.setColors(R.array.favcolors).setTitle(R.string.chooseacolor)
+                    .setSelectedColor(getResources().getIntArray(R.array.favcolors)[currentUser.getFavColour()])
+                    .setFixedColumnCount(5)
+                    .setOnColorSelectedListener((positiveResult, scolor) -> {
                 if (positiveResult) {
                     int i = 0;
                     for (int c : getResources().getIntArray(R.array.favcolors)) {
@@ -717,10 +716,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view12 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view12 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
             showProfile();
@@ -728,19 +727,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view1 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!username.getText().toString().isEmpty()) {
                     if (!location.getText().toString().isEmpty()) {
                         if (!birthday.getText().toString().isEmpty()) {
                             String oldUserName = currentUser.getName();
                             int oldColor = color;
+                            if (tmpcolor >= 0) {
+                                color = tmpcolor;
+                            }
+
                             currentUser.setName(username.getText().toString());
                             currentUser.setDescription(profileDescription.getText().toString());
                             currentUser.setLocation(location.getText().toString());
                             currentUser.setBirthday(birthday.getText().toString());
-                            if (tmpcolor >= 0) {
-                                color = tmpcolor;
-                            }
+                            currentUser.setFavColour(color);
+
                             DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                             Map<String, Object> map = new HashMap<>();
                             map.put("name", currentUser.getName());
@@ -755,20 +757,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             currentUserRoot.updateChildren(map);
                             profileNameText.setText(currentUser.getName());
                             Toast.makeText(getApplicationContext(), R.string.profileedited, Toast.LENGTH_SHORT).show();
-                            if (view1 != null) {
+                            if (buttonView != null) {
                                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                                imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                             }
                             if (!currentUser.getOwnProfileImage() && ((!currentUser.getName().substring(0, 1).equals(oldUserName.substring(0, 1)) || color != oldColor))) {
-                                TextDrawable drawable = TextDrawable.builder()
-                                        .beginConfig()
-                                        .bold()
-                                        .endConfig()
-                                        .buildRect(currentUser.getName().substring(0, 1), getResources().getIntArray(R.array.favcolors)[color]);
-                                Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-                                Canvas canvas = new Canvas(bitmap);
-                                drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                                drawable.draw(canvas);
+                                Bitmap bitmap = ImageOperations.generateStandardProfileImage(this, currentUser.getName(), color);
 
                                 byte[] byteArray;
                                 final StorageReference refNewProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + profileImage);
@@ -780,7 +774,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                                 } catch (IOException ioe) {
                                     ioe.printStackTrace();
                                 }
-                                refNewProfileImage.putBytes(byteArray);
+
+                                refNewProfileImage.putBytes(byteArray).addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        currentUser.setImage(profileImage);
+
+                                        updateNavigationDrawerIcon();
+                                        updateProfileImages();
+                                    }
+                                });
                             }
                             showProfile();
                             alert.cancel();
@@ -807,10 +809,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Background currentBackground = Background.getCurrentBackground(getApplicationContext());
 
         GridView themeGrid = view.findViewById(R.id.gridview_themes);
-        themeGrid.setAdapter(new ThemeAdapter(this, getResources().obtainTypedArray(R.array.themeDrawables), currentTheme, theme));
+        ThemeAdapter themeAdapter = new ThemeAdapter(this, getResources().obtainTypedArray(R.array.themeDrawables), currentTheme, theme);
+        themeGrid.setAdapter(themeAdapter);
 
         GridView backgroundGrid = view.findViewById(R.id.gridview_backgrounds);
-        backgroundGrid.setAdapter(new BackgroundAdapter(this, getResources().obtainTypedArray(R.array.backgroundDrawables), currentBackground, theme));
+        BackgroundAdapter backgroundAdapter = new BackgroundAdapter(this, getResources().obtainTypedArray(R.array.backgroundDrawables), currentBackground, theme);
+        backgroundGrid.setAdapter(backgroundAdapter);
 
         AlertDialog.Builder builder;
         if (this.theme == Theme.DARK) {
@@ -825,11 +829,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> dialogInterface.cancel());
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
-
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view1 -> {
+            b.setOnClickListener(buttonView -> {
+                theme = themeAdapter.getSelected();
                 Theme.setTheme(getApplicationContext(), theme);
-                Background.setBackground(getApplicationContext(), background);
+                Background.setBackground(getApplicationContext(), backgroundAdapter.getSelected());
                 if (currentTheme != theme) {
                     FragmentManager mFragmentManager = getSupportFragmentManager();
                     mFragmentManager.beginTransaction().remove(rFragMore).commit();
@@ -856,17 +860,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         SwitchCompat camera = view.findViewById(R.id.camera);
         Button deleteAccount = view.findViewById(R.id.delete_account);
 
-        boolean settingPushNotification = sharedPref.getBoolean(settingsPushNotificationsKey, true);
-        boolean settingSavEnteredText = sharedPref.getBoolean(settingsSaveEnteredTextKey, true);
-        boolean settingPreviewImages = sharedPref.getBoolean(settingsPreviewImagesKey, true);
-        boolean settingStoreCameraPictures = sharedPref.getBoolean(settingsStoreCameraPicturesKey, true);
+        boolean settingPushNotification = sharedPref.getBoolean(Constants.settingsPushNotificationsKey, true);
+        boolean settingSavEnteredText = sharedPref.getBoolean(Constants.settingsSaveEnteredTextKey, true);
+        boolean settingPreviewImages = sharedPref.getBoolean(Constants.settingsPreviewImagesKey, true);
+        boolean settingStoreCameraPictures = sharedPref.getBoolean(Constants.settingsStoreCameraPicturesKey, true);
 
         push.setChecked(settingPushNotification);
         save.setChecked(settingSavEnteredText);
         preview.setChecked(settingPreviewImages);
         camera.setChecked(settingStoreCameraPictures);
 
-        deleteAccount.setOnClickListener(view1 -> showPasswordRequest());
+        deleteAccount.setOnClickListener(buttonView -> showPasswordRequest());
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -878,10 +882,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putBoolean(settingsPushNotificationsKey, push.isChecked());
-            editor.putBoolean(settingsSaveEnteredTextKey, save.isChecked());
-            editor.putBoolean(settingsPreviewImagesKey, preview.isChecked());
-            editor.putBoolean(settingsStoreCameraPicturesKey, camera.isChecked());
+            editor.putBoolean(Constants.settingsPushNotificationsKey, push.isChecked());
+            editor.putBoolean(Constants.settingsSaveEnteredTextKey, save.isChecked());
+            editor.putBoolean(Constants.settingsPreviewImagesKey, preview.isChecked());
+            editor.putBoolean(Constants.settingsStoreCameraPicturesKey, camera.isChecked());
             editor.apply();
 
             Toast.makeText(getApplicationContext(), R.string.settingssaved, Toast.LENGTH_SHORT).show();
@@ -898,24 +902,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final EditText passwordEdit = view.findViewById(R.id.profile_password);
         final TextInputLayout passwordLayout = view.findViewById(R.id.profile_password_layout);
 
-        passwordEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    passwordLayout.setError(null);
-                }
-            }
-        });
+        passwordEdit.addTextChangedListener(new TextWatcher(passwordLayout));
 
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
@@ -930,10 +917,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
 
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
@@ -941,16 +928,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!passwordEdit.getText().toString().isEmpty()) {
                     AuthCredential credential = EmailAuthProvider.getCredential(mAuth.getCurrentUser().getEmail(), passwordEdit.getText().toString());
                     mAuth.getCurrentUser().reauthenticate(credential).addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             deleteAccount();
 
-                            if (view12 != null) {
+                            if (buttonView != null) {
                                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                                imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                             }
 
                             alert.cancel();
@@ -1105,11 +1092,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .into(profileImageButton);
 
         StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + currentUser.getBanner());
-        GlideApp.with(getApplicationContext())
-                .load(refProfileBanner)
-                .centerCrop()
-                .thumbnail(0.05f)
-                .into(profileBannerButton);
+        if (theme == Theme.DARK) {
+            GlideApp.with(getApplicationContext())
+                    .load(refProfileBanner)
+                    .placeholder(R.drawable.side_nav_bar_dark)
+                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
+                    .centerCrop()
+                    .thumbnail(0.05f)
+                    .into(profileBannerButton);
+        } else {
+            GlideApp.with(getApplicationContext())
+                    .load(refProfileBanner)
+                    .placeholder(R.drawable.side_nav_bar)
+                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
+                    .centerCrop()
+                    .thumbnail(0.05f)
+                    .into(profileBannerButton);
+        }
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -1142,24 +1141,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         public void onReceive(Context context, Intent intent) {
             TabLayout.Tab tab = tabLayout.getTabAt(0);
             tab.select();
-        }
-    };
-
-    public BroadcastReceiver themeReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int position = intent.getIntExtra("position", 0);
-
-            theme = Theme.getByPosition(position);
-        }
-    };
-
-    public BroadcastReceiver backgroundReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            int position = intent.getIntExtra("position", 0);
-
-            background = Background.getByPosition(position);
         }
     };
 
@@ -1218,12 +1199,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 map.put("ownProfileImage", true);
                 map.put("image", imageName);
                 currentUserRoot.updateChildren(map);
+                removeProfileImage.setVisibility(View.VISIBLE);
             } else if (type == ImageOperations.PICK_PROFILE_BANNER_REQUEST) {
                 currentUser.setBanner(imageName);
                 DatabaseReference currentUserRoot = userRoot.child(currentUser.getUserID());
                 Map<String, Object> map = new HashMap<>();
                 map.put("banner", imageName);
                 currentUserRoot.updateChildren(map);
+                removeProfileBanner.setVisibility(View.VISIBLE);
             }
 
             if (type != ImageOperations.PICK_ROOM_IMAGE_REQUEST) {
@@ -1239,15 +1222,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .load(refRoomImage)
                         .centerCrop()
                         .into(roomImageButton);
+
+                removeRoomImage.setVisibility(View.VISIBLE);
             }
         }).addOnFailureListener(e -> {
             Log.e("Upload failed", e.toString());
             progressDialog.dismiss();
-            Toast.makeText(MainActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, R.string.image_upload_failed, Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(taskSnapshot -> {
-            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                    .getTotalByteCount());
-            progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
+            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+            progressDialog.setMessage((int)progress + "% " + getResources().getString(R.string.uploaded));
         });
     }
 

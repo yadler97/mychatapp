@@ -11,13 +11,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -99,8 +97,8 @@ public class RoomListFragmentFavorites extends Fragment {
             }
         });
 
-        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-            int position = listView.getPositionForView(view1);
+        listView.setOnItemClickListener((adapterView, layoutView, i, l) -> {
+            int position = listView.getPositionForView(layoutView);
             Room room = roomList.get(position);
             requestPassword(room);
         });
@@ -140,13 +138,14 @@ public class RoomListFragmentFavorites extends Fragment {
                             String image = child.child("image").getValue().toString();
                             String userid = child.child("sender").getValue().toString();
                             boolean pinned = (boolean) child.child("pinned").getValue();
+                            boolean forwarded = (boolean) child.child("forwarded").getValue();
                             String time = child.child("time").getValue().toString();
 
                             Message newestMessage;
                             if (!image.isEmpty()) {
-                                newestMessage = new Message(null, image, time, key, Message.Type.IMAGE_RECEIVED, null, pinned);
+                                newestMessage = new Message(null, image, time, key, Message.Type.IMAGE_RECEIVED, null, pinned, forwarded);
                             } else {
-                                newestMessage = new Message(null, message, time, key, Message.Type.MESSAGE_RECEIVED, null, pinned);
+                                newestMessage = new Message(null, message, time, key, Message.Type.MESSAGE_RECEIVED, null, pinned, forwarded);
                             }
                             room.setNewestMessage(newestMessage);
 
@@ -187,7 +186,7 @@ public class RoomListFragmentFavorites extends Fragment {
                 String key = dataSnapshot.getKey();
                 User u;
                 if (dataSnapshot.getValue() == null) {
-                    u = new User(key, getResources().getString(R.string.unknownuser), "19700101", "", getResources().getString(R.string.unknown), 0, "unknown_user", "");
+                    u = User.getUnknownUser(getContext(), key);
                 } else {
                     u = dataSnapshot.getValue(User.class);
                     u.setUserID(key);
@@ -293,7 +292,7 @@ public class RoomListFragmentFavorites extends Fragment {
                 User user = new User();
                 user.setUserID(userid);
                 user.setName(username);
-                Message newestMessage = new Message(user, nmMsg, nmTime, nmKey, nmType, null, false);
+                Message newestMessage = new Message(user, nmMsg, nmTime, nmKey, nmType, null, false, false);
                 room.setNewestMessage(newestMessage);
             }
 

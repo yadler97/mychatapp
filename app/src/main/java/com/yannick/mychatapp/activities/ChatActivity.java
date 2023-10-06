@@ -22,10 +22,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.GestureDetector;
@@ -67,7 +65,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
 
-import com.bumptech.glide.signature.ObjectKey;
 import com.chrisrenke.giv.GravityImageView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -84,6 +81,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.yannick.mychatapp.Constants;
+import com.yannick.mychatapp.StringOperations;
+import com.yannick.mychatapp.TextWatcher;
 import com.yannick.mychatapp.adapters.ForwardMessageAdapter;
 import com.yannick.mychatapp.data.Background;
 import com.yannick.mychatapp.BuildConfig;
@@ -165,17 +164,14 @@ public class ChatActivity extends AppCompatActivity {
     private AlertDialog pinboardAlert;
     private boolean userListCreated = false;
     private boolean cancelFullscreenImage = false;
-    private boolean imageListOpened = false;
     private boolean lastReadMessageReached = false;
     private FloatingActionButton scrollDownButton;
-
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
-    private SimpleDateFormat sdf_local = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
 
     private int categoryIndex = 0;
 
     private GravityImageView backgroundView;
-    private ImageButton roomImageButton;
+    private CircleImageView roomImageButton;
 
     private TextView quoteText;
     private LinearLayout quoteLayout;
@@ -190,6 +186,8 @@ public class ChatActivity extends AppCompatActivity {
     private final FileOperations fileOperations = new FileOperations(this);
 
     private SharedPreferences settings;
+
+    private ImageButton removeRoomImage;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -249,6 +247,7 @@ public class ChatActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(pinReceiver, new IntentFilter("pinMessage"));
         LocalBroadcastManager.getInstance(this).registerReceiver(jumppinnedReceiver, new IntentFilter("jumppinned"));
         LocalBroadcastManager.getInstance(this).registerReceiver(closeFullscreenReceiver, new IntentFilter("closefullscreen"));
+        LocalBroadcastManager.getInstance(this).registerReceiver(deleteReceiver, new IntentFilter("delete"));
 
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
@@ -274,7 +273,7 @@ public class ChatActivity extends AppCompatActivity {
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.cancel(pushID);
 
-        if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
+        if (settings.getBoolean(Constants.settingsSaveEnteredTextKey, true)) {
             messageInput.setText(fileOperations.readFromFile(String.format(FileOperations.currentInputFilePattern, roomKey)).replaceAll("<br />", "\n"));
         }
 
@@ -312,6 +311,7 @@ public class ChatActivity extends AppCompatActivity {
                     map.put("text", messageInput.getText().toString().trim());
                     map.put("image", "");
                     map.put("pinned", false);
+                    map.put("forwarded", false);
                     map.put("quote", quoteStatus);
                     map.put("time", currentDateAndTime);
 
@@ -333,14 +333,14 @@ public class ChatActivity extends AppCompatActivity {
         imageButton.setOnTouchListener((view, event) -> {
             if (gestureDetector.onTouchEvent(event)) {
                 chooseImage();
-                imageButton.setBackgroundResource(R.drawable.ic_image);
+                imageButton.setBackgroundResource(R.drawable.icon_image);
                 return true;
             } else {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    imageButton.setBackgroundResource(R.drawable.ic_image_light);
+                    imageButton.setBackgroundResource(R.drawable.icon_image_pressed);
                     return true;
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    imageButton.setBackgroundResource(R.drawable.ic_image);
+                    imageButton.setBackgroundResource(R.drawable.icon_image);
                     return true;
                 }
             }
@@ -350,14 +350,14 @@ public class ChatActivity extends AppCompatActivity {
         cameraButton.setOnTouchListener((view, event) -> {
             if (gestureDetector.onTouchEvent(event)) {
                 takePicture();
-                cameraButton.setBackgroundResource(R.drawable.ic_camera);
+                cameraButton.setBackgroundResource(R.drawable.icon_camera);
                 return true;
             } else {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    cameraButton.setBackgroundResource(R.drawable.ic_camera_light);
+                    cameraButton.setBackgroundResource(R.drawable.icon_camera_pressed);
                     return true;
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    cameraButton.setBackgroundResource(R.drawable.ic_camera);
+                    cameraButton.setBackgroundResource(R.drawable.icon_camera);
                     return true;
                 }
             }
@@ -371,14 +371,14 @@ public class ChatActivity extends AppCompatActivity {
                 quoteImageImageView.setImageDrawable(null);
                 quoteImageImageView.setVisibility(View.GONE);
                 quoteLayout.setVisibility(View.GONE);
-                removeQuoteButton.setBackgroundResource(R.drawable.ic_clear);
+                removeQuoteButton.setBackgroundResource(R.drawable.icon_clear);
                 return true;
             } else {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    removeQuoteButton.setBackgroundResource(R.drawable.ic_clear_light);
+                    removeQuoteButton.setBackgroundResource(R.drawable.icon_clear_pressed);
                     return true;
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    removeQuoteButton.setBackgroundResource(R.drawable.ic_clear);
+                    removeQuoteButton.setBackgroundResource(R.drawable.icon_clear);
                     return true;
                 }
             }
@@ -510,15 +510,15 @@ public class ChatActivity extends AppCompatActivity {
         String creationTime = room.getTime();
 
         try {
-            creationTime = sdf_local.format(sdf_local.parse(creationTime));
+            creationTime = sdf.format(sdf.parse(creationTime));
         } catch (ParseException e) {
             Log.e("ParseException", e.toString());
         }
 
         User user = getUser(room.getAdmin());
-        String creationTimeCon = creationTime.substring(6, 8) + "." + creationTime.substring(4,6) + "." + creationTime.substring(0, 4);
+        String creationTimeCon = StringOperations.convertDateToDisplayFormat(creationTime);
         String text = getResources().getString(R.string.roomintro, creationTimeCon, user.getName());
-        Message m = new Message(user, text, creationTime, room.getKey(), Message.Type.HEADER, null, false);
+        Message m = new Message(user, text, creationTime, room.getKey(), Message.Type.HEADER, null, false, false);
 
         messageList.add(m);
         mAdapter.notifyDataSetChanged();
@@ -530,25 +530,26 @@ public class ChatActivity extends AppCompatActivity {
         String image = dataSnapshot.child("image").getValue().toString();
         String userId = dataSnapshot.child("sender").getValue().toString();
         boolean pinned = (boolean) dataSnapshot.child("pinned").getValue();
+        boolean forwarded = (boolean) dataSnapshot.child("forwarded").getValue();
         String quote = dataSnapshot.child("quote").getValue().toString();
         String time = dataSnapshot.child("time").getValue().toString();
 
         User user = getUser(userId);
 
         try {
-            time = sdf_local.format(sdf_local.parse(time));
+            time = sdf.format(sdf.parse(time));
         } catch (ParseException e) {
             Log.e("ParseException", e.toString());
         }
         if (lastReadMessage.equals(lastKey) && !lastReadMessageReached) {
-            Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, "-", Message.Type.HEADER, null, false);
+            Message m = new Message(user, getResources().getString(R.string.unreadmessages), time, "-", Message.Type.HEADER, null, false, false);
             messageList.add(m);
         }
         lastKey = key;
 
         if (index == -1 && !messageList.get(messageList.size() - 1).getTime().substring(0, 8).equals(time.substring(0, 8))) {
-            String timeText = time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
-            Message m = new Message(user, timeText, time, "-", Message.Type.HEADER, null, false);
+            String timeText = StringOperations.convertDateToDisplayFormat(time);
+            Message m = new Message(user, timeText, time, "-", Message.Type.HEADER, null, false, false);
             messageList.add(m);
         }
 
@@ -563,24 +564,24 @@ public class ChatActivity extends AppCompatActivity {
         Message m;
         if (quote.equals("")) {
             if (!text.equals("")) {
-                if (text.length() > 11 && text.substring(0, 12).equals("(Forwarded) ")) {
-                    if (text.length() > 2000 + 12) {
-                        m = new Message(user, text.substring(12), time, key, Message.getFittingForwardedExpandableMessageType(sender, con), null, pinned);
+                if (forwarded) {
+                    if (text.length() > 2000) {
+                        m = new Message(user, text, time, key, Message.getFittingForwardedExpandableMessageType(sender, con), null, pinned, forwarded);
                     } else {
-                        m = new Message(user, text.substring(12), time, key, Message.getFittingForwardedMessageType(sender, con), null, pinned);
+                        m = new Message(user, text, time, key, Message.getFittingForwardedMessageType(sender, con), null, pinned, forwarded);
                     }
                 } else {
                     if (text.length() > 2000) {
-                        m = new Message(user, text, time, key, Message.getFittingExpandableMessageType(sender, con), null, pinned);
+                        m = new Message(user, text, time, key, Message.getFittingExpandableMessageType(sender, con), null, pinned, forwarded);
                     } else {
-                        m = new Message(user, text, time, key, Message.getFittingBasicMessageType(sender, con), null, pinned);
+                        m = new Message(user, text, time, key, Message.getFittingBasicMessageType(sender, con), null, pinned, forwarded);
                     }
                 }
             } else {
                 if (!imageList.contains(image)) {
                     imageList.add(image);
                 }
-                m = new Message(user, image, time, key, Message.getFittingImageMessageType(sender, con), null, pinned);
+                m = new Message(user, image, time, key, Message.getFittingImageMessageType(sender, con), null, pinned, forwarded);
             }
         } else {
             Message quotedMessage = null;
@@ -593,15 +594,15 @@ public class ChatActivity extends AppCompatActivity {
 
             if (quotedMessage != null) {
                 if (!Message.isImage(quotedMessage.getType())) {
-                    m = new Message(user, text, time, key, Message.getFittingQuoteMessageType(sender, con), quotedMessage, pinned);
+                    m = new Message(user, text, time, key, Message.getFittingQuoteMessageType(sender, con), quotedMessage, pinned, forwarded);
                 } else {
-                    m = new Message(user, text, time, key, Message.getFittingQuoteImageMessageType(sender, con), quotedMessage, pinned);
+                    m = new Message(user, text, time, key, Message.getFittingQuoteImageMessageType(sender, con), quotedMessage, pinned, forwarded);
                 }
             } else {
                 quotedMessage = new Message();
                 quotedMessage.setText(getResources().getString(R.string.quotedmessagenolongeravailable));
                 quotedMessage.setKey(quote);
-                m = new Message(user, text, time, key, Message.getFittingQuoteDeletedMessageType(sender, con), quotedMessage, pinned);
+                m = new Message(user, text, time, key, Message.getFittingQuoteDeletedMessageType(sender, con), quotedMessage, pinned, forwarded);
             }
         }
         if (index != -1 && messageList.get(ind).getTime().equals("")) {
@@ -851,6 +852,7 @@ public class ChatActivity extends AppCompatActivity {
                 map.put("text", "");
                 map.put("image", imageName);
                 map.put("pinned", false);
+                map.put("forwarded", false);
                 map.put("quote", "");
                 map.put("time", currentDateAndTime);
 
@@ -858,7 +860,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 quoteStatus = "";
 
-                if (type == ImageOperations.CAPTURE_IMAGE_REQUEST && settings.getBoolean(MainActivity.settingsStoreCameraPicturesKey, true)) {
+                if (type == ImageOperations.CAPTURE_IMAGE_REQUEST && settings.getBoolean(Constants.settingsStoreCameraPicturesKey, true)) {
                     downloadImage(imageName, type);
                 }
             } else {
@@ -875,15 +877,16 @@ public class ChatActivity extends AppCompatActivity {
                         .centerCrop()
                         .thumbnail(0.05f)
                         .into(roomImageButton);
+
+                removeRoomImage.setVisibility(View.VISIBLE);
             }
         }).addOnFailureListener(e -> {
             Log.e("Upload failed", e.toString());
             progressDialog.dismiss();
-            Toast.makeText(ChatActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+            Toast.makeText(ChatActivity.this, R.string.image_upload_failed, Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(taskSnapshot -> {
-            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                    .getTotalByteCount());
-            progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
+            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+            progressDialog.setMessage((int)progress + "% " + getResources().getString(R.string.uploaded));
         });
     }
 
@@ -1090,6 +1093,39 @@ public class ChatActivity extends AppCompatActivity {
         }
     };
 
+    public BroadcastReceiver deleteReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(final Context context, Intent intent) {
+            String messageId = intent.getStringExtra("messageID");
+            for (Message m : messageList) {
+                if (m.getKey().equals(messageId)) {
+                    deleteMessage(m);
+                }
+            }
+        }
+    };
+
+    private void deleteMessage(Message message) {
+        AlertDialog.Builder builder;
+        if (theme == Theme.DARK) {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
+        } else {
+            builder = new AlertDialog.Builder(this);
+        }
+        builder.setTitle(R.string.really_delete_message);
+        builder.setPositiveButton(R.string.yes, (dialogInterface, which) -> {
+            roomRoot.child(roomKey).child(Constants.messagesDatabaseKey).child(message.getKey()).removeValue();
+            if (Message.isImage(message.getType())) {
+                StorageReference ref = storageReference.child(Constants.imagesStorageKey + message.getText());
+                ref.delete();
+            }
+            Toast.makeText(getApplicationContext(), R.string.message_deleted, Toast.LENGTH_SHORT).show();
+        });
+        builder.setNegativeButton(R.string.no, null);
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
     private class SingleTapConfirm extends GestureDetector.SimpleOnGestureListener {
 
         @Override
@@ -1160,66 +1196,92 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu (Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        if (!fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
-            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
-                inflater.inflate(R.menu.menu_chatroom, menu);
-            } else {
-                inflater.inflate(R.menu.menu_chatroom_unmute, menu);
-            }
-        } else {
-            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
-                inflater.inflate(R.menu.menu_chatroom_unfav, menu);
-            } else {
-                inflater.inflate(R.menu.menu_chatroom_unmute_unfav, menu);
-            }
-        }
-
-        if (menu instanceof MenuBuilder) {
-            MenuBuilder m = (MenuBuilder) menu;
-            m.setOptionalIconsVisible(true);
-        }
-
-        MenuItem searchItem = menu.findItem(R.id.roomsearch);
-        searchView = (SearchView) searchItem.getActionView();
-        searchView.setFocusable(false);
-        searchView.setQueryHint(getResources().getString(R.string.searchmessage));
-        ImageView searchClose = searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
-        searchClose.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
             @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String s) {
-                TextView noMessageFound = findViewById(R.id.no_message_found);
-                if (!s.trim().isEmpty()) {
-                    searchResultList = searchMessage(s);
-
-                    if (!searchResultList.isEmpty()) {
-                        mAdapter = new MessageAdapter(searchResultList);
-                        recyclerView.setAdapter(mAdapter);
-                        recyclerView.setVisibility(View.VISIBLE);
-                        noMessageFound.setVisibility(View.GONE);
-                        mAdapter.notifyDataSetChanged();
-                        recyclerView.scrollToPosition(searchResultList.size() - 1);
-                    } else {
-                        recyclerView.setVisibility(View.GONE);
-                        noMessageFound.setVisibility(View.VISIBLE);
-                    }
+            public void run() {
+                if (room == null) {
+                    handler.postDelayed(this, 10);
                 } else {
-                    mAdapter = new MessageAdapter(messageList);
-                    recyclerView.setVisibility(View.VISIBLE);
-                    noMessageFound.setVisibility(View.GONE);
-                    recyclerView.setAdapter(mAdapter);
-                    mAdapter.notifyDataSetChanged();
+                    MenuInflater inflater = getMenuInflater();
+                    if (room.getAdmin().equals(mAuth.getCurrentUser().getUid())) {
+                        if (!fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+                            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+                                inflater.inflate(R.menu.menu_chatroom_admin, menu);
+                            } else {
+                                inflater.inflate(R.menu.menu_chatroom_unmute_admin, menu);
+                            }
+                        } else {
+                            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+                                inflater.inflate(R.menu.menu_chatroom_unfav_admin, menu);
+                            } else {
+                                inflater.inflate(R.menu.menu_chatroom_unmute_unfav_admin, menu);
+                            }
+                        }
+                    } else {
+                        if (!fileOperations.readFromFile(String.format(FileOperations.favFilePattern, roomKey)).equals("1")) {
+                            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+                                inflater.inflate(R.menu.menu_chatroom, menu);
+                            } else {
+                                inflater.inflate(R.menu.menu_chatroom_unmute, menu);
+                            }
+                        } else {
+                            if (!fileOperations.readFromFile(String.format(FileOperations.muteFilePattern, roomKey)).equals("1")) {
+                                inflater.inflate(R.menu.menu_chatroom_unfav, menu);
+                            } else {
+                                inflater.inflate(R.menu.menu_chatroom_unmute_unfav, menu);
+                            }
+                        }
+                    }
+
+                    if (menu instanceof MenuBuilder) {
+                        MenuBuilder m = (MenuBuilder) menu;
+                        m.setOptionalIconsVisible(true);
+                    }
+
+                    MenuItem searchItem = menu.findItem(R.id.roomsearch);
+                    searchView = (SearchView) searchItem.getActionView();
+                    searchView.setFocusable(false);
+                    searchView.setQueryHint(getResources().getString(R.string.searchmessage));
+                    ImageView searchClose = searchView.findViewById(androidx.appcompat.R.id.search_close_btn);
+                    searchClose.setColorFilter(Color.WHITE, PorterDuff.Mode.SRC_ATOP);
+                    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+                        @Override
+                        public boolean onQueryTextSubmit(String s) {
+                            return false;
+                        }
+
+                        @Override
+                        public boolean onQueryTextChange(String s) {
+                            TextView noMessageFound = findViewById(R.id.no_message_found);
+                            if (!s.trim().isEmpty()) {
+                                searchResultList = searchMessage(s);
+
+                                if (!searchResultList.isEmpty()) {
+                                    mAdapter = new MessageAdapter(searchResultList);
+                                    recyclerView.setAdapter(mAdapter);
+                                    recyclerView.setVisibility(View.VISIBLE);
+                                    noMessageFound.setVisibility(View.GONE);
+                                    mAdapter.notifyDataSetChanged();
+                                    recyclerView.scrollToPosition(searchResultList.size() - 1);
+                                } else {
+                                    recyclerView.setVisibility(View.GONE);
+                                    noMessageFound.setVisibility(View.VISIBLE);
+                                }
+                            } else {
+                                mAdapter = new MessageAdapter(messageList);
+                                recyclerView.setVisibility(View.VISIBLE);
+                                noMessageFound.setVisibility(View.GONE);
+                                recyclerView.setAdapter(mAdapter);
+                                mAdapter.notifyDataSetChanged();
+                            }
+                            return false;
+                        }
+                    });
                 }
-                return false;
             }
-        });
+        }, 10);
 
         return true;
     }
@@ -1253,6 +1315,9 @@ public class ChatActivity extends AppCompatActivity {
         } else if (item.getItemId() == R.id.roomleave) {
             leaveRoom();
             return true;
+        } else if (item.getItemId() == R.id.roomdelete) {
+            deleteRoom();
+            return true;
         } else if (item.getItemId() == android.R.id.home) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(userReceiver);
             LocalBroadcastManager.getInstance(this).unregisterReceiver(forwardReceiver);
@@ -1264,7 +1329,7 @@ public class ChatActivity extends AppCompatActivity {
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
-            if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
+            if (settings.getBoolean(Constants.settingsSaveEnteredTextKey, true)) {
                 fileOperations.writeToFile(messageInput.getText().toString().trim().replaceAll("\\n", "<br />"), String.format(FileOperations.currentInputFilePattern, roomKey));
                 if (!messageInput.getText().toString().trim().isEmpty()) {
                     Toast.makeText(this, R.string.messagesaved, Toast.LENGTH_SHORT).show();
@@ -1295,7 +1360,7 @@ public class ChatActivity extends AppCompatActivity {
         final ListView memberListView = view.findViewById(R.id.memberList);
         memberListView.setAdapter(new MemberListAdapter(getApplicationContext(), memberList, room.getAdmin()));
 
-        String time = room.getTime().substring(6, 8) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(0, 4);
+        String time = StringOperations.convertDateToDisplayFormat(room.getTime());
         roomNameText.setText(room.getName());
         roomDescriptionText.setText(room.getDescription());
         roomCategoryText.setText(getResources().getStringArray(R.array.categories)[room.getCategory()]);
@@ -1304,7 +1369,6 @@ public class ChatActivity extends AppCompatActivity {
 
         final StorageReference refRoomImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImage());
         GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refRoomImage)
                 .centerCrop()
                 .into(roomImage);
@@ -1322,7 +1386,6 @@ public class ChatActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.close, null);
         if (room.getAdmin().equals(userID)) {
             builder.setNegativeButton(R.string.editroom, (dialogInterface, i) -> editRoom());
-            builder.setNeutralButton(R.string.delete_room, (dialogInterface, i) -> deleteRoom());
         }
         AlertDialog alert = builder.create();
         alert.show();
@@ -1335,7 +1398,7 @@ public class ChatActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(fullscreenReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(jumppinnedReceiver);
         LocalBroadcastManager.getInstance(this).unregisterReceiver(closeFullscreenReceiver);
-        if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
+        if (settings.getBoolean(Constants.settingsSaveEnteredTextKey, true)) {
             fileOperations.writeToFile(messageInput.getText().toString().trim().replaceAll("\\n", "<br />"), String.format(FileOperations.currentInputFilePattern, roomKey));
         }
         fileOperations.writeToFile("0", FileOperations.currentRoomFile);
@@ -1347,7 +1410,7 @@ public class ChatActivity extends AppCompatActivity {
 
     @Override
     public void onPause() {
-        if (settings.getBoolean(MainActivity.settingsSaveEnteredTextKey, true)) {
+        if (settings.getBoolean(Constants.settingsSaveEnteredTextKey, true)) {
             fileOperations.writeToFile(messageInput.getText().toString().trim().replaceAll("\\n", "<br />"), String.format(FileOperations.currentInputFilePattern, roomKey));
         }
         if (!messageList.isEmpty()) {
@@ -1388,15 +1451,15 @@ public class ChatActivity extends AppCompatActivity {
     private ArrayList<Message> searchStringInMessage(ArrayList<Message> searchedMessageList, Message m, String text) {
         if (m.getText().toLowerCase().contains(text.toLowerCase()) && m.getType() != Message.Type.HEADER && !Message.isImage(m.getType())) {
             if (searchedMessageList.isEmpty() || !searchedMessageList.get(searchedMessageList.size() - 1).getTime().substring(0, 8).equals(m.getTime().substring(0, 8))) {
-                String time = m.getTime().substring(6, 8) + "." + m.getTime().substring(4, 6) + "." + m.getTime().substring(0, 4);
-                Message m2 = new Message(m.getUser(), time, m.getTime(), "-", Message.Type.HEADER, null, m.isPinned());
+                String time = StringOperations.convertDateToDisplayFormat(m.getTime());
+                Message m2 = new Message(m.getUser(), time, m.getTime(), "-", Message.Type.HEADER, null, m.isPinned(), m.isForwarded());
                 searchedMessageList.add(m2);
             }
             Message m2;
             if (Message.isConMessage(m.getType())) {
-                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuotedMessage(), m.isPinned());
+                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), Message.getNonConTypeForConType(m.getType()), m.getQuotedMessage(), m.isPinned(), m.isForwarded());
             } else {
-                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), m.getType(), m.getQuotedMessage(), m.isPinned());
+                m2 = new Message(m.getUser(), m.getText(), m.getTime(), m.getKey(), m.getType(), m.getQuotedMessage(), m.isPinned(), m.isForwarded());
             }
             m2.setSearchString(text);
             searchedMessageList.add(m2);
@@ -1405,7 +1468,7 @@ public class ChatActivity extends AppCompatActivity {
     }
 
     private String createBackup() {
-        String currentDateAndTime = sdf_local.format(new Date());
+        String currentDateAndTime = sdf.format(new Date());
         String fcdat = currentDateAndTime.substring(0, 4) + "." + currentDateAndTime.substring(4, 6) + "." + currentDateAndTime.substring(6, 8) + " " + currentDateAndTime.substring(9, 11) + ":" + currentDateAndTime.substring(11, 13) + ":" + currentDateAndTime.substring(13, 15);
         String ftime = room.getTime().substring(0, 4) + "." + room.getTime().substring(4, 6) + "." + room.getTime().substring(6, 8) + " " + room.getTime().substring(9, 11) + ":" + room.getTime().substring(11, 13) + ":" + room.getTime().substring(13, 15);
         String backup = getResources().getString(R.string.backupof) + " " + roomName + "\n" + getResources().getString(R.string.createdon) + ": " + fcdat + "\n\n" +
@@ -1444,7 +1507,7 @@ public class ChatActivity extends AppCompatActivity {
                 path.mkdirs();
             }
 
-            final File file = new File(path, getResources().getString(R.string.app_name) + "_" + roomName.replace(" ", "") + "_backup.txt");
+            final File file = new File(path, getResources().getString(R.string.app_name) + "_" + roomName.replace(" ", "_").replace("/", "_") + "_backup.txt");
 
             try {
                 file.createNewFile();
@@ -1459,7 +1522,7 @@ public class ChatActivity extends AppCompatActivity {
 
                 createSnackbar(file, "text/plain", getResources().getString(R.string.backupcreated));
             } catch (IOException e) {
-                Log.e("Exception", "File write failed: " + e.toString());
+                Log.e("Exception", "File write failed: " + e);
             }
         }
     }
@@ -1477,7 +1540,7 @@ public class ChatActivity extends AppCompatActivity {
                 });
         View sbView = snack.getView();
         if (theme == Theme.DARK) {
-            sbView.setBackgroundColor(getResources().getColor(R.color.dark_actionbar));
+            sbView.setBackgroundColor(getResources().getColor(R.color.dark_button));
         } else {
             sbView.setBackgroundColor(getResources().getColor(R.color.red));
         }
@@ -1496,7 +1559,7 @@ public class ChatActivity extends AppCompatActivity {
 
         recyclerView.scrollToPosition(messageList.size() - 1);
 
-        if (imageListOpened) {
+        if (imageListAlert != null && imageListAlert.isShowing()) {
             imageListAlert.dismiss();
             openImageList();
         }
@@ -1603,7 +1666,7 @@ public class ChatActivity extends AppCompatActivity {
 
         profileName.setText(user.getName());
         profileDescription.setText(user.getDescription());
-        birthday.setText(user.getBirthday().substring(6, 8) + "." + user.getBirthday().substring(4, 6) + "." + user.getBirthday().substring(0, 4));
+        birthday.setText(StringOperations.convertDateToDisplayFormat(user.getBirthday()));
         location.setText(user.getLocation());
 
         builder.setCustomTitle(setupHeader(getResources().getString(R.string.profile, user.getName())));
@@ -1631,8 +1694,8 @@ public class ChatActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.cancel, null);
         final AlertDialog alert = builder.create();
         alert.show();
-        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-            int position = listView.getPositionForView(view1);
+        listView.setOnItemClickListener((adapterView, layoutView, i, l) -> {
+            int position = listView.getPositionForView(layoutView);
             String roomKey = roomList.get(position).getKey();
             Message fMessage = new Message();
             for (Message m : messageList) {
@@ -1652,10 +1715,11 @@ public class ChatActivity extends AppCompatActivity {
                 map.put("text", "");
                 map.put("image", fMessage.getText());
             } else {
-                map.put("text", "(Forwarded) " + fMessage.getText());
+                map.put("text", fMessage.getText());
                 map.put("image", "");
             }
             map.put("pinned", false);
+            map.put("forwarded", true);
             map.put("quote", quoteStatus);
             map.put("time", currentDateAndTime);
 
@@ -1677,7 +1741,7 @@ public class ChatActivity extends AppCompatActivity {
             }
         }
 
-        return new User(userId, getResources().getString(R.string.unknownuser), "19700101", "", getResources().getString(R.string.unknown), 0, "unknown_user", "");
+        return User.getUnknownUser(this, userId);
     }
 
     private void showFullscreenImage(String image, Image type) {
@@ -1729,7 +1793,7 @@ public class ChatActivity extends AppCompatActivity {
             View view = inflater.inflate(R.layout.image_list, null);
             GridView imageGrid = view.findViewById(R.id.gridview);
             imageGrid.setAdapter(new ImageAdapter(this, imageList));
-            imageGrid.setOnItemClickListener((adapterView, view1, i, l) -> showFullscreenImage(imageList.get(i), Image.MESSAGE_IMAGE));
+            imageGrid.setOnItemClickListener((adapterView, layoutView, i, l) -> showFullscreenImage(imageList.get(i), Image.MESSAGE_IMAGE));
             AlertDialog.Builder builder;
             if (theme == Theme.DARK) {
                 builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
@@ -1738,10 +1802,9 @@ public class ChatActivity extends AppCompatActivity {
             }
             builder.setCustomTitle(setupHeader(getResources().getString(R.string.images)));
             builder.setView(view);
-            builder.setPositiveButton(R.string.close, (dialogInterface, i) -> imageListOpened = false);
+            builder.setPositiveButton(R.string.close, null);
             imageListAlert = builder.create();
             imageListAlert.show();
-            imageListOpened = true;
         } else {
             Toast.makeText(this, R.string.noimagesfound, Toast.LENGTH_SHORT).show();
         }
@@ -1864,6 +1927,7 @@ public class ChatActivity extends AppCompatActivity {
         alert.show();
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void editRoom() {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.add_room, null);
@@ -1876,6 +1940,11 @@ public class ChatActivity extends AppCompatActivity {
         final TextInputLayout roomNameLayout = view.findViewById(R.id.room_name_layout);
         final TextInputLayout roomPasswordLayout = view.findViewById(R.id.room_password_layout);
         final TextInputLayout roomPasswordRepeatLayout = view.findViewById(R.id.room_password_repeat_layout);
+
+        removeRoomImage = view.findViewById(R.id.room_image_remove);
+        if (room.getImage().startsWith("standard")) {
+            removeRoomImage.setVisibility(View.GONE);
+        }
 
         roomNameEditText.setText(room.getName());
         roomDescriptionEditText.setText(room.getDescription());
@@ -1903,86 +1972,65 @@ public class ChatActivity extends AppCompatActivity {
             }
         });
 
-        roomNameEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomNameLayout.setError(null);
-                }
-            }
-        });
-
-        roomPasswordEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomPasswordLayout.setError(null);
-                }
-            }
-        });
-
-        roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    roomPasswordRepeatLayout.setError(null);
-                }
-            }
-        });
+        roomNameEditText.addTextChangedListener(new TextWatcher(roomNameLayout));
+        roomPasswordEditText.addTextChangedListener(new TextWatcher(roomPasswordLayout));
+        roomPasswordRepeatEditText.addTextChangedListener(new TextWatcher(roomPasswordRepeatLayout));
 
         final StorageReference refImage = storage.getReference().child(Constants.roomImagesStorageKey + room.getImage());
+        GlideApp.with(getApplicationContext())
+                .load(refImage)
+                .centerCrop()
+                .into(roomImageButton);
 
-        if (theme == Theme.DARK) {
-            GlideApp.with(getApplicationContext())
-                    .load(refImage)
-                    .placeholder(R.drawable.side_nav_bar_dark)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(roomImageButton);
-        } else {
-            GlideApp.with(getApplicationContext())
-                    .load(refImage)
-                    .placeholder(R.drawable.side_nav_bar)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(roomImageButton);
-        }
+        roomImageButton.setOnTouchListener((roomImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                roomImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickRoomImageLauncher.launch(intent);
+                }
 
-        roomImageButton.setOnClickListener(view13 -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickRoomImageLauncher.launch(intent);
+                roomImageButton.setForeground(null);
+            }
+
+            return true;
+        });
+
+        removeRoomImage.setOnTouchListener((removeImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeRoomImage.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    String imageRoom = ImageOperations.getStandardRoomImage();
+
+                    DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("image", imageRoom);
+                    messageRoot.updateChildren(map);
+
+                    room.setImage(imageRoom);
+
+                    StorageReference pathReference = storage.getReference().child(Constants.roomImagesStorageKey + imageRoom);
+                    GlideApp.with(getApplicationContext())
+                            .load(pathReference)
+                            .centerCrop()
+                            .thumbnail(0.05f)
+                            .into(roomImageButton);
+
+                    removeRoomImage.setVisibility(View.GONE);
+                }
+
+                removeRoomImage.setBackgroundResource(R.drawable.icon_clear);
+            }
+
+            return true;
         });
 
         AlertDialog.Builder builder;
@@ -1996,10 +2044,10 @@ public class ChatActivity extends AppCompatActivity {
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
             openInfo();
@@ -2007,7 +2055,7 @@ public class ChatActivity extends AppCompatActivity {
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 final String roomName = roomNameEditText.getText().toString().trim();
                 final String roomPassword = roomPasswordEditText.getText().toString().trim();
                 final String roomPasswordRepeat = roomPasswordRepeatEditText.getText().toString().trim();
@@ -2017,9 +2065,9 @@ public class ChatActivity extends AppCompatActivity {
                         if (!roomPassword.isEmpty()) {
                             if (!roomPasswordRepeat.isEmpty()) {
                                 if (roomPassword.equals(roomPasswordRepeat)) {
-                                    if (view12 != null) {
+                                    if (buttonView != null) {
                                         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                        imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                                        imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                                     }
                                     DatabaseReference messageRoot = roomRoot.child(roomKey).child(Constants.roomDataDatabaseKey);
                                     Map<String, Object> map = new HashMap<>();
@@ -2067,14 +2115,14 @@ public class ChatActivity extends AppCompatActivity {
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
         }
-        builder.setCustomTitle(setupHeader(getResources().getString(R.string.delete_room)));
+        builder.setCustomTitle(setupHeader(getResources().getString(R.string.delete_room_header)));
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.close, null);
         AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().getUid().equals(room.getAdmin())) {
                     roomRoot.child(roomKey).removeValue((error, ref) -> {
                         Intent homeIntent = new Intent(ChatActivity.this, MainActivity.class);

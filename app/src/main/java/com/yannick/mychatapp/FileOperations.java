@@ -44,11 +44,11 @@ public class FileOperations {
                 result = stringBuilder.toString();
             }
         } catch (FileNotFoundException e) {
-            Log.e("FileOperations", "File not found: " + e.toString());
+            Log.e("FileOperations", "File not found: " + e);
         } catch (IOException e) {
-            Log.e("FileOperations", "Can not read file: " + e.toString());
+            Log.e("FileOperations", "Can not read file: " + e);
         } catch (NullPointerException e) {
-            Log.e("FileOperations", "NullPointerException: " + e.toString());
+            Log.e("FileOperations", "NullPointerException: " + e);
         }
 
         return result;
@@ -60,7 +60,7 @@ public class FileOperations {
             outputStreamWriter.write(text);
             outputStreamWriter.close();
         } catch (IOException e) {
-            Log.e("FileOperations", "File write failed: " + e.toString());
+            Log.e("FileOperations", "File write failed: " + e);
         }
     }
 }

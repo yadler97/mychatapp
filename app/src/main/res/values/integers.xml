@@ -3,8 +3,15 @@
     <integer name="ExpandableMaxLines">25</integer>
     <integer name="ExpandableMaxLinesLand">15</integer>
 
-    <integer name="max_profile_password_length">32</integer>
-    <integer name="max_room_password_length">32</integer>
+    <integer name="maxProfileNameLength">15</integer>
+    <integer name="maxProfileDescriptionLength">200</integer>
+    <integer name="maxProfileLocationLength">25</integer>
+    <integer name="maxProfileEmailLength">40</integer>
+    <integer name="maxProfilePasswordLength">32</integer>
+    <integer name="maxRoomNameLength">25</integer>
+    <integer name="maxRoomDescriptionLength">150</integer>
+    <integer name="maxRoomPasswordLength">32</integer>
+    <integer name="maxChatMessageLength">10000</integer>
 
     <integer-array name="themeDrawables">
         <item>@drawable/theme_standard</item>

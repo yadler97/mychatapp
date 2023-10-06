@@ -1,23 +1,22 @@
 package com.yannick.mychatapp.activities;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -32,8 +31,8 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 
-import com.amulyakhare.textdrawable.TextDrawable;
 import com.bumptech.glide.signature.ObjectKey;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -49,6 +48,7 @@ import com.yannick.mychatapp.GlideApp;
 import com.yannick.mychatapp.ImageOperations;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.StringOperations;
+import com.yannick.mychatapp.TextWatcher;
 import com.yannick.mychatapp.data.Theme;
 
 import java.io.ByteArrayOutputStream;
@@ -59,13 +59,13 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class LoginActivity extends AppCompatActivity {
 
     private FirebaseAuth mAuth;
     private Theme theme;
     private FirebaseStorage storage;
-    private static String userID = "";
-    private static final String DEFAULT_BIRTHDAY = "01.01.2000";
     private static boolean ownProfileImage = false;
     private static int colour = 0;
     private final DatabaseReference userRoot = FirebaseDatabase.getInstance().getReference().getRoot().child(Constants.usersDatabaseKey);
@@ -73,8 +73,10 @@ public class LoginActivity extends AppCompatActivity {
     private String image = "";
     private String banner = "";
 
-    private ImageButton profileImageButton;
+    private CircleImageView profileImageButton;
     private ImageButton profileBannerButton;
+    private ImageButton removeProfileImage;
+    private ImageButton removeProfileBanner;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,6 +86,7 @@ public class LoginActivity extends AppCompatActivity {
 
         Button loginButton = findViewById(R.id.loginbutton);
         Button createButton = findViewById(R.id.createbutton);
+        Button resetButton = findViewById(R.id.forgotpasswordbutton);
         EditText inputEmail = findViewById(R.id.login_email);
         EditText inputPassword = findViewById(R.id.login_password);
         TextInputLayout inputEmailLayout = findViewById(R.id.login_email_layout);
@@ -92,43 +95,8 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         storage = FirebaseStorage.getInstance();
 
-        inputEmail.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    inputEmailLayout.setError(null);
-                }
-            }
-        });
-
-        inputPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    inputPasswordLayout.setError(null);
-                }
-            }
-        });
+        inputEmail.addTextChangedListener(new TextWatcher(inputEmailLayout));
+        inputPassword.addTextChangedListener(new TextWatcher(inputPasswordLayout));
 
         loginButton.setOnClickListener(view -> {
             String email = inputEmail.getText().toString().trim();
@@ -145,6 +113,8 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         createButton.setOnClickListener(view -> createAccount());
+
+        resetButton.setOnClickListener(view -> openForgotPasswordDialog());
     }
 
     private void login(String email, String password) {
@@ -194,9 +164,63 @@ public class LoginActivity extends AppCompatActivity {
 
         final AlertDialog alert = builder.create();
 
-        resendEmailButton.setOnClickListener(view1 -> {
+        resendEmailButton.setOnClickListener(buttonView -> {
             resendEmail();
             alert.cancel();
+        });
+
+        alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
+        alert.show();
+    }
+
+    private void openForgotPasswordDialog() {
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View view = inflater.inflate(R.layout.enter_email, null);
+
+        final TextView email = view.findViewById(R.id.account_email);
+        final TextInputLayout emailLayout = view.findViewById(R.id.account_email_layout);
+
+        email.addTextChangedListener(new TextWatcher(emailLayout));
+
+        AlertDialog.Builder builder;
+        if (theme == Theme.DARK) {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialogDark));
+        } else {
+            builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
+        }
+
+        builder.setCustomTitle(setupHeader(getResources().getString(R.string.forgot_password)));
+        builder.setCancelable(false);
+        builder.setView(view);
+        builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
+        builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
+            }
+            dialogInterface.cancel();
+        });
+
+        final AlertDialog alert = builder.create();
+        alert.setOnShowListener(dialogInterface -> {
+            Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
+            b.setOnClickListener(buttonView -> {
+                if (!email.getText().toString().isEmpty()) {
+                    if (Patterns.EMAIL_ADDRESS.matcher(email.getText()).matches()) {
+                        mAuth.sendPasswordResetEmail(email.getText().toString()).addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                Toast.makeText(LoginActivity.this, R.string.password_reset_mail_sent, Toast.LENGTH_SHORT).show();
+                                alert.cancel();
+                            }
+                        });
+                    } else {
+                        emailLayout.setError(getResources().getString(R.string.invalid_email));
+                    }
+                } else {
+                    emailLayout.setError(getResources().getString(R.string.enteremail));
+                }
+            });
         });
 
         alert.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -215,60 +239,9 @@ public class LoginActivity extends AppCompatActivity {
         final TextInputLayout passwordLayout = view.findViewById(R.id.account_password_layout);
         final TextInputLayout passwordRepeatLayout = view.findViewById(R.id.account_password_repeat_layout);
 
-        email.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    emailLayout.setError(null);
-                }
-            }
-        });
-        password.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    passwordLayout.setError(null);
-                }
-            }
-        });
-        passwordRepeat.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    passwordRepeatLayout.setError(null);
-                }
-            }
-        });
+        email.addTextChangedListener(new TextWatcher(emailLayout));
+        password.addTextChangedListener(new TextWatcher(passwordLayout));
+        passwordRepeat.addTextChangedListener(new TextWatcher(passwordRepeatLayout));
 
         image = "";
         banner = "";
@@ -286,10 +259,10 @@ public class LoginActivity extends AppCompatActivity {
         builder.setView(view);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
@@ -297,7 +270,7 @@ public class LoginActivity extends AppCompatActivity {
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!email.getText().toString().isEmpty()) {
                     if (Patterns.EMAIL_ADDRESS.matcher(email.getText()).matches()) {
                         if (!password.getText().toString().trim().isEmpty()) {
@@ -336,7 +309,7 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
-                        userID = user.getUid();
+                        String userID = user.getUid();
 
                         if (!ownProfileImage) {
                             image = UUID.randomUUID().toString();
@@ -356,15 +329,7 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(getApplicationContext(), R.string.profilecreated, Toast.LENGTH_SHORT).show();
 
                         if (!ownProfileImage) {
-                            TextDrawable drawable = TextDrawable.builder()
-                                    .beginConfig()
-                                    .bold()
-                                    .endConfig()
-                                    .buildRect(name.substring(0, 1), getResources().getIntArray(R.array.favcolors)[colour]);
-                            Bitmap bitmap = Bitmap.createBitmap(500, 500, Bitmap.Config.ARGB_8888);
-                            Canvas canvas = new Canvas(bitmap);
-                            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-                            drawable.draw(canvas);
+                            Bitmap bitmap = ImageOperations.generateStandardProfileImage(this, name, colour);
 
                             byte[] byteArray;
                             final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
@@ -387,6 +352,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     private void createAccountData(final String email, final String password) {
         LayoutInflater inflater = LayoutInflater.from(this);
         View view = inflater.inflate(R.layout.edit_profile, null);
@@ -399,64 +365,31 @@ public class LoginActivity extends AppCompatActivity {
         final TextInputLayout usernameLayout = view.findViewById(R.id.user_name_layout);
         final TextInputLayout locationLayout = view.findViewById(R.id.user_location_layout);
 
-        usernameEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        removeProfileImage = view.findViewById(R.id.user_profile_image_remove);
+        removeProfileBanner = view.findViewById(R.id.user_profile_banner_remove);
 
-            }
+        removeProfileImage.setVisibility(View.GONE);
+        removeProfileBanner.setVisibility(View.GONE);
 
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    usernameLayout.setError(null);
-                }
-            }
-        });
-
-        locationEdit.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    locationLayout.setError(null);
-                }
-            }
-        });
+        usernameEdit.addTextChangedListener(new TextWatcher(usernameLayout));
+        locationEdit.addTextChangedListener(new TextWatcher(locationLayout));
 
         final ImageButton favColour = view.findViewById(R.id.user_favcolor);
         profileImageButton = view.findViewById(R.id.user_profile_image);
         profileBannerButton = view.findViewById(R.id.user_profile_banner);
 
-        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
+        final StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + "unknown_user");
         final StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
 
-        birthdayEdit.setText(DEFAULT_BIRTHDAY);
+        birthdayEdit.setText(Constants.DEFAULT_BIRTHDAY);
+
+        GlideApp.with(getApplicationContext())
+                .load(refProfileImage)
+                .centerCrop()
+                .into(profileImageButton);
 
         if (theme == Theme.DARK) {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
-                    .load(refProfileImage)
-                    .placeholder(R.drawable.side_nav_bar_dark)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(profileImageButton);
-
-            GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar_dark)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -464,15 +397,6 @@ public class LoginActivity extends AppCompatActivity {
                     .into(profileBannerButton);
         } else {
             GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
-                    .load(refProfileImage)
-                    .placeholder(R.drawable.side_nav_bar)
-                    .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
-                    .centerCrop()
-                    .into(profileImageButton);
-
-            GlideApp.with(getApplicationContext())
-                    //.using(new FirebaseImageLoader())
                     .load(refProfileBanner)
                     .placeholder(R.drawable.side_nav_bar)
                     .signature(new ObjectKey(String.valueOf(System.currentTimeMillis())))
@@ -480,18 +404,79 @@ public class LoginActivity extends AppCompatActivity {
                     .into(profileBannerButton);
         }
 
-        profileImageButton.setOnClickListener(view15 -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickProfileImageLauncher.launch(intent);
+        profileImageButton.setOnTouchListener((profileImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                profileImageButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay_profile, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickProfileImageLauncher.launch(intent);
+                }
+
+                profileImageButton.setForeground(null);
+            }
+
+            return true;
         });
 
-        profileBannerButton.setOnClickListener(view16 -> {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            pickProfileBannerLauncher.launch(intent);
+        profileBannerButton.setOnTouchListener((profileBannerView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                profileBannerButton.setForeground(ResourcesCompat.getDrawable(getResources(), R.drawable.image_overlay, null));
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    Intent intent = new Intent();
+                    intent.setType("image/*");
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    pickProfileBannerLauncher.launch(intent);
+                }
+
+                profileBannerButton.setForeground(null);
+            }
+
+            return true;
+        });
+
+        removeProfileImage.setOnTouchListener((removeImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeProfileImage.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    image = "";
+                    ownProfileImage = false;
+                    removeProfileImage.setVisibility(View.GONE);
+                    updateEditProfileImages();
+                }
+
+                removeProfileImage.setBackgroundResource(R.drawable.icon_clear);
+            }
+
+            return true;
+        });
+
+        removeProfileBanner.setOnTouchListener((removeImageView, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                removeProfileBanner.setBackgroundResource(R.drawable.icon_clear_pressed);
+            }
+            if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
+                if (action == MotionEvent.ACTION_UP) {
+                    banner = "";
+                    removeProfileBanner.setVisibility(View.GONE);
+                    updateEditProfileImages();
+                }
+
+                removeProfileBanner.setBackgroundResource(R.drawable.icon_clear);
+            }
+
+            return true;
         });
 
         GradientDrawable shape = new GradientDrawable();
@@ -499,10 +484,10 @@ public class LoginActivity extends AppCompatActivity {
         shape.setColor(getResources().getIntArray(R.array.favcolors)[colour]);
         favColour.setBackground(shape);
 
-        AtomicReference<String> selectedBirthday = new AtomicReference<>(DEFAULT_BIRTHDAY);
+        AtomicReference<String> selectedBirthday = new AtomicReference<>(Constants.DEFAULT_BIRTHDAY);
 
-        birthdayEdit.setOnClickListener(view14 -> {
-            DatePickerDialog datePicker = new DatePickerDialog(view14.getContext(), (view141, year, monthOfYear, dayOfMonth) -> {
+        birthdayEdit.setOnClickListener(birthdayEditView -> {
+            DatePickerDialog datePicker = new DatePickerDialog(birthdayEditView.getContext(), (datePickerView, year, monthOfYear, dayOfMonth) -> {
                 String date = StringOperations.buildDate(year, monthOfYear, dayOfMonth);
                 selectedBirthday.set(date);
                 birthdayEdit.setText(date);
@@ -514,7 +499,7 @@ public class LoginActivity extends AppCompatActivity {
             datePicker.show();
         });
 
-        favColour.setOnClickListener(view13 -> {
+        favColour.setOnClickListener(favColourEditView -> {
             SpectrumDialog.Builder builder;
             if (theme == Theme.DARK) {
                 builder = new SpectrumDialog.Builder(getApplicationContext(), R.style.AlertDialogDark);
@@ -551,20 +536,18 @@ public class LoginActivity extends AppCompatActivity {
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
 
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
-            userID = "";
         });
 
         final AlertDialog alert = builder.create();
         alert.setOnShowListener(dialogInterface -> {
-
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!usernameEdit.getText().toString().isEmpty()) {
                     if (!locationEdit.getText().toString().isEmpty()) {
                         if (!birthdayEdit.getText().toString().isEmpty()) {
@@ -575,9 +558,9 @@ public class LoginActivity extends AppCompatActivity {
 
                             createAccountAuth(email, password, username, description, location, birthday);
 
-                            if (view12 != null) {
+                            if (buttonView != null) {
                                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                                imm.hideSoftInputFromWindow(view12.getWindowToken(), 0);
+                                imm.hideSoftInputFromWindow(buttonView.getWindowToken(), 0);
                             }
 
                             alert.cancel();
@@ -650,34 +633,32 @@ public class LoginActivity extends AppCompatActivity {
             progressDialog.dismiss();
             if (type == ImageOperations.PICK_PROFILE_IMAGE_REQUEST) {
                 ownProfileImage = true;
+                removeProfileImage.setVisibility(View.VISIBLE);
+            } else {
+                removeProfileBanner.setVisibility(View.VISIBLE);
             }
             updateEditProfileImages();
             Toast.makeText(LoginActivity.this, R.string.imageuploaded, Toast.LENGTH_SHORT).show();
         }).addOnFailureListener(e -> {
             Log.e("Upload failed", e.toString());
             progressDialog.dismiss();
-            Toast.makeText(LoginActivity.this, R.string.imagetoolarge, Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, R.string.image_upload_failed, Toast.LENGTH_SHORT).show();
         }).addOnProgressListener(taskSnapshot -> {
-            double progress = (100.0*taskSnapshot.getBytesTransferred()/taskSnapshot
-                    .getTotalByteCount());
-            progressDialog.setMessage((int)progress+"% " + getResources().getString(R.string.uploaded));
+            double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+            progressDialog.setMessage((int)progress + "% " + getResources().getString(R.string.uploaded));
         });
     }
 
     private void updateEditProfileImages() {
         StorageReference refProfileImage = storage.getReference().child(Constants.profileImagesStorageKey + image);
         refProfileImage.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refProfileImage)
-                .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                 .centerCrop()
                 .into(profileImageButton));
 
         StorageReference refProfileBanner = storage.getReference().child(Constants.profileBannersStorageKey + banner);
         refProfileBanner.getMetadata().addOnSuccessListener(storageMetadata -> GlideApp.with(getApplicationContext())
-                //.using(new FirebaseImageLoader())
                 .load(refProfileBanner)
-                .signature(new ObjectKey(String.valueOf(storageMetadata.getCreationTimeMillis())))
                 .centerCrop()
                 .thumbnail(0.05f)
                 .into(profileBannerButton));

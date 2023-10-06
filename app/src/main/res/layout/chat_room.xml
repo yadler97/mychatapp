@@ -76,7 +76,7 @@
                     android:id="@+id/quote_remove"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:background="@drawable/ic_clear"
+                    android:background="@drawable/icon_clear"
                     android:layout_alignParentRight="true" />
 
             </RelativeLayout>
@@ -99,7 +99,7 @@
                 android:id="@+id/btn_camera"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@drawable/ic_camera"
+                android:background="@drawable/icon_camera"
                 android:gravity="center"
                 android:layout_gravity="bottom"
                 android:layout_marginLeft="5dp"
@@ -109,7 +109,7 @@
                 android:id="@+id/btn_image"
                 android:layout_width="30dp"
                 android:layout_height="30dp"
-                android:background="@drawable/ic_image"
+                android:background="@drawable/icon_image"
                 android:gravity="center"
                 android:layout_gravity="bottom"
                 android:layout_marginLeft="5dp"
@@ -127,7 +127,7 @@
                 android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:imeOptions="actionDone"
-                android:maxLength="10000"
+                android:maxLength="@integer/maxChatMessageLength"
                 android:maxLines="6" />
 
             <Button
@@ -168,7 +168,7 @@
         android:layout_marginRight="4dp"
         android:layout_marginBottom="6dp"
         android:layout_gravity="end"
-        android:src="@drawable/ic_arrowdown"
+        android:src="@drawable/icon_arrow_down"
         app:layout_anchor="@+id/margin"
         app:layout_anchorGravity="top|right"
         app:fabSize="mini" />

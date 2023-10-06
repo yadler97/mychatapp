@@ -20,7 +20,6 @@ public class SplashActivity extends AppCompatActivity{
     private final static int SPLASH_OUT_TIME = 2000;
     private Theme theme;
     private FirebaseAuth mAuth;
-    private FirebaseAnalytics mFirebaseAnalytics;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +27,7 @@ public class SplashActivity extends AppCompatActivity{
         changeTheme(Theme.getCurrentTheme(this));
         setContentView(R.layout.activity_splash);
 
-        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+        FirebaseAnalytics mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         Bundle params = new Bundle();
         if (theme == Theme.DARK) {
             params.putString("theme", "dark");

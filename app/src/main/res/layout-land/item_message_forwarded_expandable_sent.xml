@@ -29,7 +29,7 @@
             <ImageView
                 android:layout_width="16dp"
                 android:layout_height="16dp"
-                android:background="@drawable/ic_fw"
+                android:background="@drawable/icon_forward_message"
                 android:layout_gravity="center"
                 android:layout_marginRight="5dp" />
 

@@ -34,7 +34,7 @@
     <string name="enterroomname">Raumnamen eingeben</string>
     <string name="selectcategory">Kategorie auswählen</string>
     <string name="imageuploaded">Bild hochgeladen</string>
-    <string name="imagetoolarge">Fehlgeschlagen: Bild zu groß</string>
+    <string name="image_upload_failed">Bild hochladen fehlgschlagen</string>
     <string name="copy">Kopieren</string>
     <string name="quote">Zitieren</string>
     <string name="jumptoquotedimage">Zu zitiertem Bild springen</string>
@@ -154,10 +154,16 @@
     <string name="account_successfully_deleted">Account erfolgreich gelöscht</string>
     <string name="account_deletion_info">ACHTUNG: Du bist kurz davor, deinen Account zu löschen. Diese Aktion kann nicht rückgängig gemacht werden! Wenn du wirklich deinen Account löschen möchtest, dann gib bitte dein Passwort ein, um fortzufahren.</string>
     <string name="email_verification_info">Du musst deine Mail-Adresse bestätigen, bevor du deinen Account nutzen kannst. Wenn du keine Mail erhalten hast, klicke bitte den \"Erneut Versenden\"-Button. Wenn du deine Mail-Adresse bestätigt hast, kannst du dieses Fenster schließen und mit dem Login fortfahren.</string>
-    <string name="delete_room">Raum löschen</string>
+    <string name="delete_room"><font color='#FF0000'>Raum löschen</font></string>
+    <string name="delete_room_header">Raum löschen</string>
     <string name="room_successfully_deleted">Raum erfolgreich gelöscht</string>
     <string name="room_deletion_info">Möchtest du diesen Raum wirklich löschen?</string>
     <string name="invalid_email">Ungültige E-Mail-Adresse</string>
+    <string name="delete_message"><font color='#FF0000'>Nachricht löschen</font></string>
+    <string name="really_delete_message">Nachricht wirklich löschen?</string>
+    <string name="message_deleted">Nachricht gelöscht</string>
+    <string name="forgot_password">Passwort vergessen?</string>
+    <string name="password_reset_mail_sent">Mail zum Passwort zurücksetzen verschickt</string>
 
     <string name="hint_email">E-Mail-Adresse <font color='#FF0000'>*</font></string>
     <string name="hint_name">Name <font color='#FF0000'>*</font></string>
@@ -168,7 +174,7 @@
     <string name="hint_confirm_password">Passwort wiederholen <font color='#FF0000'>*</font></string>
 
     <string-array name="categories">
-        <item>Kategorie auswählen</item>
+        <item>Kategorie auswählen <font color='#FF0000'>*</font></item>
         <item>Studium &amp; Arbeit</item>
         <item>Videospiele</item>
         <item>Politik</item>
@@ -217,6 +223,7 @@
         <item>Version 1.1.2 (10.09.2023)</item>
         <item>Version 1.2.0 (14.09.2023)</item>
         <item>Version 1.2.1 (15.09.2023)</item>
+        <item>Version 1.3.0 (06.10.2023)</item>
     </string-array>
 
     <string-array name="changelog_text">
@@ -433,6 +440,28 @@
         "- Ein Absturz wurde behoben, der beim Anpinnen einer Nachricht auftrat\n"
         "- Ein Fehler wurde behoben, dass das Geburtsdatum im Auswahldialog auf den Standardwert zurückgesetzt wird\n"
         "- Ein Fehler wurde behoben, dass Kamera, Backup und \"Bild speichern\" auf Android 13 nicht funktioniert haben\n"
+        "\n "</item>
+
+        <item>"- Nutzer können jetzt ihre eigenen Nachrichten löschen\n"
+        "- Eine \"Passwort vergessen\"-Funktion wurde hinzugefügt\n"
+        "- Die Möglichkeit Profilbilder/-banner und Raumbilder zurückzusetzen wurde hinzugefügt\n"
+        "- Alle Symbole verwenden jetzt Vektorengrafiken\n"
+        "- Zitierte Nachrichten werden jetzt markiert, wenn man zu ihnen springt\n"
+        "- Das Profil von anderen Nutzern kann jetzt geöffnet werden, indem man auf ihr Profilbild neben der Nachricht klickt\n"
+        "- Asugewählte Profilbilder/-banner und Raumbilder werden jetzt Dialogfenster größer dargestellt und haben einen Hover-Effekt\n"
+        "- Die Option, einen Raum zu löschen, wurde in das Menü oben im Chatraum verschoben\n"
+        "- Das Raumkategorie-Feld wird jetzt im Dialogfenster korrekt als verpflichtend markiert\n"
+        "- Der Standard-Geburtstag wird jetzt für unbekannte Nutzer verwendet\n"
+        "- Der "Passwort eingeben"-Dialog nutzt jetzt denselben Header wie alle anderen Dialogfenster\n"
+        "- Themes und Hintergründe werden jetzt mit abgerundeten Ecken im Auswahlbildschirm angezeigt\n"
+        "- Ein Absturz wurde behoben, der auftrat, wenn das Gerät innerhalb eines Chatraums rotiert wurde\n"
+        "- Ein Fehler wurde behoben, der es erlaubte mithilfe von \"(Forwarded)\" am Beginn einer neuen Nachricht eine gefälschte weitergeleitete Nachricht zu erstellen\n"
+        "- Ein Fehler wurde behoben, dass das Datum einer Nachricht auf der Pinnwand im falschen Format angezeigt wurde\n"
+        "- Ein Fehler wurde behoben, dass das Erstellen eines Backups fehlschlug, wenn der Raumname ein \"/\" beinhaltete\n"
+        "- Ein Fehler wurde behoben, dass die Snackbar im Dark Mode eine falsche Farbe verwendet hatte\n"
+        "- Ein Fehler wurde behoben, dass die bisherige Lieblingsfarbe im \"Profil bearbeiten\"-Fenster nicht korrekt angezeigt wurde\n"
+        "- Ein Fehler wurde behoben, dass einige Textboxen mit einer falschen Breite dargestellt wurden\n"
+        "- Ein Fehler wurde behoben, dass Dialogfenster im falschen Theme angezeigt wurden, wenn im Auswahldialog ein anderes Theme ausgewählt wird, die Änderung dann aber nicht gespeichert wird\n"
         "\n "</item>
     </string-array>
 

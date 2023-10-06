@@ -5,15 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.DataSetObserver;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
 import com.google.android.material.textfield.TextInputLayout;
 import androidx.fragment.app.Fragment;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.app.AlertDialog;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,7 +23,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
@@ -35,6 +33,7 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.R;
+import com.yannick.mychatapp.TextWatcher;
 import com.yannick.mychatapp.activities.ChatActivity;
 import com.yannick.mychatapp.adapters.RoomAdapter;
 import com.yannick.mychatapp.data.Room;
@@ -104,8 +103,8 @@ public class RoomListFragmentMore extends Fragment {
             }
         });
 
-        listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-            int position = listView.getPositionForView(view1);
+        listView.setOnItemClickListener((adapterView, layoutView, i, l) -> {
+            int position = listView.getPositionForView(layoutView);
             Room room = roomList.get(position);
             requestPassword(room, position);
         });
@@ -162,41 +161,26 @@ public class RoomListFragmentMore extends Fragment {
     private void requestPassword(final Room room, final int position) {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         View view = inflater.inflate(R.layout.enter_room, null);
+
         final EditText inputPassword = view.findViewById(R.id.room_password);
         final TextInputLayout inputPasswordLayout = view.findViewById(R.id.room_password_layout);
-        inputPassword.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        inputPassword.addTextChangedListener(new TextWatcher(inputPasswordLayout));
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-                if (editable.length() != 0) {
-                    inputPasswordLayout.setError(null);
-                }
-            }
-        });
         AlertDialog.Builder builder;
         if (theme == Theme.DARK) {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialogDark));
         } else {
             builder = new AlertDialog.Builder(new ContextThemeWrapper(getActivity(), R.style.AlertDialog));
         }
-        builder.setTitle(R.string.pleaseenterpassword);
+        builder.setCustomTitle(setupHeader(getResources().getString(R.string.pleaseenterpassword)));
         builder.setView(view);
         builder.setCancelable(false);
         builder.setPositiveButton(R.string.confirm, (dialogInterface, i) -> {});
         builder.setNegativeButton(R.string.cancel, (dialogInterface, i) -> {
-            View view1 = ((AlertDialog) dialogInterface).getCurrentFocus();
-            if (view1 != null) {
+            View currentFocus = ((AlertDialog) dialogInterface).getCurrentFocus();
+            if (currentFocus != null) {
                 InputMethodManager imm = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(view1.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(currentFocus.getWindowToken(), 0);
             }
             dialogInterface.cancel();
         });
@@ -205,7 +189,7 @@ public class RoomListFragmentMore extends Fragment {
         alert.setOnShowListener(dialogInterface -> {
 
             Button b = alert.getButton(AlertDialog.BUTTON_POSITIVE);
-            b.setOnClickListener(view12 -> {
+            b.setOnClickListener(buttonView -> {
                 if (!inputPassword.getText().toString().isEmpty()) {
                     if (inputPassword.getText().toString().trim().equals(room.getPassword())) {
                         String roomKey = room.getKey();
@@ -287,5 +271,23 @@ public class RoomListFragmentMore extends Fragment {
                 searchRoomList.add(r2);
             }
         }
+    }
+
+    private TextView setupHeader(String title) {
+        TextView header = new TextView(getContext());
+
+        if (theme == Theme.DARK) {
+            header.setBackgroundColor(getResources().getColor(R.color.dark_button));
+        } else {
+            header.setBackgroundColor(getResources().getColor(R.color.red));
+        }
+
+        header.setText(title);
+        header.setPadding(30, 30, 30, 30);
+        header.setTextSize(20F);
+        header.setTypeface(Typeface.DEFAULT_BOLD);
+        header.setTextColor(Color.WHITE);
+
+        return header;
     }
 }

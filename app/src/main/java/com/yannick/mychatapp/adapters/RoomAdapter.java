@@ -1,7 +1,6 @@
 package com.yannick.mychatapp.adapters;
 
 import android.content.Context;
-import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
@@ -23,6 +22,7 @@ import com.google.firebase.storage.StorageReference;
 import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.GlideApp;
+import com.yannick.mychatapp.StringOperations;
 import com.yannick.mychatapp.data.Message;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.data.Room;
@@ -40,7 +40,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
     private final Context context;
     private final ArrayList<Room> roomList;
     private final RoomListType type;
-    private final SimpleDateFormat sdf_local = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss_z");
     private final FirebaseStorage storage;
     private final FirebaseAuth mAuth;
 
@@ -103,7 +103,9 @@ public class RoomAdapter extends ArrayAdapter<Room> {
         } else {
             if (r.getNewestMessage() != null) {
                 if (r.getNewestMessage().getType() == Message.Type.MESSAGE_RECEIVED) {
-                    if (r.getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
+                    if (r.getNewestMessage().isForwarded()) {
+                        viewHolder.categoryText.setText(context.getResources().getString(R.string.forwarded) + ": " + r.getNewestMessage().getText());
+                    } else if (r.getNewestMessage().getUser().getUserID().equals(mAuth.getCurrentUser().getUid())) {
                         viewHolder.categoryText.setText(context.getResources().getString(R.string.you) + ": " + r.getNewestMessage().getText());
                     } else {
                         viewHolder.categoryText.setText(r.getNewestMessage().getUser().getName() + ": " + r.getNewestMessage().getText());
@@ -151,12 +153,7 @@ public class RoomAdapter extends ArrayAdapter<Room> {
             }
 
             if (r.isMuted()) {
-                viewHolder.muteIcon.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.ic_muted, null));
-                if (Theme.getCurrentTheme(context) == Theme.DARK) {
-                    viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
-                } else {
-                    viewHolder.muteIcon.setColorFilter(context.getResources().getColor(R.color.iconGrey), PorterDuff.Mode.SRC_ATOP);
-                }
+                viewHolder.muteIcon.setImageDrawable(ResourcesCompat.getDrawable(context.getResources(), R.drawable.icon_muted, context.getTheme()));
             } else {
                 viewHolder.muteIcon.setImageDrawable(null);
             }
@@ -175,14 +172,14 @@ public class RoomAdapter extends ArrayAdapter<Room> {
 
     private String parseTime(String time) {
         try {
-            time = sdf_local.format(sdf_local.parse(time));
+            time = sdf.format(sdf.parse(time));
         } catch (ParseException e) {
             Log.e("ParseException", e.toString());
         }
-        if (time.substring(0, 8).equals(sdf_local.format(new Date()).substring(0, 8))) {
+        if (time.substring(0, 8).equals(sdf.format(new Date()).substring(0, 8))) {
             return time.substring(9, 11) + ":" + time.substring(11, 13);
         } else {
-            return time.substring(6, 8) + "." + time.substring(4, 6) + "." + time.substring(0, 4);
+            return StringOperations.convertDateToDisplayFormat(time);
         }
     }
 

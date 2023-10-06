@@ -8,32 +8,32 @@
     <item
         android:id="@+id/roominfo"
         android:title="@string/roominfo"
-        android:icon="@drawable/icon_roominfo"
+        android:icon="@drawable/icon_info"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/roomfav"
         android:title="@string/unfavorite"
-        android:icon="@drawable/icon_roomunfav"
+        android:icon="@drawable/icon_unfav"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/roomsearch"
         android:title="@string/searchmessage"
-        android:icon="@drawable/icon_roomsearch"
+        android:icon="@drawable/icon_search"
         app:showAsAction="always"
         app:actionViewClass="androidx.appcompat.widget.SearchView" />
 
     <item
         android:id="@+id/roomphotos"
         android:title="@string/images"
-        android:icon="@drawable/icon_roomphotos"
+        android:icon="@drawable/icon_photos"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/roompinboard"
         android:title="@string/pinboard"
-        android:icon="@drawable/icon_roompinboard"
+        android:icon="@drawable/icon_pinboard"
         app:showAsAction="never" />
 
     <item
@@ -45,7 +45,7 @@
     <item
         android:id="@+id/roombackup"
         android:title="@string/backup"
-        android:icon="@drawable/icon_roombackup"
+        android:icon="@drawable/icon_backup"
         app:showAsAction="never" />
 
     <item

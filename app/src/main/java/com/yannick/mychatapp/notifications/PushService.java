@@ -20,10 +20,10 @@ import androidx.preference.PreferenceManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.yannick.mychatapp.Constants;
 import com.yannick.mychatapp.FileOperations;
 import com.yannick.mychatapp.R;
 import com.yannick.mychatapp.activities.ChatActivity;
-import com.yannick.mychatapp.activities.MainActivity;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class PushService extends FirebaseMessagingService {
         FileOperations fileOperations = new FileOperations(this);
         if (!appInForeground(this) || (appInForeground(this) && !fileOperations.readFromFile(FileOperations.currentRoomFile).equals(remoteMessage.getData().get("roomid")))) {
             SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(this);
-            if (settings.getBoolean(MainActivity.settingsPushNotificationsKey, true) && !remoteMessage.getData().get("sender").equals(mAuth.getCurrentUser().getUid())) {
+            if (settings.getBoolean(Constants.settingsPushNotificationsKey, true) && !remoteMessage.getData().get("sender").equals(mAuth.getCurrentUser().getUid())) {
                 int pushID = 0;
                 for (int i = 0; i < remoteMessage.getData().get("roomid").length(); ++i) {
                     pushID += (int) remoteMessage.getData().get("roomid").charAt(i);
